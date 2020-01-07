@@ -1,4 +1,4 @@
-package cn.edu.scau.acm.acmer.controller;
+package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
