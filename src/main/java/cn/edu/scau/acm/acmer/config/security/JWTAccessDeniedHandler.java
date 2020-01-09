@@ -21,6 +21,7 @@ public class JWTAccessDeniedHandler implements AccessDeniedHandler {
         httpServletResponse.setContentType("application/json; charset=utf-8");
         httpServletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
         String reason = "统一处理，原因：" + e.getMessage();
+//        System.out.println(reason);
         httpServletResponse.getWriter().write(new ObjectMapper().writeValueAsString(reason));
     }
 }

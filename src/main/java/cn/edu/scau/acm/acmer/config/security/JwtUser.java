@@ -42,7 +42,6 @@ public class JwtUser implements UserDetails {
             authorities = Collections.singleton(new SimpleGrantedAuthority("STUDENT"));
         }
         if(user.getIsAdmin() == (byte)1){
-//            roles.add("ADMIN");
             authorities = Collections.singleton(new SimpleGrantedAuthority("ADMIN"));
         }
     }

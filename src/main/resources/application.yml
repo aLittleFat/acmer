@@ -33,9 +33,26 @@ spring:
       datetime_format: yyyy-MM-dd HH:mm:ss
       date_format: yyyy-MM-dd
       time_format: HH:mm:ss
+  redis:
+    host: localhost
+    port: 6379
+  mail:
+    host: smtp.qq.com
+    username: zhanghonghai9999@qq.com
+    password: txnqevcafpamgcfi
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+            required: false
 swagger:
   base-path: /**
   base-package: 'cn.edu.scau.acm.acmer'
   authorization:
     key-name: Authorization
+mail:
+  fromMail:
+    addr: zhanghonghai9999@qq.com
 

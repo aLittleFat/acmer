@@ -12,9 +12,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -74,10 +77,28 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // 但是这里创建的token只是单纯的token
         // 按照jwt的规定，最后请求的时候应该是 `Bearer token`
         response.setHeader("token", JwtTokenUtils.TOKEN_PREFIX + token);
+//        Cookie c = new Cookie("Token", URLEncoder.encode(JwtTokenUtils.TOKEN_PREFIX + token));
+//        c.setMaxAge(1800);
+//        response.addCookie(c);
+
+        boolean login = true;
+        response.getWriter().write(new ObjectMapper().writeValueAsString(login));
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        response.getWriter().write("authentication failed, reason: " + failed.getMessage());
+
+//        Cookie[] cookies = request.getCookies();
+//        Cookie c = cookies[0];
+
+//        System.out.println(c.getName() + " " + c.getValue());
+//        System.out.println(c.getName() + " " + URLDecoder.decode(c.getValue()));
+
+
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json; charset=utf-8");
+//        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        boolean login = false;
+        response.getWriter().write(new ObjectMapper().writeValueAsString(login));
     }
 }
