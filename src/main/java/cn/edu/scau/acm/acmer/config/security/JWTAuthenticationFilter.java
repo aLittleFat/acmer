@@ -62,8 +62,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         JwtUser jwtUser = (JwtUser) authResult.getPrincipal();
         System.out.println("jwtUser:" + jwtUser.toString());
-//        System.out.println(rememberMe.get());
-//        boolean isRemember = rememberMe.get() == 1;
 
         String role = "";
         Collection<? extends GrantedAuthority> authorities = jwtUser.getAuthorities();
@@ -72,14 +70,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         }
 
         String token = JwtTokenUtils.createToken(jwtUser.getUsername(), role, false);
-//        String token = JwtTokenUtils.createToken(jwtUser.getUsername(), false);
         // 返回创建成功的token
         // 但是这里创建的token只是单纯的token
         // 按照jwt的规定，最后请求的时候应该是 `Bearer token`
         response.setHeader("token", JwtTokenUtils.TOKEN_PREFIX + token);
-//        Cookie c = new Cookie("Token", URLEncoder.encode(JwtTokenUtils.TOKEN_PREFIX + token));
-//        c.setMaxAge(1800);
-//        response.addCookie(c);
 
         boolean login = true;
         response.getWriter().write(new ObjectMapper().writeValueAsString(login));
@@ -87,13 +81,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-
-//        Cookie[] cookies = request.getCookies();
-//        Cookie c = cookies[0];
-
-//        System.out.println(c.getName() + " " + c.getValue());
-//        System.out.println(c.getName() + " " + URLDecoder.decode(c.getValue()));
-
 
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json; charset=utf-8");

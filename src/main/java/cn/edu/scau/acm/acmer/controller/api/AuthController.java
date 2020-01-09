@@ -1,7 +1,5 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
-import cn.edu.scau.acm.acmer.entity.User;
-import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.AccountService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +41,7 @@ public class AuthController {
         return accountService.isEmailVerify(email);
     }
 
-    @ApiOperation(value = "查询邮箱是否已验证")
+    @ApiOperation(value = "验证邮箱")
     @GetMapping("/verifyEmail")
     public String verifyEmail(String email, String verifyCode){
         return accountService.verifyEmail(email, verifyCode);

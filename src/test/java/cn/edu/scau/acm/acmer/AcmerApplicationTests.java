@@ -7,8 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 class AcmerApplicationTests {
     
     @Test
-    void contextLoads() {
-
-    }
+    void contextLoads() { }
 
 }

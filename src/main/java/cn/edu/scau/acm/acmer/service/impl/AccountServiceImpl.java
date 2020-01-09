@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -69,12 +70,18 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public String verifyEmail(String email, String verifyCode) {
         User u = getUserByEmail(email);
+        if(u == null){
+            return "邮箱不存在";
+        }
+        if(u.getEmailVerify() == (byte)1){
+            return "邮箱已验证，无需再验证";
+        }
         String getCode = stringRedisTemplate.opsForValue().get(email + "_Verify");
-        logger.info("开始校验邮箱");
-        logger.info(email);
-        logger.info(verifyCode);
-        logger.info(getCode);
-        if(u != null && getCode != null && getCode.equals(verifyCode)){
+        if(getCode == null){
+            sendVerifyEmail(email);
+            return "验证码已过期，已重发验证邮件";
+        }
+        if(u != null && getCode.equals(verifyCode)){
             u.setEmailVerify((byte)1);
             userRepository.save(u);
             return "验证成功";
@@ -86,11 +93,13 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean isEmailVerify(String email) {
-        boolean isVerify = getUserByEmail(email).getVerify() == (byte)1;
-//        System.out.println(stringRedisTemplate.opsForValue().get(email + "_Verify"));
-//        if(stringRedisTemplate.opsForValue().get(email + "_Verify") == null) {
-            sendVerifyEmail(email);
-//        }
+        boolean isVerify = getUserByEmail(email).getEmailVerify() == (byte)1;
+        if(!isVerify) {
+            String verifyCode = stringRedisTemplate.opsForValue().get(email + "_Verify");
+            if(verifyCode == null) {
+                sendVerifyEmail(email);
+            }
+        }
         return isVerify;
     }
 
@@ -98,7 +107,7 @@ public class AccountServiceImpl implements AccountService {
     public void sendVerifyEmail(String email) {
         String verifyCode = stringRedisTemplate.opsForValue().get(email + "_Verify");
         if(verifyCode == null){
-            verifyCode = (new BCryptPasswordEncoder()).encode(email);
+            verifyCode = (new BCryptPasswordEncoder()).encode(email + LocalDateTime.now().toString());
             stringRedisTemplate.opsForValue().set(email + "_Verify", verifyCode, 1800, TimeUnit.SECONDS);
         }
         String url = "http://localhost:8080/auth/verifyEmail?email=" + email + "&verifyCode=" + verifyCode;
