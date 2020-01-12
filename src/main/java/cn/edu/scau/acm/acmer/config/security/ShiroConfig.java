@@ -92,14 +92,6 @@ public class ShiroConfig {
         chainDefinition.addPathDefinition("/article/list", "noSessionCreation,authcToken");
         chainDefinition.addPathDefinition("/article/*", "noSessionCreation,authcToken[permissive]");
         chainDefinition.addPathDefinition("/**", "noSessionCreation,anon");
-
-//        chainDefinition.addPathDefinition("/swagger-ui.html", "noSessionCreation,anon");
-//        chainDefinition.addPathDefinition("/favicon.ico", "noSessionCreation,anon");
-//        chainDefinition.addPathDefinition("/swagger-resources", "noSessionCreation,anon");
-//        chainDefinition.addPathDefinition("/v2/api-docs", "noSessionCreation,anon");
-//        chainDefinition.addPathDefinition("/webjars/springfox-swagger-ui/**", "noSessionCreation,anon");
-//        chainDefinition.addPathDefinition("/configuration/security", "noSessionCreation,anon");
-//        chainDefinition.addPathDefinition("/configuration/ui", "noSessionCreation,anon");
         return chainDefinition;
     }
 

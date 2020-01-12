@@ -1,5 +1,6 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
+import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
@@ -13,6 +14,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -35,23 +37,31 @@ public class AccountServiceImpl implements AccountService {
     MailService mailService;
 
     @Override
-    public User registerUser(String email, String password, String phone, String name) {
+    public String registerUser(String email, String password, String phone, String name, String verifyCode) {
+        if(userRepository.findByEmail(email) != null){
+            return "该邮箱已被注册";
+        }
+
+        String verifyStatus = verifyEmail(email, verifyCode);
+
+        if(!verifyStatus.equals("true")){
+            return verifyStatus;
+        }
         User u = new User();
         u.setEmail(email);
         String enPassword = new Sha256Hash(password, encryptSalt).toHex();
-        logger.info(enPassword);
         u.setPassword(enPassword);
         u.setPhone(phone);
         u.setName(name);
         u.setIsAdmin((byte) 1);
-        u.setEmailVerify((byte) 0);
         if(userRepository.count() == 0){
             u.setVerify((byte) 1);
         }
         else {
             u.setVerify((byte) 0);
         }
-        return userRepository.save(u);
+        userRepository.save(u);
+        return "true";
     }
 
     @Override
@@ -60,9 +70,52 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void registerStudent(String email, String password, String phone, String name, int grade, String id, String vjId, String vjPassword) {
+    public String registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId) {
+        if(userRepository.findByEmail(email) != null){
+            return "该邮箱已被注册";
+        }
 
+        String verifyStatus = verifyEmail(email, verifyCode);
+
+        if(!verifyStatus.equals("true")){
+            return verifyStatus;
+        }
+        User u = new User();
+        u.setEmail(email);
+        String enPassword = new Sha256Hash(password, encryptSalt).toHex();
+        u.setPassword(enPassword);
+        u.setPhone(phone);
+        u.setName(name);
+        if(userRepository.count() == 0){
+            u.setIsAdmin((byte) 1);
+        }
+        else {
+            u.setIsAdmin((byte) 0);
+        }
+        if(userRepository.count() == 0){
+            u.setVerify((byte) 1);
+        }
+        else {
+            u.setVerify((byte) 0);
+        }
+        if(studentRepository.findById(stuId).isPresent()){
+            return "该学号已被注册";
+        }
+        userRepository.save(u);
+        Student stu = new Student();
+        stu.setId(stuId);
+        stu.setGrade(grade);
+        stu.setStatus("现役");
+        stu.setUserId(userRepository.findByEmail(email).getId());
+        studentRepository.save(stu);
+        return "true";
     }
+
+    @Override
+    public boolean isVerify(String email) {
+        return userRepository.findByEmail(email).getVerify() == (byte)1;
+    }
+
 
     @Override
     public void login() {
@@ -76,49 +129,26 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public String verifyEmail(String email, String verifyCode) {
-        User u = getUserByEmail(email);
-        if(u == null){
-            return "邮箱不存在";
-        }
-        if(u.getEmailVerify() == (byte)1){
-            return "邮箱已验证，无需再验证";
-        }
         String getCode = stringRedisTemplate.opsForValue().get(email + "_Verify");
         if(getCode == null){
-            sendVerifyEmail(email);
-            return "验证码已过期，已重发验证邮件";
+            return "验证码已过期";
         }
-        if(u != null && getCode.equals(verifyCode)){
-            u.setEmailVerify((byte)1);
-            userRepository.save(u);
-            return "验证成功";
+        if(getCode.equals(verifyCode)){
+            return "true";
         }
         else{
-            return "验证失败";
+            return "验证码错误";
         }
-    }
-
-    @Override
-    public boolean isEmailVerify(String email) {
-        boolean isVerify = getUserByEmail(email).getEmailVerify() == (byte)1;
-        if(!isVerify) {
-            String verifyCode = stringRedisTemplate.opsForValue().get(email + "_Verify");
-            if(verifyCode == null) {
-                sendVerifyEmail(email);
-            }
-        }
-        return isVerify;
     }
 
     @Override
     public void sendVerifyEmail(String email) {
         String verifyCode = stringRedisTemplate.opsForValue().get(email + "_Verify");
         if(verifyCode == null){
-            verifyCode = new Sha256Hash(email + LocalDateTime.now().toString(), encryptSalt).toHex();
-            stringRedisTemplate.opsForValue().set(email + "_Verify", verifyCode, 1800, TimeUnit.SECONDS);
+            verifyCode = genEmailVerifyCode();
+            stringRedisTemplate.opsForValue().set(email + "_Verify", verifyCode, 10, TimeUnit.MINUTES);
         }
-        String url = "http://localhost:8080/auth/verifyEmail?email=" + email + "&verifyCode=" + verifyCode;
-        mailService.sendTextMail(email, "ACMER网站邮箱验证", "请通过链接完成验证，有效期30min：" + url);
+        mailService.sendTextMail(email, "SCAUACMER网站邮箱验证码", "验证码为：" + verifyCode + ". 有效期为10分钟.");
     }
 
     @Override
@@ -129,6 +159,17 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public boolean isAdmin(int id) {
         return (userRepository.findById(id).getIsAdmin() == (byte)1);
+    }
+
+    @Override
+    public String genEmailVerifyCode() {
+        StringBuffer code = new StringBuffer();
+        Random rand = new Random();
+        for(int i = 0; i < 6; ++i){
+            code.append(rand.nextInt(10));
+        }
+        logger.info(code.toString());
+        return code.toString();
     }
 
 }

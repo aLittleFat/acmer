@@ -26,7 +26,7 @@ public class AuthController {
     @Autowired
     AccountService accountService;
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     UserService userService;
@@ -38,54 +38,69 @@ public class AuthController {
      * @param response
      * @return
      */
-    @PostMapping(value = "/login")
-    public ResponseEntity<Void> login(String email, String password, HttpServletResponse response){
+
+    @RequestMapping(method = RequestMethod.POST, value = "/login", produces = "application/json; charset=utf-8")
+    public ResponseEntity<String> login(String email, String password, HttpServletResponse response){
+        log.info(email + " " + password);
         Subject subject = SecurityUtils.getSubject();
         try {
             UsernamePasswordToken token = new UsernamePasswordToken(email, password);
             subject.login(token);
 
+            if(!accountService.isVerify(email)){
+                return new ResponseEntity<String>("账号未通过审核，请等待管理员审核", HttpStatus.OK);
+            }
+
             UserDto user = (UserDto) subject.getPrincipal();
             String newToken = userService.generateJwtToken(user.getUsername());
-            response.setHeader("x-auth-token", newToken);
+            response.setHeader("token", newToken);
 
-            return ResponseEntity.ok().build();
+            return new ResponseEntity<String>("true", HttpStatus.OK);
         } catch (AuthenticationException e) {
-            logger.error("User {} login fail, Reason:{}", email, e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            log.error("User {} login fail, Reason:{}", email, e.getMessage());
+            return new ResponseEntity<String>("邮箱名或密码错误", HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return new ResponseEntity<String>("网络错误", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-
     /**
-     * Teacher Register
+     * register
      * @param email
      * @param password
      * @param phone
      * @param name
+     * @param verifyCode
+     * @param grade
+     * @param studentId
+     * @param type
      * @return
      */
-    @PostMapping("/register/teacher")
-    public String registerTeacher(String email, String password, String phone, String name){
-        System.out.println(email + " " + password + " " + phone + " " + name);
-        return accountService.registerUser(email, password, phone, name).toString();
+    @RequestMapping(method = RequestMethod.POST, value = "/register", produces = "application/json; charset=utf-8")
+    public String register(String email, String password, String phone, String name, String verifyCode, int grade, String studentId, String type){
+        if(type.equals("教师"))
+            return accountService.registerUser(email, password, phone, name, verifyCode);
+        else
+            return accountService.registerStudent(email, password, phone, name, verifyCode, grade, studentId);
     }
 
     /**
-     * Student Register
-     * @param registerUser
+     * 退出登录
      * @return
      */
-    @PostMapping("/register/student")
-    public String registerStudent(@RequestBody Map<String,String> registerUser){
-        System.out.println(registerUser.get("email") + " " + registerUser.get("password") + " " + registerUser.get("phone") + " " + registerUser.get("name"));
-        return accountService.registerUser(registerUser.get("email"), registerUser.get("password"), registerUser.get("phone"), registerUser.get("name")).toString();
+    @GetMapping(value = "/logout")
+    public ResponseEntity<Void> logout() {
+        Subject subject = SecurityUtils.getSubject();
+        if(subject.getPrincipals() != null) {
+            UserDto user = (UserDto)subject.getPrincipals().getPrimaryPrincipal();
+            userService.deleteLoginInfo(user.getUsername());
+        }
+        SecurityUtils.getSubject().logout();
+        return ResponseEntity.ok().build();
     }
 
     /**
-     * 验证邮箱
+     * VerifyEmail
      * @param email
      * @param verifyCode
      * @return
@@ -93,6 +108,15 @@ public class AuthController {
     @GetMapping("/verifyEmail")
     public String verifyEmail(String email, String verifyCode){
         return accountService.verifyEmail(email, verifyCode);
+    }
+
+    /**
+     * Send the Verify Email Code
+     * @param email
+     */
+    @PostMapping("/sendVerifyEmailCode")
+    public void verifyEmail(String email){
+        accountService.sendVerifyEmail(email);
     }
 
 }
