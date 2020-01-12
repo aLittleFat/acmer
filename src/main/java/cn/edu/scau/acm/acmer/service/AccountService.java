@@ -11,4 +11,6 @@ public interface AccountService {
     public String verifyEmail(String email, String verifyCode);
     public boolean isEmailVerify(String email);
     public void sendVerifyEmail(String email);
+    public boolean isStudent(int id);
+    public boolean isAdmin(int id);
 }

@@ -5,11 +5,11 @@ import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.AccountService;
 import cn.edu.scau.acm.acmer.service.MailService;
+import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 public class AccountServiceImpl implements AccountService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private static final String encryptSalt = "F12839WhsnnEV$#23b";
 
     @Autowired
     StudentRepository studentRepository;
@@ -36,14 +38,19 @@ public class AccountServiceImpl implements AccountService {
     public User registerUser(String email, String password, String phone, String name) {
         User u = new User();
         u.setEmail(email);
-        String enPassword = (new BCryptPasswordEncoder()).encode(password);
-        System.out.println(enPassword);
+        String enPassword = new Sha256Hash(password, encryptSalt).toHex();
+        logger.info(enPassword);
         u.setPassword(enPassword);
         u.setPhone(phone);
         u.setName(name);
         u.setIsAdmin((byte) 1);
         u.setEmailVerify((byte) 0);
-        u.setVerify((byte) 0);
+        if(userRepository.count() == 0){
+            u.setVerify((byte) 1);
+        }
+        else {
+            u.setVerify((byte) 0);
+        }
         return userRepository.save(u);
     }
 
@@ -107,11 +114,21 @@ public class AccountServiceImpl implements AccountService {
     public void sendVerifyEmail(String email) {
         String verifyCode = stringRedisTemplate.opsForValue().get(email + "_Verify");
         if(verifyCode == null){
-            verifyCode = (new BCryptPasswordEncoder()).encode(email + LocalDateTime.now().toString());
+            verifyCode = new Sha256Hash(email + LocalDateTime.now().toString(), encryptSalt).toHex();
             stringRedisTemplate.opsForValue().set(email + "_Verify", verifyCode, 1800, TimeUnit.SECONDS);
         }
         String url = "http://localhost:8080/auth/verifyEmail?email=" + email + "&verifyCode=" + verifyCode;
         mailService.sendTextMail(email, "ACMER网站邮箱验证", "请通过链接完成验证，有效期30min：" + url);
+    }
+
+    @Override
+    public boolean isStudent(int id) {
+        return studentRepository.findByUserId(id) != null;
+    }
+
+    @Override
+    public boolean isAdmin(int id) {
+        return (userRepository.findById(id).getIsAdmin() == (byte)1);
     }
 
 }

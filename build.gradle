@@ -16,12 +16,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'com.spring4all:swagger-spring-boot-starter:1.9.1.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-freemarker'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+    implementation 'org.apache.shiro:shiro-spring-boot-web-starter:1.4.2'
+    implementation 'org.apache.httpcomponents:httpclient'
+    implementation 'org.apache.commons:commons-lang3'
+    implementation 'com.auth0:java-jwt:3.9.0'
+    implementation 'com.github.shalousun:smart-doc:1.8.0'
 
     runtimeOnly 'mysql:mysql-connector-java'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {

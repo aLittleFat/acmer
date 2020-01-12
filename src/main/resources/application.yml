@@ -47,11 +47,6 @@ spring:
           starttls:
             enable: false
             required: false
-swagger:
-  base-path: /**
-  base-package: 'cn.edu.scau.acm.acmer'
-  authorization:
-    key-name: Authorization
 mail:
   fromMail:
     addr: zhanghonghai9999@qq.com
