@@ -7,11 +7,13 @@ public interface AccountService {
     public User getUserByEmail(String email);
     public String registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId);
     public boolean isVerify(String email);
-    public void login();
     public void verifyAccount();
     public String verifyEmail(String email, String verifyCode);
-    public void sendVerifyEmail(String email);
+    public String verifyForgetPasswordEmail(String email, String verifyCode);
+    public String sendVerifyEmail(String email);
+    public String sendForgetPasswordVerifyEmail(String email);
     public boolean isStudent(int id);
     public boolean isAdmin(int id);
     public String genEmailVerifyCode();
+    public String forgetPassword(String email, String password, String verifyCode);
 }

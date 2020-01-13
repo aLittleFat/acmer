@@ -38,7 +38,6 @@ public class AuthController {
      * @param response
      * @return
      */
-
     @RequestMapping(method = RequestMethod.POST, value = "/login", produces = "application/json; charset=utf-8")
     public ResponseEntity<String> login(String email, String password, HttpServletResponse response){
         log.info(email + " " + password);
@@ -116,9 +115,24 @@ public class AuthController {
      * Send the Verify Email Code
      * @param email
      */
-    @PostMapping("/sendVerifyEmailCode")
-    public void verifyEmail(String email){
-        accountService.sendVerifyEmail(email);
+    @RequestMapping(method = RequestMethod.POST, value = "/sendVerifyEmailCode", produces = "application/json; charset=utf-8")
+    public String sendVerifyEmailCode(String email){
+        return accountService.sendVerifyEmail(email);
+    }
+
+    /**
+     * Send the Verify Email Code when Forget Password
+     * @param email
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/sendForgetPasswordVerifyEmailCode", produces = "application/json; charset=utf-8")
+    public String sendForgetPasswordVerifyEmailCode(String email){
+        return accountService.sendForgetPasswordVerifyEmail(email);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/forgetPassword", produces = "application/json; charset=utf-8")
+    public String forgetPassword(String email, String password, String verifyCode){
+        return accountService.forgetPassword(email, password, verifyCode);
     }
 
 }

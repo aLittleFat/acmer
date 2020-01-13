@@ -116,12 +116,6 @@ public class AccountServiceImpl implements AccountService {
         return userRepository.findByEmail(email).getVerify() == (byte)1;
     }
 
-
-    @Override
-    public void login() {
-
-    }
-
     @Override
     public void verifyAccount() {
 
@@ -142,13 +136,45 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void sendVerifyEmail(String email) {
+    public String verifyForgetPasswordEmail(String email, String verifyCode) {
+        String getCode = stringRedisTemplate.opsForValue().get(email + "_ForgetPasswordVerify");
+        if(getCode == null){
+            return "验证码已过期";
+        }
+        if(getCode.equals(verifyCode)){
+            return "true";
+        }
+        else{
+            return "验证码错误";
+        }
+    }
+
+    @Override
+    public String sendVerifyEmail(String email) {
+        if(userRepository.findByEmail(email) != null){
+            return "该邮箱已被注册";
+        }
         String verifyCode = stringRedisTemplate.opsForValue().get(email + "_Verify");
         if(verifyCode == null){
             verifyCode = genEmailVerifyCode();
             stringRedisTemplate.opsForValue().set(email + "_Verify", verifyCode, 10, TimeUnit.MINUTES);
         }
         mailService.sendTextMail(email, "SCAUACMER网站邮箱验证码", "验证码为：" + verifyCode + ". 有效期为10分钟.");
+        return "true";
+    }
+
+    @Override
+    public String sendForgetPasswordVerifyEmail(String email) {
+        if(userRepository.findByEmail(email) == null){
+            return "该邮箱不存在";
+        }
+        String verifyCode = stringRedisTemplate.opsForValue().get(email + "_ForgetPasswordVerify");
+        if(verifyCode == null){
+            verifyCode = genEmailVerifyCode();
+            stringRedisTemplate.opsForValue().set(email + "_ForgetPasswordVerify", verifyCode, 10, TimeUnit.MINUTES);
+        }
+        mailService.sendTextMail(email, "SCAUACMER网站邮箱验证码", "验证码为：" + verifyCode + ". 有效期为10分钟.");
+        return "true";
     }
 
     @Override
@@ -170,6 +196,21 @@ public class AccountServiceImpl implements AccountService {
         }
         logger.info(code.toString());
         return code.toString();
+    }
+
+    @Override
+    public String forgetPassword(String email, String password, String verifyCode) {
+        User u = userRepository.findByEmail(email);
+        if(u == null){
+            return "该邮箱不存在";
+        }
+        String verifyStatus = verifyForgetPasswordEmail(email, verifyCode);
+        if(verifyStatus != "true"){
+            return verifyStatus;
+        }
+        u.setPassword(new Sha256Hash(password, encryptSalt).toHex());
+        userRepository.save(u);
+        return "true";
     }
 
 }
