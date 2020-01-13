@@ -77,11 +77,13 @@ public class AuthController {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/register", produces = "application/json; charset=utf-8")
-    public String register(String email, String password, String phone, String name, String verifyCode, int grade, String studentId, String type){
-        if(type.equals("教师"))
+    public String register(String email, String password, String phone, String name, String verifyCode, String grade, String studentId, String type){
+        if(type.equals("教师")) {
             return accountService.registerUser(email, password, phone, name, verifyCode);
-        else
-            return accountService.registerStudent(email, password, phone, name, verifyCode, grade, studentId);
+        }
+        else {
+            return accountService.registerStudent(email, password, phone, name, verifyCode,Integer.parseInt(grade), studentId);
+        }
     }
 
     /**
