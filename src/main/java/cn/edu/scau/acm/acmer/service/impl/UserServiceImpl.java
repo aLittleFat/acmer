@@ -71,9 +71,6 @@ public class UserServiceImpl implements UserService {
      */
     public UserDto getUserInfo(String userName) {
         UserDto user = new UserDto();
-//        user.setUserId(1L);
-//        user.setUsername("admin");
-//        user.setEncryptPwd(new Sha256Hash("123456", encryptSalt).toHex());
         User u = accountService.getUserByEmail(userName);
 
 

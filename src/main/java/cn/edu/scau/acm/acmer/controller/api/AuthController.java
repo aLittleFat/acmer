@@ -53,8 +53,8 @@ public class AuthController {
             UserDto user = (UserDto) subject.getPrincipal();
             String newToken = userService.generateJwtToken(user.getUsername());
             response.setHeader("token", newToken);
-
-            return new ResponseEntity<String>("true", HttpStatus.OK);
+            String userId = String.valueOf(accountService.getUserByEmail(email).getId());
+            return new ResponseEntity<String>(userId, HttpStatus.OK);
         } catch (AuthenticationException e) {
             log.error("User {} login fail, Reason:{}", email, e.getMessage());
             return new ResponseEntity<String>("邮箱名或密码错误", HttpStatus.UNAUTHORIZED);

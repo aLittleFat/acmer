@@ -53,8 +53,10 @@ public class ResponseHeaderAdvice implements ResponseBodyAdvice<Object> {
             response.setHeader(allowMethods, "GET,POST,OPTIONS,HEAD");
 
         String exposeHeaders = "access-control-expose-headers";
-        if(!response.containsHeader(exposeHeaders))
+        if(!response.containsHeader(exposeHeaders)) {
             response.setHeader(exposeHeaders, "Authorization");
+            response.setHeader(exposeHeaders, "token");
+        }
 
         return o;
     }

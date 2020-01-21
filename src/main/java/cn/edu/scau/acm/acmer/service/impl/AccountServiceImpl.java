@@ -2,6 +2,7 @@ package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.entity.User;
+import cn.edu.scau.acm.acmer.model.User_Student;
 import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.AccountService;
@@ -10,6 +11,10 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -117,8 +122,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void verifyAccount() {
-
+    public void verifyAccount(int id) {
+        User u = userRepository.findById(id);
+        u.setVerify((byte)1);
+        userRepository.save(u);
+        mailService.sendTextMail(u.getEmail(), "ACMER账号审核通过", "你在ACMER网站注册的账号 " + u.getEmail() + " 已通过审核，请尽快登录并完善个人信息");
     }
 
     @Override
@@ -211,6 +219,28 @@ public class AccountServiceImpl implements AccountService {
         u.setPassword(new Sha256Hash(password, encryptSalt).toHex());
         userRepository.save(u);
         return "true";
+    }
+
+    @Override
+    public User getUserById(int id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    public Page<User_Student> getUserUnverify(Integer page, Integer size) {
+        Pageable pr = PageRequest.of(page-1, size, Sort.Direction.ASC, "name");
+        return userRepository.findAllUnVerify(pr);
+    }
+
+    @Override
+    public void deleteAccount(Integer id) {
+        User u = getUserById(id);
+        Student student = studentRepository.findByUserId(id);
+        if(student != null) {
+            studentRepository.delete(student);
+        }
+        userRepository.delete(u);
+        mailService.sendTextMail(u.getEmail(), "ACMER账号审核不通过", "你在ACMER网站注册的账号 " + u.getEmail() + " 没有通过审核，账号已删除，请重新注册");
     }
 
 }

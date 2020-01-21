@@ -5,12 +5,16 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Date;
 
 public class JwtUtils {
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 获得token中的信息无需secret解密也能获得
@@ -47,6 +51,7 @@ public class JwtUtils {
     public static String sign(String username, String salt, long time) {
 //        try {
             Date date = new Date(System.currentTimeMillis()+time*1000);
+            System.out.println(date.toString());
             Algorithm algorithm = Algorithm.HMAC256(salt);
             // 附带username信息
             return JWT.create()
@@ -66,6 +71,7 @@ public class JwtUtils {
     public static boolean isTokenExpired(String token) {
         Date now = Calendar.getInstance().getTime();
         DecodedJWT jwt = JWT.decode(token);
+        System.out.println(now + " " + jwt.getExpiresAt() + " " + jwt.getExpiresAt().before(now));
         return jwt.getExpiresAt().before(now);
     }
 

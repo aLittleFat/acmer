@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JWTShiroRealm extends AuthorizingRealm {
-    private final Logger log = LoggerFactory.getLogger(JWTShiroRealm.class);
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     protected UserService userService;
 

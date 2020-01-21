@@ -36,6 +36,9 @@ public class DbShiroRealm extends AuthorizingRealm {
         UsernamePasswordToken userpasswordToken = (UsernamePasswordToken)token;
         String username = userpasswordToken.getUsername();
         UserDto user = userService.getUserInfo(username);
+
+        log.info(username);
+
         if(user == null)
             throw new AuthenticationException("用户名或者密码错误");
 
