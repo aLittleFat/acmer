@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import java.util.Objects;
 
 @Entity
-public class OjAccount {
+public class OJAccount {
     private int id;
     private String account;
     private String studentId;
@@ -57,7 +57,7 @@ public class OjAccount {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        OjAccount ojAccount = (OjAccount) o;
+        OJAccount ojAccount = (OJAccount) o;
         return id == ojAccount.id &&
                 Objects.equals(account, ojAccount.account) &&
                 Objects.equals(studentId, ojAccount.studentId) &&

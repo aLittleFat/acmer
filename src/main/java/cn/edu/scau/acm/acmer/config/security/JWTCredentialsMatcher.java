@@ -16,6 +16,7 @@ import java.io.UnsupportedEncodingException;
 public class JWTCredentialsMatcher implements CredentialsMatcher {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
     /**
      * Matcher中直接调用工具包中的verify方法即可
      */
@@ -31,6 +32,8 @@ public class JWTCredentialsMatcher implements CredentialsMatcher {
         log.info(salt);
 
         UserDto user = (UserDto)authenticationInfo.getPrincipals().getPrimaryPrincipal();
+
+        log.info(user.getSalt());
         log.info(user.getUsername());
         try {
             Algorithm algorithm = Algorithm.HMAC256(salt);

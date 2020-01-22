@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import java.util.Objects;
 
 @Entity
-public class Oj {
+public class OJ {
     private String name;
 
     @Id
@@ -23,7 +23,7 @@ public class Oj {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Oj oj = (Oj) o;
+        OJ oj = (OJ) o;
         return Objects.equals(name, oj.name);
     }
 

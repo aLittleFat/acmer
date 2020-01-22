@@ -104,7 +104,7 @@ public class JwtAuthFilter extends AuthenticatingFilter {
             }
         }
         if(StringUtils.isNotBlank(newToken))
-            httpResponse.setHeader("Authorization", newToken);
+            httpResponse.setHeader("token", newToken);
 
         return true;
     }
