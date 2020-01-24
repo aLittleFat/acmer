@@ -3,24 +3,28 @@ package cn.edu.scau.acm.acmer.controller.api;
 import cn.edu.scau.acm.acmer.model.UserDto;
 import cn.edu.scau.acm.acmer.service.AccountService;
 import cn.edu.scau.acm.acmer.service.UserService;
+import org.apache.catalina.connector.Response;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping(value = "/auth"  ,produces = "application/json; charset=utf-8")
 public class AuthController {
 
     @Autowired
@@ -38,7 +42,7 @@ public class AuthController {
      * @param response
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/login", produces = "application/json; charset=utf-8")
+    @PostMapping("/login")
     public ResponseEntity<String> login(String email, String password, HttpServletResponse response){
         log.info(email + " " + password);
         Subject subject = SecurityUtils.getSubject();
@@ -50,10 +54,11 @@ public class AuthController {
                 return new ResponseEntity<String>("账号未通过审核，请等待管理员审核", HttpStatus.OK);
             }
 
-            UserDto user = (UserDto) subject.getPrincipal();
-            String newToken = userService.generateJwtToken(user.getUsername());
-            response.setHeader("token", newToken);
+//            UserDto user = (UserDto) subject.getPrincipal();
+//            String newToken = userService.generateJwtToken(user.getUsername());
+//            response.setHeader("token", newToken);
             String userId = String.valueOf(accountService.getUserByEmail(email).getId());
+            response.setHeader("token", (String) subject.getSession().getId());
             return new ResponseEntity<String>(userId, HttpStatus.OK);
         } catch (AuthenticationException e) {
             log.error("User {} login fail, Reason:{}", email, e.getMessage());
@@ -75,7 +80,7 @@ public class AuthController {
      * @param type
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/register", produces = "application/json; charset=utf-8")
+    @PostMapping("/register")
     public String register(String email, String password, String phone, String name, String verifyCode, String grade, String studentId, String type){
         if(type.equals("教师")) {
             return accountService.registerUser(email, password, phone, name, verifyCode);
@@ -89,14 +94,10 @@ public class AuthController {
      * 退出登录
      * @return
      */
-    @GetMapping(value = "/logout")
+    @GetMapping("/logout")
     public ResponseEntity<Void> logout() {
         Subject subject = SecurityUtils.getSubject();
-        if(subject.getPrincipals() != null) {
-            UserDto user = (UserDto)subject.getPrincipals().getPrimaryPrincipal();
-            userService.deleteLoginInfo(user.getUsername());
-        }
-        SecurityUtils.getSubject().logout();
+        subject.logout();
         return ResponseEntity.ok().build();
     }
 
@@ -115,7 +116,7 @@ public class AuthController {
      * Send the Verify Email Code
      * @param email
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/sendVerifyEmailCode", produces = "application/json; charset=utf-8")
+    @PostMapping("/sendVerifyEmailCode")
     public String sendVerifyEmailCode(String email){
         return accountService.sendVerifyEmail(email);
     }
@@ -125,14 +126,20 @@ public class AuthController {
      * @param email
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/sendForgetPasswordVerifyEmailCode", produces = "application/json; charset=utf-8")
+    @PostMapping("/sendForgetPasswordVerifyEmailCode")
     public String sendForgetPasswordVerifyEmailCode(String email){
         return accountService.sendForgetPasswordVerifyEmail(email);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/forgetPassword", produces = "application/json; charset=utf-8")
+    @PostMapping(value = "/forgetPassword")
     public String forgetPassword(String email, String password, String verifyCode){
         return accountService.forgetPassword(email, password, verifyCode);
+    }
+
+    @RequestMapping(value = "/unauth")
+    @ResponseBody
+    public HttpEntity<Void> unauth() {
+        return new ResponseEntity(HttpStatus.UNAUTHORIZED);
     }
 
 }

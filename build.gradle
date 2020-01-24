@@ -19,11 +19,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-freemarker'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.apache.shiro:shiro-spring-boot-web-starter:1.4.2'
+    implementation 'org.apache.shiro:shiro-spring:1.4.2'
     implementation 'org.apache.httpcomponents:httpclient'
     implementation 'org.apache.commons:commons-lang3'
-    implementation 'com.auth0:java-jwt:3.9.0'
     implementation 'com.github.shalousun:smart-doc:1.8.0'
+    implementation 'org.crazycake:shiro-redis:3.2.3'
+    implementation 'com.alibaba:fastjson:1.2.62'
 
     runtimeOnly 'mysql:mysql-connector-java'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {

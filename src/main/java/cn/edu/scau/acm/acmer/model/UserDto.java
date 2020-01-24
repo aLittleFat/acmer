@@ -13,6 +13,10 @@ public class UserDto implements Serializable {
     private String salt;
     private List<String> roles;
 
+    public int getId(){
+        return userId;
+    }
+
     public String getUsername() {
         return username;
     }
