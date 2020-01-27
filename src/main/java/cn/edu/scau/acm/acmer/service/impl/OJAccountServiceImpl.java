@@ -9,16 +9,11 @@ import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.OJAccountService;
 import cn.edu.scau.acm.acmer.service.OJService;
+import cn.edu.scau.acm.acmer.service.VjService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -27,16 +22,10 @@ public class OJAccountServiceImpl implements OJAccountService {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private StudentRepository studentRepository;
-
-    @Autowired
-    private OJRepository ojRepository;
 
     @Autowired
     private OJAccountRepository ojAccountRepository;
@@ -44,63 +33,87 @@ public class OJAccountServiceImpl implements OJAccountService {
     @Autowired
     private OJService ojService;
 
+    @Autowired
+    private VjService vjService;
+
     @Override
-    public String addVjAccount(String username, String password, int id) {
+    public String addOjAccount(String ojName, String username, String password, int id) {
 
         User u = userRepository.findById(id);
         Student stu = studentRepository.findByUserId(u.getId());
 
-        ojService.addOj("VJ");
+        ojService.addOj(ojName);
 
-        if(ojAccountRepository.findByStudentIdAndOjName(stu.getId(), "VJ") != null) {
-            return "已存在VJ账号";
+        if(ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName) != null) {
+            return "已存在" + ojName + "账号";
         }
 
-        if(checkVjLoginStatus()){
-            vjLogout();
+        boolean checkOjAccount = false;
+        if(ojName.equals("VJ")) {
+            checkOjAccount = vjService.checkVjAccount(username, password);
         }
-        String url = "https://vjudge.net/user/login";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
-        map.add("username", username);
-        map.add("password", password);
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-        String response = restTemplate.postForObject( url, request , String.class );
-        log.info(response);
-        if(response.equals("success")){
+        if(checkOjAccount){
             OJAccount ojAccount = new OJAccount();
             ojAccount.setAccount(username);
-            ojAccount.setOjName("VJ");
+            ojAccount.setOjName(ojName);
             ojAccount.setStudentId(stu.getId());
             ojAccountRepository.save(ojAccount);
             return "true";
         }
-        else{
-            return response;
+        else {
+            return "添加失败，用户名/密码/网络错误";
         }
     }
 
     @Override
-    public boolean checkVjLoginStatus() {
-        String url = "https://vjudge.net/user/checkLogInStatus";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-        log.info(request.toString());
-        String res = restTemplate.postForObject(url, request, String.class);
-        log.info(res);
-        return res.equals("true");
+    public String getOjAccount(String ojName, int userId) {
+        Student stu = studentRepository.findByUserId(userId);
+        OJAccount ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
+        if(ojAccount == null) {
+            return "";
+        }
+        else{
+            return ojAccount.getAccount();
+        }
     }
 
     @Override
-    public void vjLogout() {
-        String url = "https://vjudge.net/user/logout";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity( url, request , String.class );
+    public String deleteOjAccount(String ojName, int userId) {
+        Student stu = studentRepository.findByUserId(userId);
+        OJAccount ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
+        if(ojAccount == null) {
+            return "VJ账号不存在";
+        }
+        // TODO： 删除VJ账号对应的题目记录
+
+        ojAccountRepository.delete(ojAccount);
+        return "true";
+    }
+
+    @Override
+    public String changeOjAccount(String ojName, String username, String password, int userId) {
+        Student stu = studentRepository.findByUserId(userId);
+        OJAccount ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
+        if(ojAccount == null) {
+            return "目前不存在" + ojName + "账户";
+        }
+        if(ojAccount.getAccount().equals(username)){
+            return "你修改的用户名和之前的一样，无需修改";
+        }
+        boolean checkOjAccount = false;
+        if(ojName.equals("VJ")) {
+            checkOjAccount = vjService.checkVjAccount(username, password);
+        }
+        if(checkOjAccount){
+            deleteOjAccount(ojName, userId);
+            OJAccount newOjAccount = new OJAccount();
+            newOjAccount.setAccount(username);
+            newOjAccount.setOjName(ojName);
+            newOjAccount.setStudentId(stu.getId());
+            ojAccountRepository.save(newOjAccount);
+            return "true";
+        } else {
+            return "修改失败，用户名/密码/网络错误";
+        }
     }
 }

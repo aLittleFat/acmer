@@ -243,4 +243,25 @@ public class AccountServiceImpl implements AccountService {
         mailService.sendTextMail(u.getEmail(), "ACMER账号审核不通过", "你在ACMER网站注册的账号 " + u.getEmail() + " 没有通过审核，账号已删除，请重新注册");
     }
 
+    @Override
+    public User_Student getUserStudentById(int id) {
+        return new User_Student(userRepository.findById(id), studentRepository.findByUserId(id));
+    }
+
+    @Override
+    public String changePhoneAndIcpcEmail(String phone, String icpcEmail, int id) {
+        User u = userRepository.findById(id);
+        Student stu = studentRepository.findByUserId(id);
+        if(!phone.equals("")){
+            u.setPhone(phone);
+            userRepository.save(u);
+        }
+        if(!icpcEmail.equals("")){
+            stu.setIcpcEmail(icpcEmail);
+            studentRepository.save(stu);
+        }
+
+        return "true";
+    }
+
 }

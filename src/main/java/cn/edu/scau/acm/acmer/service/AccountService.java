@@ -24,4 +24,8 @@ public interface AccountService {
     public Page<User_Student> getUserUnverify(Integer page, Integer size);
 
     public void deleteAccount(Integer id);
+
+    public User_Student getUserStudentById(int id);
+
+    public String changePhoneAndIcpcEmail(String phone, String icpcEmail, int id);
 }
