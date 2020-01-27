@@ -6,10 +6,7 @@ import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.repository.OJAccountRepository;
 import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
-import cn.edu.scau.acm.acmer.service.HduService;
-import cn.edu.scau.acm.acmer.service.OJAccountService;
-import cn.edu.scau.acm.acmer.service.OJService;
-import cn.edu.scau.acm.acmer.service.VjService;
+import cn.edu.scau.acm.acmer.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +35,21 @@ public class OJAccountServiceImpl implements OJAccountService {
     @Autowired
     private HduService hduService;
 
+    @Autowired
+    private BzojService bzojService;
+
+    @Override
+    public boolean checkOjAccount(String ojName, String username, String password) {
+        if(ojName.equals("VJ")) {
+            return vjService.checkVjAccount(username, password);
+        } else if (ojName.equals("HDU")) {
+            return hduService.checkHduAccount(username, password);
+        } else if (ojName.equals("BZOJ")) {
+            return bzojService.checkBzojAccount(username, password);
+        }
+        return false;
+    }
+
     @Override
     public String addOjAccount(String ojName, String username, String password, int id) {
 
@@ -49,14 +61,7 @@ public class OJAccountServiceImpl implements OJAccountService {
         if(ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName) != null) {
             return "已存在" + ojName + "账号";
         }
-
-        boolean checkOjAccount = false;
-        if(ojName.equals("VJ")) {
-            checkOjAccount = vjService.checkVjAccount(username, password);
-        } else if (ojName.equals("HDU")) {
-            checkOjAccount = hduService.checkHduAccount(username, password);
-        }
-        if(checkOjAccount){
+        if(checkOjAccount(ojName, username, password)){
             OJAccount ojAccount = new OJAccount();
             ojAccount.setAccount(username);
             ojAccount.setOjName(ojName);
@@ -104,13 +109,7 @@ public class OJAccountServiceImpl implements OJAccountService {
         if(ojAccount.getAccount().equals(username)){
             return "你修改的用户名和之前的一样，无需修改";
         }
-        boolean checkOjAccount = false;
-        if(ojName.equals("VJ")) {
-            checkOjAccount = vjService.checkVjAccount(username, password);
-        } else if (ojName.equals("HDU")) {
-            checkOjAccount = hduService.checkHduAccount(username, password);
-        }
-        if(checkOjAccount){
+        if(checkOjAccount(ojName, username, password)){
             deleteOjAccount(ojName, userId);
             OJAccount newOjAccount = new OJAccount();
             newOjAccount.setAccount(username);
