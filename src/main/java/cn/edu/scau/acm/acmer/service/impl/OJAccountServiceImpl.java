@@ -6,6 +6,7 @@ import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.repository.OJAccountRepository;
 import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
+import cn.edu.scau.acm.acmer.service.HduService;
 import cn.edu.scau.acm.acmer.service.OJAccountService;
 import cn.edu.scau.acm.acmer.service.OJService;
 import cn.edu.scau.acm.acmer.service.VjService;
@@ -34,6 +35,9 @@ public class OJAccountServiceImpl implements OJAccountService {
     @Autowired
     private VjService vjService;
 
+    @Autowired
+    private HduService hduService;
+
     @Override
     public String addOjAccount(String ojName, String username, String password, int id) {
 
@@ -49,6 +53,8 @@ public class OJAccountServiceImpl implements OJAccountService {
         boolean checkOjAccount = false;
         if(ojName.equals("VJ")) {
             checkOjAccount = vjService.checkVjAccount(username, password);
+        } else if (ojName.equals("HDU")) {
+            checkOjAccount = hduService.checkHduAccount(username, password);
         }
         if(checkOjAccount){
             OJAccount ojAccount = new OJAccount();
@@ -101,6 +107,8 @@ public class OJAccountServiceImpl implements OJAccountService {
         boolean checkOjAccount = false;
         if(ojName.equals("VJ")) {
             checkOjAccount = vjService.checkVjAccount(username, password);
+        } else if (ojName.equals("HDU")) {
+            checkOjAccount = hduService.checkHduAccount(username, password);
         }
         if(checkOjAccount){
             deleteOjAccount(ojName, userId);
