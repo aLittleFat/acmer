@@ -5,27 +5,27 @@ import cn.edu.scau.acm.acmer.model.User_Student;
 import org.springframework.data.domain.Page;
 
 public interface AccountService {
-    public String registerUser(String email, String password, String phone, String name, String verifyCode);
-    public User getUserByEmail(String email);
-    public String registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId);
-    public boolean isVerify(String email);
-    public void verifyAccount(int id);
-    public String verifyEmail(String email, String verifyCode);
-    public String verifyForgetPasswordEmail(String email, String verifyCode);
-    public String sendVerifyEmail(String email);
-    public String sendForgetPasswordVerifyEmail(String email);
-    public boolean isStudent(int id);
-    public boolean isAdmin(int id);
-    public String genEmailVerifyCode();
-    public String forgetPassword(String email, String password, String verifyCode);
+    String registerUser(String email, String password, String phone, String name, String verifyCode);
+    User getUserByEmail(String email);
+    String registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId);
+    boolean isVerify(String email);
+    void verifyAccount(int id);
+    String verifyEmail(String email, String verifyCode);
+    String verifyForgetPasswordEmail(String email, String verifyCode);
+    String sendVerifyEmail(String email);
+    String sendForgetPasswordVerifyEmail(String email);
+    boolean isStudent(int id);
+    boolean isAdmin(int id);
+    String genEmailVerifyCode();
+    String forgetPassword(String email, String password, String verifyCode);
 
-    public User getUserById(int id);
+    User getUserById(int id);
 
-    public Page<User_Student> getUserUnverify(Integer page, Integer size);
+    Page<User_Student> getUserUnverify(Integer page, Integer size);
 
-    public void deleteAccount(Integer id);
+    void deleteAccount(Integer id);
 
-    public User_Student getUserStudentById(int id);
+    User_Student getUserStudentById(int id);
 
-    public String changePhoneAndIcpcEmail(String phone, String icpcEmail, int id);
+    String changePhoneAndIcpcEmail(String phone, String icpcEmail, int id);
 }

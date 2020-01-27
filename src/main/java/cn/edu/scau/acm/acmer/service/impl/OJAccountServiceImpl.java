@@ -4,7 +4,6 @@ import cn.edu.scau.acm.acmer.entity.OJAccount;
 import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.repository.OJAccountRepository;
-import cn.edu.scau.acm.acmer.repository.OJRepository;
 import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.OJAccountService;
@@ -14,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 public class OJAccountServiceImpl implements OJAccountService {
