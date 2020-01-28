@@ -15,7 +15,6 @@ public class User {
     private String password;
     private Byte isAdmin;
     private Byte verify;
-    private Byte emailVerify;
 
     @Id
     @Column(name = "ID")
@@ -87,16 +86,6 @@ public class User {
         this.verify = verify;
     }
 
-    @Basic
-    @Column(name = "EmailVerify")
-    public Byte getEmailVerify() {
-        return emailVerify;
-    }
-
-    public void setEmailVerify(Byte emailVerify) {
-        this.emailVerify = emailVerify;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -108,12 +97,11 @@ public class User {
                 Objects.equals(name, user.name) &&
                 Objects.equals(password, user.password) &&
                 Objects.equals(isAdmin, user.isAdmin) &&
-                Objects.equals(verify, user.verify) &&
-                Objects.equals(emailVerify, user.emailVerify);
+                Objects.equals(verify, user.verify);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, phone, name, password, isAdmin, verify, emailVerify);
+        return Objects.hash(id, email, phone, name, password, isAdmin, verify);
     }
 }

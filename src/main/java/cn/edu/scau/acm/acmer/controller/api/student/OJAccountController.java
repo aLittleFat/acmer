@@ -1,7 +1,9 @@
 package cn.edu.scau.acm.acmer.controller.api.student;
 
+import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.model.UserDto;
 import cn.edu.scau.acm.acmer.service.OJAccountService;
+import cn.edu.scau.acm.acmer.service.VjService;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

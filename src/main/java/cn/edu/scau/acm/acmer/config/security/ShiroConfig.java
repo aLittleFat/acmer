@@ -139,6 +139,7 @@ public class ShiroConfig {
         chainDefinition.put("/api/admin/**", "authc,anyRole[admin]"); //只允许admin角色的用户访问
         chainDefinition.put("/api/student/**", "authc,anyRole[student]"); //只允许student角色的用户访问
         chainDefinition.put("/api/common/**", "authc");
+        chainDefinition.put("/api/unauth/**", "anon");
         chainDefinition.put("/article/list", "authc");
         chainDefinition.put("/article/*", "authc[permissive]");
         chainDefinition.put("/**", "anon");

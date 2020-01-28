@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-public class ProblemAcRecord {
+public class ProblemACRecord {
     private int id;
     private Timestamp time;
     private Integer ojAccountId;
@@ -58,7 +58,7 @@ public class ProblemAcRecord {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ProblemAcRecord that = (ProblemAcRecord) o;
+        ProblemACRecord that = (ProblemACRecord) o;
         return id == that.id &&
                 Objects.equals(time, that.time) &&
                 Objects.equals(ojAccountId, that.ojAccountId) &&
