@@ -25,6 +25,7 @@ dependencies {
     implementation 'com.github.shalousun:smart-doc:1.8.0'
     implementation 'org.crazycake:shiro-redis:3.2.3'
     implementation 'com.alibaba:fastjson:1.2.62'
+    implementation 'org.jsoup:jsoup:1.12.1'
 
     runtimeOnly 'mysql:mysql-connector-java'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {

@@ -1,12 +1,12 @@
 package cn.edu.scau.acm.acmer.entity;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
+@Table(name = "Problem", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"ProblemId","OJName"})
+})
 public class Problem {
     private int id;
     private String problemId;
@@ -14,6 +14,7 @@ public class Problem {
 
     @Id
     @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
     }

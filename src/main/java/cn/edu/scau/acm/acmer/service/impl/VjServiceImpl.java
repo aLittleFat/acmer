@@ -88,6 +88,7 @@ public class VjServiceImpl implements VjService {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         int sz = 0;
         int start = 0;
+        int retry = 10;
         do {
             MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
             map.add("start", String.valueOf(start));
@@ -99,20 +100,27 @@ public class VjServiceImpl implements VjService {
             String response;
             try {
                 response = restTemplate.postForObject(url, request, String.class);
-            } catch (Exception e) {
-                e.printStackTrace();
-                continue;
-            }
-            JSONObject jsonObject = JSONObject.parseObject(response);
-            JSONArray vjProblems = jsonObject.getJSONArray("data");
-            sz = vjProblems.size();
-            for (Object vjProblem : vjProblems) {
-                JSONObject jsonProblem = (JSONObject) vjProblem;
-                ojService.addOj(jsonProblem.getString("oj"));
-                problemService.addProblem(jsonProblem.getString("oj"),jsonProblem.getString("probNum"));
-                if(!problemService.addProblemAcRecord(problemService.findProblem(jsonProblem.getString("oj"),jsonProblem.getString("probNum")), vjAccount, jsonProblem.getLong("time"))){
-                    return;
+                JSONObject jsonObject = JSONObject.parseObject(response);
+                JSONArray vjProblems = jsonObject.getJSONArray("data");
+                sz = vjProblems.size();
+                for (Object vjProblem : vjProblems) {
+                    JSONObject jsonProblem = (JSONObject) vjProblem;
+                    ojService.addOj(jsonProblem.getString("oj"));
+                    problemService.addProblem(jsonProblem.getString("oj"),jsonProblem.getString("probNum"));
+                    if(!problemService.addProblemAcRecord(problemService.findProblem(jsonProblem.getString("oj"),jsonProblem.getString("probNum")), vjAccount, jsonProblem.getLong("time"))){
+                        return;
+                    }
                 }
+                retry = 10;
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(1000);
+                    retry--;
+                    log.error("网络错误，准备重试，重试第{}次", 10-retry);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                continue;
             }
             start += 20;
             log.info(String.valueOf(sz));
@@ -120,7 +128,7 @@ public class VjServiceImpl implements VjService {
     }
 
     @Override
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Async
     public void getAllAcProblems() {
         List<OJAccount> ojAccounts = ojAccountRepository.findAllByOjName("VJ");
         for(OJAccount ojAccount : ojAccounts) {
