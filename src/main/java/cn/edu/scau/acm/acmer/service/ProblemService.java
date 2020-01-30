@@ -11,4 +11,6 @@ public interface ProblemService {
     void addProblem(String ojName, String problemId);
     boolean addProblemAcRecord(Problem problem, OJAccount ojAccount, Long time);
     Problem findProblem(String ojName, String problemId);
+
+    void getAllAcProblems();
 }

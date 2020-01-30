@@ -3,20 +3,16 @@ package cn.edu.scau.acm.acmer.service.impl;
 import cn.edu.scau.acm.acmer.entity.OJAccount;
 import cn.edu.scau.acm.acmer.repository.OJAccountRepository;
 import cn.edu.scau.acm.acmer.service.CfService;
-import cn.edu.scau.acm.acmer.service.OJService;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -55,9 +51,9 @@ public class CfServiceImpl implements CfService {
                 for (Object cfProblem : cfProblems) {
                     JSONObject jsonProblem = (JSONObject) cfProblem;
                     String proId = jsonProblem.getJSONObject("problem").getInteger("contestId") + jsonProblem.getJSONObject("problem").getString("index");
-                    problemService.addProblem("Codeforces",proId);
+                    problemService.addProblem("CodeForces",proId);
                     log.info(proId);
-                    if(!problemService.addProblemAcRecord(problemService.findProblem("Codeforces", proId), cfAccount, jsonProblem.getLong("creationTimeSeconds")*1000)){
+                    if(!problemService.addProblemAcRecord(problemService.findProblem("CodeForces", proId), cfAccount, jsonProblem.getLong("creationTimeSeconds")*1000)){
                         continue;
                     }
                 }
@@ -81,7 +77,7 @@ public class CfServiceImpl implements CfService {
     @Override
     @Async
     public void getAllAcProblems() {
-        List<OJAccount> ojAccounts = ojAccountRepository.findAllByOjName("Codeforces");
+        List<OJAccount> ojAccounts = ojAccountRepository.findAllByOjName("CodeForces");
         for(OJAccount ojAccount : ojAccounts) {
             getAcProblemsByCfAccount(ojAccount);
         }

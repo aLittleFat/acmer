@@ -5,8 +5,10 @@ import cn.edu.scau.acm.acmer.entity.Problem;
 import cn.edu.scau.acm.acmer.entity.ProblemACRecord;
 import cn.edu.scau.acm.acmer.repository.ProblemACRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ProblemRepository;
-import cn.edu.scau.acm.acmer.service.ProblemService;
+import cn.edu.scau.acm.acmer.service.*;
+import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -22,6 +24,18 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Autowired
     ProblemACRecordRepository problemACRecordRepository;
+
+    @Autowired
+    BzojService bzojService;
+
+    @Autowired
+    CfService cfService;
+
+    @Autowired
+    HduService hduService;
+
+    @Autowired
+    VjService vjService;
 
     @Override
     public void addProblem(String ojName, String problemId) {
@@ -50,7 +64,15 @@ public class ProblemServiceImpl implements ProblemService {
     public Problem findProblem(String ojName, String problemId) {
         return problemRepository.findByOjNameAndProblemId(ojName, problemId);
     }
-    
+
+    @Override
+    @Scheduled(cron = "0 0 2 * * ?")
+    public void getAllAcProblems() {
+        bzojService.getAllAcProblems();
+        cfService.getAllAcProblems();
+        hduService.getAllAcProblems();
+        vjService.getAllAcProblems();
+    }
 
 
 }
