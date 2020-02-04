@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "api/student/ojaccount", produces = "application/json; charset=utf-8")
+@RequestMapping(value = "api/student/ojAccount", produces = "application/json; charset=utf-8")
 public class OJAccountController {
     @Autowired
     OJAccountService ojAccountService;

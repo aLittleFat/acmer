@@ -1,5 +1,6 @@
 package cn.edu.scau.acm.acmer.service;
 
+import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.model.User_Student;
 import org.springframework.data.domain.Page;
@@ -28,4 +29,6 @@ public interface AccountService {
     User_Student getUserStudentById(int id);
 
     String changePhoneAndIcpcEmail(String phone, String icpcEmail, int id);
+
+    Student getStudentByUserId(int userId);
 }

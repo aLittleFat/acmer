@@ -51,9 +51,12 @@ public class CfServiceImpl implements CfService {
                 for (Object cfProblem : cfProblems) {
                     JSONObject jsonProblem = (JSONObject) cfProblem;
                     String proId = jsonProblem.getJSONObject("problem").getInteger("contestId") + jsonProblem.getJSONObject("problem").getString("index");
-                    problemService.addProblem("CodeForces",proId);
-                    log.info(proId);
-                    if(!problemService.addProblemAcRecord(problemService.findProblem("CodeForces", proId), cfAccount, jsonProblem.getLong("creationTimeSeconds")*1000)){
+                    String ojName="CodeForces";
+                    if(jsonProblem.getJSONObject("problem").getInteger("contestId") >= 9999) {
+                        ojName="Gym";
+                    }
+                    problemService.addProblem(ojName,proId);
+                    if(!problemService.addProblemAcRecord(problemService.findProblem(ojName, proId), cfAccount, jsonProblem.getLong("creationTimeSeconds")*1000)){
                         continue;
                     }
                 }

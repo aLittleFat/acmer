@@ -82,7 +82,7 @@ public class HduServiceImpl implements HduService {
                         problemService.addProblem("HDU", proId);
                         Problem problem = problemService.findProblem("HDU", proId);
                         if(!problemService.addProblemAcRecord(problem , hduAccount, time.getTime())) {
-                            break;
+                            continue;
                         }
                     }
                 }

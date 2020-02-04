@@ -108,7 +108,7 @@ public class VjServiceImpl implements VjService {
                     ojService.addOj(jsonProblem.getString("oj"));
                     problemService.addProblem(jsonProblem.getString("oj"),jsonProblem.getString("probNum"));
                     if(!problemService.addProblemAcRecord(problemService.findProblem(jsonProblem.getString("oj"),jsonProblem.getString("probNum")), vjAccount, jsonProblem.getLong("time"))){
-                        return;
+                        continue;
                     }
                 }
                 retry = 10;

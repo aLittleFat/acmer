@@ -81,7 +81,7 @@ public class BzojServiceImpl implements BzojService {
                     problemService.addProblem("BZOJ", proId);
                     Problem problem = problemService.findProblem("BZOJ", proId);
                     if(!problemService.addProblemAcRecord(problem , bzojAccount, time.getTime())) {
-                        break;
+                        continue;
                     }
                 }
                 Elements links = document.body().select("a");

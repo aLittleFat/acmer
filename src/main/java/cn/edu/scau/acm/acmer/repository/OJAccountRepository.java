@@ -10,4 +10,5 @@ import java.util.List;
 public interface OJAccountRepository extends JpaRepository<OJAccount, Integer> {
     OJAccount findByStudentIdAndOjName(String studentId, String ojName);
     List<OJAccount> findAllByOjName(String ojName);
+    List<OJAccount> findAllByStudentId(String studentId);
 }

@@ -1,9 +1,6 @@
 package cn.edu.scau.acm.acmer.controller.api.unauth;
 
-import cn.edu.scau.acm.acmer.service.BzojService;
-import cn.edu.scau.acm.acmer.service.CfService;
-import cn.edu.scau.acm.acmer.service.HduService;
-import cn.edu.scau.acm.acmer.service.VjService;
+import cn.edu.scau.acm.acmer.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     @Autowired
-    CfService cfService;
+    ProblemService problemService;
 
     @GetMapping("/test")
     void test(){
-        cfService.getAllAcProblems();
+        problemService.getAllAcProblemsFromOj();
     }
 
 }

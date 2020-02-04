@@ -263,4 +263,9 @@ public class AccountServiceImpl implements AccountService {
         return "true";
     }
 
+    @Override
+    public Student getStudentByUserId(int userId) {
+        return studentRepository.findByUserId(userId);
+    }
+
 }
