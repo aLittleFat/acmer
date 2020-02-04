@@ -1,8 +1,6 @@
 server:
   port: 8080
 spring:
-#  main:
-#    allow-bean-definition-overriding: true
   datasource:
     url: jdbc:mysql://scaufat.cn:3306/scauacm?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=true
     username: root
@@ -55,4 +53,10 @@ spring:
 mail:
   fromMail:
     addr: zhanghonghai9999@qq.com
-
+scau:
+  acmer:
+    url: http://localhost/
+  cf:
+    url: http://scaucf.top/
+swagger:
+  host: localhost

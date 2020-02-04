@@ -32,6 +32,8 @@ public class ShiroConfig {
     private int port;
     @Value("${spring.redis.password}")
     private String password;
+    @Value("${scau.acmer.url}")
+    private String acmerUrl;
 
     @Bean
     public FilterRegistrationBean<Filter> filterRegistrationBean(SecurityManager securityManager) throws Exception{
@@ -145,7 +147,7 @@ public class ShiroConfig {
         chainDefinition.put("/**", "anon");
         factoryBean.setFilterChainDefinitionMap(chainDefinition);
 
-        factoryBean.setLoginUrl("http://localhost/auth/unauth");
+        factoryBean.setLoginUrl(acmerUrl + "auth/unauth");
 
         return factoryBean;
     }

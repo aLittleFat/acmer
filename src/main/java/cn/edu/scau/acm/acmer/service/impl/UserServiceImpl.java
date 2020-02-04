@@ -32,6 +32,7 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserInfo(String userName) {
         UserDto user = new UserDto();
         User u = accountService.getUserByEmail(userName);
+        if(u == null) return null;
         user.setUserId(u.getId());
         user.setUsername(u.getEmail());
         user.setEncryptPwd(u.getPassword());

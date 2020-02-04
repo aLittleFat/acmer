@@ -67,7 +67,7 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     @Scheduled(cron = "0 0 2 * * ?")
-    public void getAllAcProblems() {
+    public void getAllAcProblemsFromOj() {
         bzojService.getAllAcProblems();
         cfService.getAllAcProblems();
         hduService.getAllAcProblems();

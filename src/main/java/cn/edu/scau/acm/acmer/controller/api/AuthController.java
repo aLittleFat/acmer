@@ -1,12 +1,10 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
-import cn.edu.scau.acm.acmer.model.UserDto;
 import cn.edu.scau.acm.acmer.service.AccountService;
 import cn.edu.scau.acm.acmer.service.UserService;
-import org.apache.catalina.connector.Response;
+import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
@@ -17,11 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/auth"  ,produces = "application/json; charset=utf-8")
@@ -35,13 +29,7 @@ public class AuthController {
     @Autowired
     UserService userService;
 
-    /**
-     * Login
-     * @param email
-     * @param password
-     * @param response
-     * @return
-     */
+    @ApiOperation("登录")
     @PostMapping("/login")
     public ResponseEntity<String> login(String email, String password, HttpServletResponse response){
         log.info(email + " " + password);
@@ -53,10 +41,6 @@ public class AuthController {
             if(!accountService.isVerify(email)){
                 return new ResponseEntity<String>("账号未通过审核，请等待管理员审核", HttpStatus.OK);
             }
-
-//            UserDto user = (UserDto) subject.getPrincipal();
-//            String newToken = userService.generateJwtToken(user.getUsername());
-//            response.setHeader("token", newToken);
             String userId = String.valueOf(accountService.getUserByEmail(email).getId());
             response.setHeader("token", (String) subject.getSession().getId());
             return new ResponseEntity<String>(userId, HttpStatus.OK);
@@ -68,18 +52,7 @@ public class AuthController {
         }
     }
 
-    /**
-     * register
-     * @param email
-     * @param password
-     * @param phone
-     * @param name
-     * @param verifyCode
-     * @param grade
-     * @param studentId
-     * @param type
-     * @return
-     */
+    @ApiOperation("注册")
     @PostMapping("/register")
     public String register(String email, String password, String phone, String name, String verifyCode, String grade, String studentId, String type){
         if(type.equals("教师")) {
@@ -90,10 +63,7 @@ public class AuthController {
         }
     }
 
-    /**
-     * 退出登录
-     * @return
-     */
+    @ApiOperation("注销")
     @GetMapping("/logout")
     public ResponseEntity<Void> logout() {
         Subject subject = SecurityUtils.getSubject();
@@ -101,41 +71,31 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * VerifyEmail
-     * @param email
-     * @param verifyCode
-     * @return
-     */
+    @ApiOperation("验证邮箱")
     @GetMapping("/verifyEmail")
     public String verifyEmail(String email, String verifyCode){
         return accountService.verifyEmail(email, verifyCode);
     }
 
-    /**
-     * Send the Verify Email Code
-     * @param email
-     */
+    @ApiOperation("发送邮箱验证码到邮箱")
     @PostMapping("/sendVerifyEmailCode")
     public String sendVerifyEmailCode(String email){
         return accountService.sendVerifyEmail(email);
     }
 
-    /**
-     * Send the Verify Email Code when Forget Password
-     * @param email
-     * @return
-     */
+    @ApiOperation("忘记密码的时候发送验证码到邮箱")
     @PostMapping("/sendForgetPasswordVerifyEmailCode")
     public String sendForgetPasswordVerifyEmailCode(String email){
         return accountService.sendForgetPasswordVerifyEmail(email);
     }
 
+    @ApiOperation("忘记密码的时候修改密码")
     @PostMapping(value = "/forgetPassword")
     public String forgetPassword(String email, String password, String verifyCode){
         return accountService.forgetPassword(email, password, verifyCode);
     }
 
+    @ApiOperation("权限不足时返回401")
     @RequestMapping(value = "/unauth")
     @ResponseBody
     public HttpEntity<Void> unauth() {
