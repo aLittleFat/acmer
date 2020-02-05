@@ -57,6 +57,8 @@ scau:
   acmer:
     url: http://localhost/
   cf:
-    url: http://scaucf.top/
+    url: http://www.scaucf.top/
+    username: admin
+    password: 123456
 swagger:
   host: localhost

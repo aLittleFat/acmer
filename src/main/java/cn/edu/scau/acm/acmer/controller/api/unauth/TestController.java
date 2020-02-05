@@ -14,9 +14,12 @@ public class TestController {
     @Autowired
     ProblemService problemService;
 
+    @Autowired
+    ScauCfService scauCfService;
+
     @GetMapping("/test")
     void test(){
-        problemService.getAllAcProblemsFromOj();
+        scauCfService.sendCfVerifyCode("Mostima");
     }
 
 }
