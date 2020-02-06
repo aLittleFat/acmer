@@ -35,10 +35,10 @@ public class HduServiceImpl implements HduService {
     private RestTemplate restTemplate;
 
     @Autowired
-    OJAccountRepository ojAccountRepository;
+    private OJAccountRepository ojAccountRepository;
 
     @Autowired
-    ProblemService problemService;
+    private ProblemService problemService;
 
     @Override
     public void hduLogout() {

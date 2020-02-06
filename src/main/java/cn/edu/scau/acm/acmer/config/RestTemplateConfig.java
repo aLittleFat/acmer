@@ -23,8 +23,6 @@ public class RestTemplateConfig {
     //Spring Boot的自动配置机制依靠@ConditionalOnMissingBean注解判断是否执行初始化代码，
     // 即如果用户已经创建了bean，则相关的初始化代码不再执行。
     public RestTemplate restTemplate(ClientHttpRequestFactory factory) {
-        RestTemplate restTemplate = new RestTemplate(factory);
-//        restTemplate.setRequestFactory(new HttpComponentsClientRestfulHttpRequestFactory());
          return new RestTemplate(factory);
     }
 
@@ -32,31 +30,10 @@ public class RestTemplateConfig {
     @ConditionalOnMissingBean({ClientHttpRequestFactory.class})
     public ClientHttpRequestFactory simpleClientHttpRequestFactory() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setReadTimeout(15000);// ms
-        factory.setConnectTimeout(15000);// ms
+        factory.setReadTimeout(30000);// ms
+        factory.setConnectTimeout(30000);// ms
         factory.setProxy(new java.net.Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8888)));
         return factory;
     }
-
-//    private static final class HttpComponentsClientRestfulHttpRequestFactory extends HttpComponentsClientHttpRequestFactory {
-//        @Override
-//        protected HttpUriRequest createHttpUriRequest(HttpMethod httpMethod, URI uri) {
-//            if (httpMethod == HttpMethod.GET) {
-//                return new HttpGetRequestWithEntity(uri);
-//            }
-//            return super.createHttpUriRequest(httpMethod, uri);
-//        }
-//    }
-//
-//    private static final class HttpGetRequestWithEntity extends HttpEntityEnclosingRequestBase {
-//        public HttpGetRequestWithEntity(final URI uri) {
-//            super.setURI(uri);
-//        }
-//
-//        @Override
-//        public String getMethod() {
-//            return HttpMethod.GET.name();
-//        }
-//    }
 
 }

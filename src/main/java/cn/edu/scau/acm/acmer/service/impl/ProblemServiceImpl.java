@@ -3,11 +3,11 @@ package cn.edu.scau.acm.acmer.service.impl;
 import cn.edu.scau.acm.acmer.entity.OJAccount;
 import cn.edu.scau.acm.acmer.entity.Problem;
 import cn.edu.scau.acm.acmer.entity.ProblemACRecord;
+import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.model.AcProblem;
 import cn.edu.scau.acm.acmer.model.AcProblemInDay;
-import cn.edu.scau.acm.acmer.repository.OJAccountRepository;
-import cn.edu.scau.acm.acmer.repository.ProblemACRecordRepository;
-import cn.edu.scau.acm.acmer.repository.ProblemRepository;
+import cn.edu.scau.acm.acmer.model.PersonalProblemAcRank;
+import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.*;
 import net.bytebuddy.asm.Advice;
 import org.slf4j.Logger;
@@ -27,25 +27,31 @@ public class ProblemServiceImpl implements ProblemService {
     Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    ProblemRepository problemRepository;
+    private ProblemRepository problemRepository;
 
     @Autowired
-    ProblemACRecordRepository problemACRecordRepository;
+    private ProblemACRecordRepository problemACRecordRepository;
 
     @Autowired
-    BzojService bzojService;
+    private BzojService bzojService;
 
     @Autowired
-    CfService cfService;
+    private CfService cfService;
 
     @Autowired
-    HduService hduService;
+    private HduService hduService;
 
     @Autowired
-    VjService vjService;
+    private VjService vjService;
 
     @Autowired
-    OJAccountRepository ojAccountRepository;
+    private OJAccountRepository ojAccountRepository;
+
+    @Autowired
+    private StudentRepository studentRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public void addProblem(String ojName, String problemId) {
@@ -148,6 +154,34 @@ public class ProblemServiceImpl implements ProblemService {
         cfService.getAllAcProblems();
         hduService.getAllAcProblems();
         vjService.getAllAcProblems();
+    }
+
+    @Override
+    public int getAcNumByStudentId(String id) {
+
+        return 0;
+    }
+
+    @Override
+    public List<PersonalProblemAcRank> getPersonalProblemAcRank(int grade, boolean includeRetired) {
+        List<Student> students;
+        if(grade == 0) {
+            students = studentRepository.findAll();
+        } else {
+            students = studentRepository.findAllByGrade(grade);
+        }
+        List<PersonalProblemAcRank> personalProblemAcRanks = new ArrayList<>();
+        for (Student student : students) {
+            PersonalProblemAcRank personalProblemAcRank = new PersonalProblemAcRank();
+            personalProblemAcRank.setUser(userRepository.findById((int)student.getUserId()));
+            personalProblemAcRank.setStudent(student);
+            personalProblemAcRank.setAcNum(problemACRecordRepository.countAllByStudnetId(student.getId()));
+            //todo getaward
+
+            personalProblemAcRanks.add(personalProblemAcRank);
+        }
+        Collections.sort(personalProblemAcRanks);
+        return personalProblemAcRanks;
     }
 
 

@@ -34,10 +34,10 @@ public class BzojServiceImpl implements BzojService {
     private RestTemplate restTemplate;
 
     @Autowired
-    OJAccountRepository ojAccountRepository;
+    private OJAccountRepository ojAccountRepository;
 
     @Autowired
-    ProblemService problemService;
+    private ProblemService problemService;
 
     @Override
     public void bzojLogout() {

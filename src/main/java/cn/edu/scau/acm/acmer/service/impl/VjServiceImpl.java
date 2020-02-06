@@ -32,13 +32,13 @@ public class VjServiceImpl implements VjService {
     private RestTemplate restTemplate;
 
     @Autowired
-    ProblemService problemService;
+    private ProblemService problemService;
 
     @Autowired
-    OJAccountRepository ojAccountRepository;
+    private OJAccountRepository ojAccountRepository;
 
     @Autowired
-    OJService ojService;
+    private OJService ojService;
 
     @Override
     public boolean checkVjLoginStatus() {

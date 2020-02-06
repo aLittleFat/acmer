@@ -4,6 +4,7 @@ import cn.edu.scau.acm.acmer.entity.OJAccount;
 import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.repository.OJAccountRepository;
+import cn.edu.scau.acm.acmer.repository.ProblemACRecordRepository;
 import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.*;
@@ -38,6 +39,12 @@ public class OJAccountServiceImpl implements OJAccountService {
     @Autowired
     private BzojService bzojService;
 
+    @Autowired
+    private CfService cfService;
+
+    @Autowired
+    private ProblemACRecordRepository problemACRecordRepository;
+
     @Override
     public boolean checkOjAccount(String ojName, String username, String password) {
         if(ojName.equals("VJ")) {
@@ -46,6 +53,8 @@ public class OJAccountServiceImpl implements OJAccountService {
             return hduService.checkHduAccount(username, password);
         } else if (ojName.equals("BZOJ")) {
             return bzojService.checkBzojAccount(username, password);
+        } else if (ojName.equals("CodeForces")) {
+            return cfService.checkCfAccount(username, password);
         }
         return false;
     }
@@ -93,7 +102,8 @@ public class OJAccountServiceImpl implements OJAccountService {
         if(ojAccount == null) {
             return "VJ账号不存在";
         }
-        // TODO： 删除VJ账号对应的题目记录
+
+        problemACRecordRepository.deleteAllByOjAccountId(ojAccount.getId());
 
         ojAccountRepository.delete(ojAccount);
         return "true";

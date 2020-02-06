@@ -17,7 +17,7 @@ public interface AccountService {
     String sendForgetPasswordVerifyEmail(String email);
     boolean isStudent(int id);
     boolean isAdmin(int id);
-    String genEmailVerifyCode();
+    String genVerifyCode();
     String forgetPassword(String email, String password, String verifyCode);
 
     User getUserById(int id);

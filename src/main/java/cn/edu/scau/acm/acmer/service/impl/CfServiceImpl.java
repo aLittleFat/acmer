@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
@@ -23,14 +24,16 @@ public class CfServiceImpl implements CfService {
     Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    OJAccountRepository ojAccountRepository;
+    private OJAccountRepository ojAccountRepository;
 
     @Autowired
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
     @Autowired
-    ProblemService problemService;
+    private ProblemService problemService;
 
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     @Async
@@ -84,5 +87,11 @@ public class CfServiceImpl implements CfService {
         for(OJAccount ojAccount : ojAccounts) {
             getAcProblemsByCfAccount(ojAccount);
         }
+    }
+
+    @Override
+    public boolean checkCfAccount(String username, String password) {
+        String verifyCode = stringRedisTemplate.opsForValue().get(username + "_Verify");
+        return verifyCode != null && verifyCode.equals(password);
     }
 }

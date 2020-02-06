@@ -2,7 +2,6 @@ package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.service.AccountService;
 import cn.edu.scau.acm.acmer.service.ScauCfService;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.TimeUnit;
@@ -32,11 +29,13 @@ public class ScauCfServiceImpl implements ScauCfService {
     private String URL;
 
     @Autowired
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
+
     @Autowired
-    StringRedisTemplate stringRedisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
+
     @Autowired
-    AccountService accountService;
+    private AccountService accountService;
 
     @Override
     public String login() {
@@ -66,7 +65,7 @@ public class ScauCfServiceImpl implements ScauCfService {
 
         String verifyCode = stringRedisTemplate.opsForValue().get(cfHandle + "_Verify");
         if(verifyCode == null){
-            verifyCode = accountService.genEmailVerifyCode();
+            verifyCode = accountService.genVerifyCode();
             stringRedisTemplate.opsForValue().set(cfHandle + "_Verify", verifyCode, 10, TimeUnit.MINUTES);
         }
 
@@ -82,8 +81,12 @@ public class ScauCfServiceImpl implements ScauCfService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(json.toString(), headers);
         JSONObject response = restTemplate.postForObject(url, request, JSONObject.class);
-        if(response.getInteger("status") == 0)
-            return "true";
-        else return "服务器出错";
+        int status = response.getInteger("status");
+        switch (status) {
+            case 0: return "true";
+            case 5: return "cf用户名出错";
+            case 7: return "发送失败";
+            default: return "服务器出错";
+        }
     }
 }

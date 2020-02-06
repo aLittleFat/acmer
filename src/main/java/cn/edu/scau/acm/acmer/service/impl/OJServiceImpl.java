@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class OJServiceImpl implements OJService {
 
     @Autowired
-    OJRepository ojRepository;
+    private OJRepository ojRepository;
 
     @Override
     public void addOj(String name) {

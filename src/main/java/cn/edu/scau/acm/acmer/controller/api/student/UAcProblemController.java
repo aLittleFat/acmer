@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "api/student/acProblem", produces = "application/json; charset=utf-8")
-public class AcProblemController {
+public class UAcProblemController {
     @Autowired
     ProblemService problemService;
 

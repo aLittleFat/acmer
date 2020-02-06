@@ -2,6 +2,7 @@ package cn.edu.scau.acm.acmer.controller.api.student;
 
 import cn.edu.scau.acm.acmer.model.UserDto;
 import cn.edu.scau.acm.acmer.service.OJAccountService;
+import cn.edu.scau.acm.acmer.service.ScauCfService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "api/student/ojAccount", produces = "application/json; charset=utf-8")
 public class OJAccountController {
+
     @Autowired
-    OJAccountService ojAccountService;
+    private OJAccountService ojAccountService;
+
+    @Autowired
+    private ScauCfService scauCfService;
 
     @ApiOperation("添加OJ账户")
     @PostMapping("addMyOjAccount")
@@ -42,5 +47,10 @@ public class OJAccountController {
     String deleteMyOjAccount(String ojName){
         int userId = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         return ojAccountService.deleteOjAccount(ojName, userId);
+    }
+
+    @PostMapping("sendCfVerifyCode")
+    String sendCfVerifyCode(String username) {
+        return scauCfService.sendCfVerifyCode(username);
     }
 }

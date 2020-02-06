@@ -29,16 +29,16 @@ public class AccountServiceImpl implements AccountService {
     private static final String encryptSalt = "F12839WhsnnEV$#23b";
 
     @Autowired
-    StudentRepository studentRepository;
+    private StudentRepository studentRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    StringRedisTemplate stringRedisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
-    MailService mailService;
+    private MailService mailService;
 
     @Override
     public String registerUser(String email, String password, String phone, String name, String verifyCode) {
@@ -163,7 +163,7 @@ public class AccountServiceImpl implements AccountService {
         }
         String verifyCode = stringRedisTemplate.opsForValue().get(email + "_Verify");
         if(verifyCode == null){
-            verifyCode = genEmailVerifyCode();
+            verifyCode = genVerifyCode();
             stringRedisTemplate.opsForValue().set(email + "_Verify", verifyCode, 10, TimeUnit.MINUTES);
         }
         mailService.sendTextMail(email, "SCAUACMER网站邮箱验证码", "验证码为：" + verifyCode + ". 有效期为10分钟.");
@@ -177,7 +177,7 @@ public class AccountServiceImpl implements AccountService {
         }
         String verifyCode = stringRedisTemplate.opsForValue().get(email + "_ForgetPasswordVerify");
         if(verifyCode == null){
-            verifyCode = genEmailVerifyCode();
+            verifyCode = genVerifyCode();
             stringRedisTemplate.opsForValue().set(email + "_ForgetPasswordVerify", verifyCode, 10, TimeUnit.MINUTES);
         }
         mailService.sendTextMail(email, "SCAUACMER网站邮箱验证码", "验证码为：" + verifyCode + ". 有效期为10分钟.");
@@ -195,7 +195,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public String genEmailVerifyCode() {
+    public String genVerifyCode() {
         StringBuffer code = new StringBuffer();
         Random rand = new Random();
         for(int i = 0; i < 6; ++i){
