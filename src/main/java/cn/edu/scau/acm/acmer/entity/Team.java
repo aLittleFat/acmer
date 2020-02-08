@@ -4,6 +4,9 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
+@Table(name = "Team", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"Rank", "SeasonID"})
+})
 public class Team {
     private int id;
     private String nameCn;

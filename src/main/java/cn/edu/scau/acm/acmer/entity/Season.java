@@ -9,6 +9,7 @@ public class Season {
     private String name;
     private String type;
     private Double cfProportion;
+    private Integer year;
 
     @Id
     @Column(name = "ID")
@@ -51,6 +52,16 @@ public class Season {
         this.cfProportion = cfProportion;
     }
 
+    @Basic
+    @Column(name = "Year")
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -59,11 +70,12 @@ public class Season {
         return id == season.id &&
                 Objects.equals(name, season.name) &&
                 Objects.equals(type, season.type) &&
-                Objects.equals(cfProportion, season.cfProportion);
+                Objects.equals(cfProportion, season.cfProportion) &&
+                Objects.equals(year, season.year);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, type, cfProportion);
+        return Objects.hash(id, name, type, cfProportion, year);
     }
 }

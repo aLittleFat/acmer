@@ -41,9 +41,8 @@ public class AuthController {
             if(!accountService.isVerify(email)){
                 return new ResponseEntity<String>("账号未通过审核，请等待管理员审核", HttpStatus.OK);
             }
-            String userId = String.valueOf(accountService.getUserByEmail(email).getId());
             response.setHeader("token", (String) subject.getSession().getId());
-            return new ResponseEntity<String>(userId, HttpStatus.OK);
+            return new ResponseEntity<String>("true", HttpStatus.OK);
         } catch (AuthenticationException e) {
             log.error("User {} login fail, Reason:{}", email, e.getMessage());
             return new ResponseEntity<String>("邮箱名或密码错误", HttpStatus.UNAUTHORIZED);

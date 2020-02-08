@@ -1,7 +1,7 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
-import cn.edu.scau.acm.acmer.entity.OJAccount;
-import cn.edu.scau.acm.acmer.repository.OJAccountRepository;
+import cn.edu.scau.acm.acmer.entity.OjAccount;
+import cn.edu.scau.acm.acmer.repository.OjAccountRepository;
 import cn.edu.scau.acm.acmer.service.CfService;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import com.alibaba.fastjson.JSONArray;
@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,7 +23,7 @@ public class CfServiceImpl implements CfService {
     Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private OJAccountRepository ojAccountRepository;
+    private OjAccountRepository ojAccountRepository;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -36,8 +35,7 @@ public class CfServiceImpl implements CfService {
     private StringRedisTemplate stringRedisTemplate;
 
     @Override
-    @Async
-    public void getAcProblemsByCfAccount(OJAccount cfAccount) {
+    public void getAcProblemsByCfAccount(OjAccount cfAccount) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         int sz = 0;
@@ -81,10 +79,9 @@ public class CfServiceImpl implements CfService {
     }
 
     @Override
-    @Async
     public void getAllAcProblems() {
-        List<OJAccount> ojAccounts = ojAccountRepository.findAllByOjName("CodeForces");
-        for(OJAccount ojAccount : ojAccounts) {
+        List<OjAccount> ojAccounts = ojAccountRepository.findAllByOjName("CodeForces");
+        for(OjAccount ojAccount : ojAccounts) {
             getAcProblemsByCfAccount(ojAccount);
         }
     }

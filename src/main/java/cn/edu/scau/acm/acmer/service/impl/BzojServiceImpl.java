@@ -1,8 +1,8 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
-import cn.edu.scau.acm.acmer.entity.OJAccount;
+import cn.edu.scau.acm.acmer.entity.OjAccount;
 import cn.edu.scau.acm.acmer.entity.Problem;
-import cn.edu.scau.acm.acmer.repository.OJAccountRepository;
+import cn.edu.scau.acm.acmer.repository.OjAccountRepository;
 import cn.edu.scau.acm.acmer.service.BzojService;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import org.jsoup.Jsoup;
@@ -16,7 +16,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -34,7 +33,7 @@ public class BzojServiceImpl implements BzojService {
     private RestTemplate restTemplate;
 
     @Autowired
-    private OJAccountRepository ojAccountRepository;
+    private OjAccountRepository ojAccountRepository;
 
     @Autowired
     private ProblemService problemService;
@@ -66,7 +65,7 @@ public class BzojServiceImpl implements BzojService {
     }
 
     @Override
-    public void getAcProblemsByBzojAccount(OJAccount bzojAccount) {
+    public void getAcProblemsByBzojAccount(OjAccount bzojAccount) {
         String url = "https://www.lydsy.com/JudgeOnline/status.php?problem_id=&user_id=" + bzojAccount.getAccount() + "&language=-1&jresult=4";
         int retry = 10;
         while(url != null && retry > 0) {
@@ -107,10 +106,9 @@ public class BzojServiceImpl implements BzojService {
     }
 
     @Override
-    @Async
     public void getAllAcProblems() {
-        List<OJAccount> ojAccounts = ojAccountRepository.findAllByOjName("BZOJ");
-        for(OJAccount ojAccount : ojAccounts) {
+        List<OjAccount> ojAccounts = ojAccountRepository.findAllByOjName("BZOJ");
+        for(OjAccount ojAccount : ojAccounts) {
             getAcProblemsByBzojAccount(ojAccount);
         }
     }

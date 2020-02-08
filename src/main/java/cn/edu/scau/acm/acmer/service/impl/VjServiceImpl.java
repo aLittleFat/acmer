@@ -1,7 +1,7 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
-import cn.edu.scau.acm.acmer.entity.OJAccount;
-import cn.edu.scau.acm.acmer.repository.OJAccountRepository;
+import cn.edu.scau.acm.acmer.entity.OjAccount;
+import cn.edu.scau.acm.acmer.repository.OjAccountRepository;
 import cn.edu.scau.acm.acmer.service.OJService;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import cn.edu.scau.acm.acmer.service.VjService;
@@ -15,7 +15,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -35,7 +34,7 @@ public class VjServiceImpl implements VjService {
     private ProblemService problemService;
 
     @Autowired
-    private OJAccountRepository ojAccountRepository;
+    private OjAccountRepository ojAccountRepository;
 
     @Autowired
     private OJService ojService;
@@ -81,8 +80,7 @@ public class VjServiceImpl implements VjService {
     }
 
     @Override
-    @Async
-    public void getAcProblemsByVjAccount(OJAccount vjAccount) {
+    public void getAcProblemsByVjAccount(OjAccount vjAccount) {
         String url = "https://vjudge.net/status/data/";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -105,6 +103,7 @@ public class VjServiceImpl implements VjService {
                 sz = vjProblems.size();
                 for (Object vjProblem : vjProblems) {
                     JSONObject jsonProblem = (JSONObject) vjProblem;
+                    log.info(jsonProblem.getString("oj") + "   " + jsonProblem.getString("probNum"));
                     ojService.addOj(jsonProblem.getString("oj"));
                     problemService.addProblem(jsonProblem.getString("oj"),jsonProblem.getString("probNum"));
                     if(!problemService.addProblemAcRecord(problemService.findProblem(jsonProblem.getString("oj"),jsonProblem.getString("probNum")), vjAccount, jsonProblem.getLong("time"))){
@@ -124,14 +123,13 @@ public class VjServiceImpl implements VjService {
             }
             start += 20;
             log.info(String.valueOf(sz));
-        } while (sz >= 20);
+        } while (sz >= 20 && retry > 0);
     }
 
     @Override
-    @Async
     public void getAllAcProblems() {
-        List<OJAccount> ojAccounts = ojAccountRepository.findAllByOjName("VJ");
-        for(OJAccount ojAccount : ojAccounts) {
+        List<OjAccount> ojAccounts = ojAccountRepository.findAllByOjName("VJ");
+        for(OjAccount ojAccount : ojAccounts) {
             getAcProblemsByVjAccount(ojAccount);
         }
     }

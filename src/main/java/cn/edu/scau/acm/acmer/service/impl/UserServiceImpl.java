@@ -2,6 +2,7 @@ package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.model.UserDto;
+import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.AccountService;
 import cn.edu.scau.acm.acmer.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +10,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private AccountService accountService;
@@ -31,11 +36,11 @@ public class UserServiceImpl implements UserService {
      */
     public UserDto getUserInfo(String userName) {
         UserDto user = new UserDto();
-        User u = accountService.getUserByEmail(userName);
-        if(u == null) return null;
-        user.setUserId(u.getId());
-        user.setUsername(u.getEmail());
-        user.setEncryptPwd(u.getPassword());
+        Optional<User> u = userRepository.findByEmail(userName);
+        if(!u.isPresent()) return null;
+        user.setUserId(u.get().getId());
+        user.setUsername(u.get().getEmail());
+        user.setEncryptPwd(u.get().getPassword());
         return user;
     }
 

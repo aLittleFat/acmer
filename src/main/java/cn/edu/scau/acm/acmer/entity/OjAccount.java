@@ -4,7 +4,10 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-public class OJAccount {
+@Table(name = "OjAccount", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"StudentID", "OJName"})
+})
+public class OjAccount {
     private int id;
     private String account;
     private String studentId;
@@ -55,7 +58,7 @@ public class OJAccount {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        OJAccount ojAccount = (OJAccount) o;
+        OjAccount ojAccount = (OjAccount) o;
         return id == ojAccount.id &&
                 Objects.equals(account, ojAccount.account) &&
                 Objects.equals(studentId, ojAccount.studentId) &&

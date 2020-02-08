@@ -5,7 +5,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "Problem", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"ProblemId","OJName"})
+        @UniqueConstraint(name = "uni", columnNames = {"ProblemID", "OJName"})
 })
 public class Problem {
     private int id;

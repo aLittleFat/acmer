@@ -9,6 +9,7 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
 repositories {
+    maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
     mavenCentral()
 }
 
@@ -26,6 +27,7 @@ dependencies {
     implementation 'org.crazycake:shiro-redis:3.2.3'
     implementation 'com.alibaba:fastjson:1.2.62'
     implementation 'org.jsoup:jsoup:1.12.1'
+    implementation 'org.seleniumhq.selenium:selenium-java:4.0.0-alpha-4'
 
     runtimeOnly 'mysql:mysql-connector-java'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {

@@ -5,10 +5,10 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-@Table(name = "ProblemACRecord", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"ProblemId","OJAccountID"})
+@Table(name = "ProblemAcRecord", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"OJAccountID", "ProblemID"})
 })
-public class ProblemACRecord {
+public class ProblemAcRecord {
     private int id;
     private Timestamp time;
     private Integer ojAccountId;
@@ -59,7 +59,7 @@ public class ProblemACRecord {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ProblemACRecord that = (ProblemACRecord) o;
+        ProblemAcRecord that = (ProblemAcRecord) o;
         return id == that.id &&
                 Objects.equals(time, that.time) &&
                 Objects.equals(ojAccountId, that.ojAccountId) &&

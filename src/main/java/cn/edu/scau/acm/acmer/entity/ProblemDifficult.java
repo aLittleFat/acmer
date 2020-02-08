@@ -5,6 +5,9 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 @Entity
+@Table(name = "ProblemDifficult", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"StudentID", "ProblemID"})
+})
 public class ProblemDifficult {
     private int id;
     private BigDecimal difficult;

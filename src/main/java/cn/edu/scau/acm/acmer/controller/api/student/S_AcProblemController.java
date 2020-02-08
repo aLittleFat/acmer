@@ -2,6 +2,7 @@ package cn.edu.scau.acm.acmer.controller.api.student;
 
 import cn.edu.scau.acm.acmer.model.AcProblemInDay;
 import cn.edu.scau.acm.acmer.model.UserDto;
+import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.service.AccountService;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import org.apache.shiro.SecurityUtils;
@@ -15,17 +16,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "api/student/acProblem", produces = "application/json; charset=utf-8")
-public class UAcProblemController {
+public class S_AcProblemController {
     @Autowired
     ProblemService problemService;
 
     @Autowired
     AccountService accountService;
 
+    @Autowired
+    StudentRepository studentRepository;
+
     @GetMapping("getMyAcProblems")
     List<AcProblemInDay> getMyAcProblems(long time, int days){
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
-        String studentId = accountService.getStudentByUserId(id).getId();
+        String studentId = studentRepository.findByUserId(id).get().getId();
         return problemService.getProblemAcRecordSeveralDays(studentId,new Date(time), days,null);
     }
 }

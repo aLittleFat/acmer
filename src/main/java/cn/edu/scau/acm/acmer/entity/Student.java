@@ -1,12 +1,12 @@
 package cn.edu.scau.acm.acmer.entity;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
+@Table(name = "Student", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"UserID"})
+})
 public class Student {
     private String id;
     private Integer grade;

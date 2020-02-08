@@ -5,6 +5,9 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
+@Table(name = "PersonalContestRecord", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"StudentID", "ContestID"})
+})
 public class PersonalContestRecord {
     private int id;
     private String account;

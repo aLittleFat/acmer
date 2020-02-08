@@ -1,12 +1,10 @@
 package cn.edu.scau.acm.acmer.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-public class OJ {
+public class Oj {
     private String name;
 
     @Id
@@ -23,7 +21,7 @@ public class OJ {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        OJ oj = (OJ) o;
+        Oj oj = (Oj) o;
         return Objects.equals(name, oj.name);
     }
 

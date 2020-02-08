@@ -1,10 +1,10 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
-import cn.edu.scau.acm.acmer.entity.OJAccount;
+import cn.edu.scau.acm.acmer.entity.OjAccount;
 import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.entity.User;
-import cn.edu.scau.acm.acmer.repository.OJAccountRepository;
-import cn.edu.scau.acm.acmer.repository.ProblemACRecordRepository;
+import cn.edu.scau.acm.acmer.repository.OjAccountRepository;
+import cn.edu.scau.acm.acmer.repository.ProblemAcRecordRepository;
 import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.*;
@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class OJAccountServiceImpl implements OJAccountService {
@@ -25,7 +27,7 @@ public class OJAccountServiceImpl implements OJAccountService {
     private StudentRepository studentRepository;
 
     @Autowired
-    private OJAccountRepository ojAccountRepository;
+    private OjAccountRepository ojAccountRepository;
 
     @Autowired
     private OJService ojService;
@@ -43,7 +45,7 @@ public class OJAccountServiceImpl implements OJAccountService {
     private CfService cfService;
 
     @Autowired
-    private ProblemACRecordRepository problemACRecordRepository;
+    private ProblemAcRecordRepository problemAcRecordRepository;
 
     @Override
     public boolean checkOjAccount(String ojName, String username, String password) {
@@ -62,16 +64,16 @@ public class OJAccountServiceImpl implements OJAccountService {
     @Override
     public String addOjAccount(String ojName, String username, String password, int id) {
 
-        User u = userRepository.findById(id);
-        Student stu = studentRepository.findByUserId(u.getId());
+        User u = userRepository.findById(id).get();
+        Student stu = studentRepository.findByUserId(u.getId()).get();
 
         ojService.addOj(ojName);
 
-        if(ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName) != null) {
+        if(ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName).isPresent()) {
             return "已存在" + ojName + "账号";
         }
         if(checkOjAccount(ojName, username, password)){
-            OJAccount ojAccount = new OJAccount();
+            OjAccount ojAccount = new OjAccount();
             ojAccount.setAccount(username);
             ojAccount.setOjName(ojName);
             ojAccount.setStudentId(stu.getId());
@@ -85,46 +87,43 @@ public class OJAccountServiceImpl implements OJAccountService {
 
     @Override
     public String getOjAccount(String ojName, int userId) {
-        Student stu = studentRepository.findByUserId(userId);
-        OJAccount ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
-        if(ojAccount == null) {
+        Student stu = studentRepository.findByUserId(userId).get();
+        Optional<OjAccount> ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
+        if(!ojAccount.isPresent()) {
             return "";
         }
         else{
-            return ojAccount.getAccount();
+            return ojAccount.get().getAccount();
         }
     }
 
     @Override
     public String deleteOjAccount(String ojName, int userId) {
-        Student stu = studentRepository.findByUserId(userId);
-        OJAccount ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
-        if(ojAccount == null) {
+        Student stu = studentRepository.findByUserId(userId).get();
+        Optional<OjAccount> ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
+        if(!ojAccount.isPresent()) {
             return "VJ账号不存在";
         }
 
-        problemACRecordRepository.deleteAllByOjAccountId(ojAccount.getId());
+        problemAcRecordRepository.deleteAllByOjAccountId(ojAccount.get().getId());
 
-        ojAccountRepository.delete(ojAccount);
+        ojAccountRepository.delete(ojAccount.get());
         return "true";
     }
 
     @Override
     public String changeOjAccount(String ojName, String username, String password, int userId) {
-        Student stu = studentRepository.findByUserId(userId);
-        OJAccount ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
-        if(ojAccount == null) {
+        Student stu = studentRepository.findByUserId(userId).get();
+        Optional<OjAccount> ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
+        if(!ojAccount.isPresent()) {
             return "目前不存在" + ojName + "账户";
         }
-        if(ojAccount.getAccount().equals(username)){
+        if(ojAccount.get().getAccount().equals(username)){
             return "你修改的用户名和之前的一样，无需修改";
         }
         if(checkOjAccount(ojName, username, password)){
-            deleteOjAccount(ojName, userId);
-            OJAccount newOjAccount = new OJAccount();
+            OjAccount newOjAccount = ojAccount.get();
             newOjAccount.setAccount(username);
-            newOjAccount.setOjName(ojName);
-            newOjAccount.setStudentId(stu.getId());
             ojAccountRepository.save(newOjAccount);
             return "true";
         } else {

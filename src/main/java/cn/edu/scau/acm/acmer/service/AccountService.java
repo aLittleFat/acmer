@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 
 public interface AccountService {
     String registerUser(String email, String password, String phone, String name, String verifyCode);
-    User getUserByEmail(String email);
     String registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId);
     boolean isVerify(String email);
     void verifyAccount(int id);
@@ -19,16 +18,8 @@ public interface AccountService {
     boolean isAdmin(int id);
     String genVerifyCode();
     String forgetPassword(String email, String password, String verifyCode);
-
-    User getUserById(int id);
-
     Page<User_Student> getUserUnverify(Integer page, Integer size);
-
     void deleteAccount(Integer id);
-
     User_Student getUserStudentById(int id);
-
     String changePhoneAndIcpcEmail(String phone, String icpcEmail, int id);
-
-    Student getStudentByUserId(int userId);
 }

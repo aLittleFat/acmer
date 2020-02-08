@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -42,7 +43,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public String registerUser(String email, String password, String phone, String name, String verifyCode) {
-        if(userRepository.findByEmail(email) != null){
+        if(userRepository.findByEmail(email).isPresent()){
             return "该邮箱已被注册";
         }
 
@@ -69,13 +70,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    @Override
     public String registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId) {
-        if(userRepository.findByEmail(email) != null){
+        if(userRepository.findByEmail(email).isPresent()){
             return "该邮箱已被注册";
         }
 
@@ -110,19 +106,19 @@ public class AccountServiceImpl implements AccountService {
         stu.setId(stuId);
         stu.setGrade(grade);
         stu.setStatus("现役");
-        stu.setUserId(userRepository.findByEmail(email).getId());
+        stu.setUserId(userRepository.findByEmail(email).get().getId());
         studentRepository.save(stu);
         return "true";
     }
 
     @Override
     public boolean isVerify(String email) {
-        return userRepository.findByEmail(email).getVerify() == (byte)1;
+        return userRepository.findByEmail(email).get().getVerify() == (byte)1;
     }
 
     @Override
     public void verifyAccount(int id) {
-        User u = userRepository.findById(id);
+        User u = userRepository.findById(id).get();
         u.setVerify((byte)1);
         userRepository.save(u);
         mailService.sendTextMail(u.getEmail(), "ACMER账号审核通过", "你在ACMER网站注册的账号 " + u.getEmail() + " 已通过审核，请尽快登录并完善个人信息");
@@ -158,7 +154,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public String sendVerifyEmail(String email) {
-        if(userRepository.findByEmail(email) != null){
+        if(userRepository.findByEmail(email).isPresent()){
             return "该邮箱已被注册";
         }
         String verifyCode = stringRedisTemplate.opsForValue().get(email + "_Verify");
@@ -172,7 +168,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public String sendForgetPasswordVerifyEmail(String email) {
-        if(userRepository.findByEmail(email) == null){
+        if(!userRepository.findByEmail(email).isPresent()){
             return "该邮箱不存在";
         }
         String verifyCode = stringRedisTemplate.opsForValue().get(email + "_ForgetPasswordVerify");
@@ -186,12 +182,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean isStudent(int id) {
-        return studentRepository.findByUserId(id) != null;
+        return studentRepository.findByUserId(id).isPresent();
     }
 
     @Override
     public boolean isAdmin(int id) {
-        return (userRepository.findById(id).getIsAdmin() == (byte)1);
+        return (userRepository.findById(id).get().getIsAdmin() == (byte)1);
     }
 
     @Override
@@ -207,22 +203,18 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public String forgetPassword(String email, String password, String verifyCode) {
-        User u = userRepository.findByEmail(email);
-        if(u == null){
+        Optional<User> u = userRepository.findByEmail(email);
+        if(!u.isPresent()){
             return "该邮箱不存在";
         }
         String verifyStatus = verifyForgetPasswordEmail(email, verifyCode);
         if(verifyStatus != "true"){
             return verifyStatus;
         }
-        u.setPassword(new Sha256Hash(password, encryptSalt).toHex());
-        userRepository.save(u);
+        User user = u.get();
+        user.setPassword(new Sha256Hash(password, encryptSalt).toHex());
+        userRepository.save(user);
         return "true";
-    }
-
-    @Override
-    public User getUserById(int id) {
-        return userRepository.findById(id);
     }
 
     @Override
@@ -233,10 +225,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void deleteAccount(Integer id) {
-        User u = getUserById(id);
-        Student student = studentRepository.findByUserId(id);
-        if(student != null) {
-            studentRepository.delete(student);
+        User u = userRepository.findById(id).get();
+        Optional<Student> student = studentRepository.findByUserId(id);
+        if(student.isPresent()) {
+            studentRepository.delete(student.get());
         }
         userRepository.delete(u);
         mailService.sendTextMail(u.getEmail(), "ACMER账号审核不通过", "你在ACMER网站注册的账号 " + u.getEmail() + " 没有通过审核，账号已删除，请重新注册");
@@ -244,13 +236,13 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public User_Student getUserStudentById(int id) {
-        return new User_Student(userRepository.findById(id), studentRepository.findByUserId(id));
+        return new User_Student(userRepository.findById(id).get(), studentRepository.findByUserId(id).orElse(null));
     }
 
     @Override
     public String changePhoneAndIcpcEmail(String phone, String icpcEmail, int id) {
-        User u = userRepository.findById(id);
-        Student stu = studentRepository.findByUserId(id);
+        User u = userRepository.findById(id).get();
+        Student stu = studentRepository.findByUserId(id).get();
         if(!phone.equals("")){
             u.setPhone(phone);
             userRepository.save(u);
@@ -261,11 +253,6 @@ public class AccountServiceImpl implements AccountService {
         }
 
         return "true";
-    }
-
-    @Override
-    public Student getStudentByUserId(int userId) {
-        return studentRepository.findByUserId(userId);
     }
 
 }
