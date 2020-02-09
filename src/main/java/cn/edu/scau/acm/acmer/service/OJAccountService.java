@@ -1,14 +1,16 @@
 package cn.edu.scau.acm.acmer.service;
 
+import cn.edu.scau.acm.acmer.model.MyResponseEntity;
+
 public interface OJAccountService {
 
     boolean checkOjAccount(String ojName, String username, String password);
 
-    String addOjAccount(String ojName, String username, String password, int id);
+    MyResponseEntity<Void> addOjAccount(String ojName, String username, String password, int id);
 
-    String getOjAccount(String ojName, int userId);
+    MyResponseEntity<String> getOjAccount(String ojName, int userId);
 
-    String deleteOjAccount(String ojName, int userId);
+    MyResponseEntity<Void> deleteOjAccount(String ojName, int userId);
 
-    String changeOjAccount(String ojName, String username, String password, int userId);
+    MyResponseEntity<Void> changeOjAccount(String ojName, String username, String password, int userId);
 }

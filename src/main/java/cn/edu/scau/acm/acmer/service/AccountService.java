@@ -2,24 +2,25 @@ package cn.edu.scau.acm.acmer.service;
 
 import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.entity.User;
+import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.User_Student;
 import org.springframework.data.domain.Page;
 
 public interface AccountService {
-    String registerUser(String email, String password, String phone, String name, String verifyCode);
-    String registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId);
+    MyResponseEntity<Void> registerUser(String email, String password, String phone, String name, String verifyCode);
+    MyResponseEntity<Void> registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId);
     boolean isVerify(String email);
-    void verifyAccount(int id);
+    MyResponseEntity<Void> verifyAccount(int id);
     String verifyEmail(String email, String verifyCode);
     String verifyForgetPasswordEmail(String email, String verifyCode);
-    String sendVerifyEmail(String email);
-    String sendForgetPasswordVerifyEmail(String email);
+    MyResponseEntity<Void> sendVerifyEmail(String email);
+    MyResponseEntity<Void> sendForgetPasswordVerifyEmail(String email);
     boolean isStudent(int id);
     boolean isAdmin(int id);
     String genVerifyCode();
-    String forgetPassword(String email, String password, String verifyCode);
-    Page<User_Student> getUserUnverify(Integer page, Integer size);
-    void deleteAccount(Integer id);
-    User_Student getUserStudentById(int id);
-    String changePhoneAndIcpcEmail(String phone, String icpcEmail, int id);
+    MyResponseEntity<Void> forgetPassword(String email, String password, String verifyCode);
+    MyResponseEntity<Page<User_Student>> getUserUnverify(Integer page, Integer size);
+    MyResponseEntity<Void> deleteAccount(Integer id);
+    MyResponseEntity<User_Student> getUserStudentById(int id);
+    MyResponseEntity<Void> changePhoneAndIcpcEmail(String phone, String icpcEmail, int id);
 }

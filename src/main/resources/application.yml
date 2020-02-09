@@ -56,6 +56,10 @@ mail:
 scau:
   acmer:
     url: http://localhost/
+    ojaccounts:
+      vj:
+        username: 1478527245
+        password: QqSt631665391
   cf:
     url: http://www.scaucf.top/
     username: admin

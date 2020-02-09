@@ -1,6 +1,7 @@
 package cn.edu.scau.acm.acmer.controller.api.student;
 
 import cn.edu.scau.acm.acmer.model.AcProblemInDay;
+import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.UserDto;
 import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.service.AccountService;
@@ -27,7 +28,7 @@ public class S_AcProblemController {
     StudentRepository studentRepository;
 
     @GetMapping("getMyAcProblems")
-    List<AcProblemInDay> getMyAcProblems(long time, int days){
+    MyResponseEntity<List<AcProblemInDay>> getMyAcProblems(long time, int days){
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         String studentId = studentRepository.findByUserId(id).get().getId();
         return problemService.getProblemAcRecordSeveralDays(studentId,new Date(time), days,null);

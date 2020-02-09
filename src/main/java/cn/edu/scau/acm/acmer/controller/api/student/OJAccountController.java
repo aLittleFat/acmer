@@ -1,5 +1,6 @@
 package cn.edu.scau.acm.acmer.controller.api.student;
 
+import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.UserDto;
 import cn.edu.scau.acm.acmer.service.OJAccountService;
 import cn.edu.scau.acm.acmer.service.ScauCfService;
@@ -23,34 +24,34 @@ public class OJAccountController {
 
     @ApiOperation("添加OJ账户")
     @PostMapping("addMyOjAccount")
-    String addMyOjAccount(String ojName, String username, String password){
+    MyResponseEntity<Void> addMyOjAccount(String ojName, String username, String password){
         int userId = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         return ojAccountService.addOjAccount(ojName, username, password, userId);
     }
 
     @ApiOperation("获取登录账户的OJ账户")
     @GetMapping("getMyOjAccount")
-    String getMyOjAccount(String ojName){
+    MyResponseEntity<String> getMyOjAccount(String ojName){
         int userId = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         return ojAccountService.getOjAccount(ojName, userId);
     }
 
     @ApiOperation("修改登录账户的OJ账户")
     @PostMapping("changeMyOjAccount")
-    String changeMyOjAccount(String ojName, String username, String password){
+    MyResponseEntity<Void> changeMyOjAccount(String ojName, String username, String password){
         int userId = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         return ojAccountService.changeOjAccount(ojName, username, password, userId);
     }
 
     @ApiOperation("删除登录账户的OJ账户")
     @PostMapping("deleteMyOjAccount")
-    String deleteMyOjAccount(String ojName){
+    MyResponseEntity<Void> deleteMyOjAccount(String ojName){
         int userId = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         return ojAccountService.deleteOjAccount(ojName, userId);
     }
 
     @PostMapping("sendCfVerifyCode")
-    String sendCfVerifyCode(String username) {
+    MyResponseEntity<Void> sendCfVerifyCode(String username) {
         return scauCfService.sendCfVerifyCode(username);
     }
 }

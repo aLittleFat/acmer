@@ -28,20 +28,22 @@ public class TestController {
     @Autowired
     ProblemAcRecordRepository problemAcRecordRepository;
 
+    @Autowired
+    ContestService contestService;
+
     @GetMapping("/addAc")
     void addAc() {
         problemService.getAllAcProblemsFromOj();
     }
 
     @GetMapping("/test")
-    List<PersonalProblemAcRank> test(){
-
-        return problemService.getPersonalProblemAcRank(0, false);
+    void test(String ojId) throws Exception {
+        contestService.addContest("VJ", ojId, "");
     }
 
     @GetMapping("/testSele")
     void testSele() throws InterruptedException {
-        System.setProperty("webdriver.chrome.driver", "C:\\Driver\\chromedriver.exe");
+
         WebDriver driver = new ChromeDriver();
         driver.get("https://passport.jisuanke.com/?n=https://www.jisuanke.com/contest/3007?view=rank#/");
         WebElement username = driver.findElements(By.tagName("input")).get(0);

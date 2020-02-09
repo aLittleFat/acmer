@@ -1,5 +1,6 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
+import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.service.AccountService;
 import cn.edu.scau.acm.acmer.service.UserService;
 import io.swagger.annotations.ApiOperation;
@@ -31,7 +32,7 @@ public class AuthController {
 
     @ApiOperation("登录")
     @PostMapping("/login")
-    public ResponseEntity<String> login(String email, String password, HttpServletResponse response){
+    public MyResponseEntity<Void> login(String email, String password, HttpServletResponse response){
         log.info(email + " " + password);
         Subject subject = SecurityUtils.getSubject();
         try {
@@ -39,21 +40,21 @@ public class AuthController {
             subject.login(token);
 
             if(!accountService.isVerify(email)){
-                return new ResponseEntity<String>("账号未通过审核，请等待管理员审核", HttpStatus.OK);
+                return new MyResponseEntity<>("账号未通过审核，请等待管理员审核");
             }
             response.setHeader("token", (String) subject.getSession().getId());
-            return new ResponseEntity<String>("true", HttpStatus.OK);
+            return new MyResponseEntity<>();
         } catch (AuthenticationException e) {
             log.error("User {} login fail, Reason:{}", email, e.getMessage());
-            return new ResponseEntity<String>("邮箱名或密码错误", HttpStatus.UNAUTHORIZED);
+            return new MyResponseEntity<>("邮箱名或密码错误");
         } catch (Exception e) {
-            return new ResponseEntity<String>("网络错误", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new MyResponseEntity<>("网络错误");
         }
     }
 
     @ApiOperation("注册")
     @PostMapping("/register")
-    public String register(String email, String password, String phone, String name, String verifyCode, String grade, String studentId, String type){
+    public MyResponseEntity<Void> register(String email, String password, String phone, String name, String verifyCode, String grade, String studentId, String type){
         if(type.equals("教师")) {
             return accountService.registerUser(email, password, phone, name, verifyCode);
         }
@@ -64,33 +65,27 @@ public class AuthController {
 
     @ApiOperation("注销")
     @GetMapping("/logout")
-    public ResponseEntity<Void> logout() {
+    public MyResponseEntity<Void> logout() {
         Subject subject = SecurityUtils.getSubject();
         subject.logout();
-        return ResponseEntity.ok().build();
-    }
-
-    @ApiOperation("验证邮箱")
-    @GetMapping("/verifyEmail")
-    public String verifyEmail(String email, String verifyCode){
-        return accountService.verifyEmail(email, verifyCode);
+        return new MyResponseEntity<>();
     }
 
     @ApiOperation("发送邮箱验证码到邮箱")
     @PostMapping("/sendVerifyEmailCode")
-    public String sendVerifyEmailCode(String email){
+    public MyResponseEntity<Void> sendVerifyEmailCode(String email){
         return accountService.sendVerifyEmail(email);
     }
 
     @ApiOperation("忘记密码的时候发送验证码到邮箱")
     @PostMapping("/sendForgetPasswordVerifyEmailCode")
-    public String sendForgetPasswordVerifyEmailCode(String email){
+    public MyResponseEntity<Void> sendForgetPasswordVerifyEmailCode(String email){
         return accountService.sendForgetPasswordVerifyEmail(email);
     }
 
     @ApiOperation("忘记密码的时候修改密码")
     @PostMapping(value = "/forgetPassword")
-    public String forgetPassword(String email, String password, String verifyCode){
+    public MyResponseEntity<Void> forgetPassword(String email, String password, String verifyCode){
         return accountService.forgetPassword(email, password, verifyCode);
     }
 

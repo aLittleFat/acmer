@@ -1,31 +1,44 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.OjAccount;
+import cn.edu.scau.acm.acmer.httpclient.VjudgeClient;
 import cn.edu.scau.acm.acmer.repository.OjAccountRepository;
 import cn.edu.scau.acm.acmer.service.OJService;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import cn.edu.scau.acm.acmer.service.VjService;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
 public class VjServiceImpl implements VjService {
 
     Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Value("${scau.acmer.ojaccounts.vj.username}")
+    private String adminUsername;
+
+    @Value("${scau.acmer.ojaccounts.vj.password}")
+    private String adminPassword;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -132,5 +145,30 @@ public class VjServiceImpl implements VjService {
         for(OjAccount ojAccount : ojAccounts) {
             getAcProblemsByVjAccount(ojAccount);
         }
+    }
+
+    @Override
+    public void login(VjudgeClient vjudgeClient) throws Exception {
+        vjudgeClient.login(adminUsername, adminPassword);
+    }
+
+    @Override
+    public String addContest(String ojId, String password) throws Exception {
+        VjudgeClient vjudgeClient = new VjudgeClient();
+        login(vjudgeClient);
+        String url = "https://vjudge.net/contest/" + ojId;
+
+        String html = vjudgeClient.get(url);
+        Document document = Jsoup.parse(html);
+        JSONObject jsonObject = (JSONObject) JSON.parse(document.body().selectFirst("[name=dataJson]").text());
+        if(jsonObject.getString("authStatus").equals("0")) {
+            if(password.equals(""))
+                return "需要密码";
+            else {
+
+            }
+        }
+        log.info(jsonObject.toJSONString());
+        return null;
     }
 }

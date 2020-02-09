@@ -1,5 +1,6 @@
 package cn.edu.scau.acm.acmer.controller.api.unauth;
 
+import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.PersonalProblemAcRank;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ public class U_AcProblemController {
     private ProblemService problemService;
 
     @GetMapping("getPersonalProblemAcRank")
-    List<PersonalProblemAcRank> getPersonalProblemAcRank(int grade, boolean includeRetired) {
+    MyResponseEntity<List<PersonalProblemAcRank>> getPersonalProblemAcRank(int grade, boolean includeRetired) {
         return problemService.getPersonalProblemAcRank(grade, includeRetired);
     }
 }

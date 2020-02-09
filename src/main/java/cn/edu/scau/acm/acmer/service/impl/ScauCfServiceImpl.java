@@ -1,5 +1,6 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
+import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.service.AccountService;
 import cn.edu.scau.acm.acmer.service.ScauCfService;
 import com.alibaba.fastjson.JSONObject;
@@ -59,9 +60,9 @@ public class ScauCfServiceImpl implements ScauCfService {
     }
 
     @Override
-    public String sendCfVerifyCode(String cfHandle) {
+    public MyResponseEntity<Void> sendCfVerifyCode(String cfHandle) {
         String token = login();
-        if(token == null) return "服务器出错";
+        if(token == null) return new MyResponseEntity<>("服务器出错");
 
         String verifyCode = stringRedisTemplate.opsForValue().get(cfHandle + "_Verify");
         if(verifyCode == null){
@@ -77,16 +78,15 @@ public class ScauCfServiceImpl implements ScauCfService {
         String content = "Your handle is being linked to the SCAU_ACMERsystem. The user name is " + cfHandle + ". Your verify code is: \'" + verifyCode + "\' .If the operator is not yourself, please ignore this message. The link is available in 10 mins.";
         json.put("content", content);
         json.put("captcha", verifyCode);
-        log.info(json.toJSONString());
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(json.toString(), headers);
         JSONObject response = restTemplate.postForObject(url, request, JSONObject.class);
         int status = response.getInteger("status");
         switch (status) {
-            case 0: return "true";
-            case 5: return "cf用户名出错";
-            case 7: return "发送失败";
-            default: return "服务器出错";
+            case 0: return new MyResponseEntity<>();
+            case 5: return new MyResponseEntity<>("cf用户名出错");
+            case 7: return new MyResponseEntity<>("发送失败");
+            default: return new MyResponseEntity<>("服务器出错");
         }
     }
 }

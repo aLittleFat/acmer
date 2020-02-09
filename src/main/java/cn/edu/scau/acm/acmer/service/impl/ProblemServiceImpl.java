@@ -6,6 +6,7 @@ import cn.edu.scau.acm.acmer.entity.ProblemAcRecord;
 import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.model.AcProblem;
 import cn.edu.scau.acm.acmer.model.AcProblemInDay;
+import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.PersonalProblemAcRank;
 import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.*;
@@ -107,40 +108,43 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public List<AcProblemInDay> getProblemAcRecordSeveralDays(String studentId, Date time, int days, String exStudentId) {
-        log.info(time.toString());
-        List<OjAccount> ojAccounts = ojAccountRepository.findAllByStudentId(studentId);
-        List<OjAccount> exOjAccounts = new ArrayList<>();
-        if(exStudentId != null) {
-            exOjAccounts = ojAccountRepository.findAllByStudentId(exStudentId);
-        }
-        List<AcProblemInDay> acProblemInDays = new ArrayList<>();
-        while(days > 0) {
-            Date preTime = new Date(0);
-            for(OjAccount ojAccount : ojAccounts) {
-                Optional<ProblemAcRecord> problemACRecord = problemAcRecordRepository.findFirstByOjAccountIdAndTimeBeforeOrderByTimeDesc(ojAccount.getId(), time);
-                if(problemACRecord.isPresent() && problemACRecord.get().getTime().after(preTime)) {
-                    preTime = problemACRecord.get().getTime();
+    public MyResponseEntity<List<AcProblemInDay>> getProblemAcRecordSeveralDays(String studentId, Date time, int days, String exStudentId) {
+        try {
+            List<OjAccount> ojAccounts = ojAccountRepository.findAllByStudentId(studentId);
+            List<OjAccount> exOjAccounts = new ArrayList<>();
+            if (exStudentId != null) {
+                exOjAccounts = ojAccountRepository.findAllByStudentId(exStudentId);
+            }
+            List<AcProblemInDay> acProblemInDays = new ArrayList<>();
+            while (days > 0) {
+                Date preTime = new Date(0);
+                for (OjAccount ojAccount : ojAccounts) {
+                    Optional<ProblemAcRecord> problemACRecord = problemAcRecordRepository.findFirstByOjAccountIdAndTimeBeforeOrderByTimeDesc(ojAccount.getId(), time);
+                    if (problemACRecord.isPresent() && problemACRecord.get().getTime().after(preTime)) {
+                        preTime = problemACRecord.get().getTime();
+                    }
+                }
+                preTime.setHours(0);
+                preTime.setMinutes(0);
+                preTime.setSeconds(0);
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(preTime);
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                time = calendar.getTime();
+                AcProblemInDay acProblemInDay = getProblemAcRecordInDay(ojAccounts, exOjAccounts, preTime, time);
+                if (acProblemInDay.getAcProblems().size() > 0) {
+                    days--;
+                    acProblemInDays.add(acProblemInDay);
+                }
+                time = preTime;
+                if (preTime.compareTo(new Date(0)) <= 0) {
+                    break;
                 }
             }
-            preTime.setHours(0);
-            preTime.setMinutes(0);
-            preTime.setSeconds(0);
-            Calendar calendar=Calendar.getInstance();
-            calendar.setTime(preTime);
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
-            time = calendar.getTime();
-            AcProblemInDay acProblemInDay = getProblemAcRecordInDay(ojAccounts, exOjAccounts, preTime, time);
-            if(acProblemInDay.getAcProblems().size() > 0) {
-                days--;
-                acProblemInDays.add(acProblemInDay);
-            }
-            time = preTime;
-            if(preTime.compareTo(new Date(0)) <= 0) {
-                break;
-            }
+            return new MyResponseEntity<>(acProblemInDays);
+        } catch (Exception e) {
+            return new MyResponseEntity<>("服务器错误");
         }
-        return acProblemInDays;
     }
 
     @Override
@@ -153,25 +157,29 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public List<PersonalProblemAcRank> getPersonalProblemAcRank(int grade, boolean includeRetired) {
-        List<Student> students;
-        if(grade == 0) {
-            students = studentRepository.findAll();
-        } else {
-            students = studentRepository.findAllByGrade(grade);
-        }
-        List<PersonalProblemAcRank> personalProblemAcRanks = new ArrayList<>();
-        for (Student student : students) {
-            PersonalProblemAcRank personalProblemAcRank = new PersonalProblemAcRank();
-            personalProblemAcRank.setUser(userRepository.findById((int)student.getUserId()).get());
-            personalProblemAcRank.setStudent(student);
-            personalProblemAcRank.setAcNum(problemAcRecordRepository.countAllByStudentId(student.getId()));
-            //todo getaward
+    public MyResponseEntity<List<PersonalProblemAcRank>> getPersonalProblemAcRank(int grade, boolean includeRetired) {
+        try {
+            List<Student> students;
+            if (grade == 0) {
+                students = studentRepository.findAll();
+            } else {
+                students = studentRepository.findAllByGrade(grade);
+            }
+            List<PersonalProblemAcRank> personalProblemAcRanks = new ArrayList<>();
+            for (Student student : students) {
+                PersonalProblemAcRank personalProblemAcRank = new PersonalProblemAcRank();
+                personalProblemAcRank.setUser(userRepository.findById((int) student.getUserId()).get());
+                personalProblemAcRank.setStudent(student);
+                personalProblemAcRank.setAcNum(problemAcRecordRepository.countAllByStudentId(student.getId()));
+                //todo getaward
 
-            personalProblemAcRanks.add(personalProblemAcRank);
+                personalProblemAcRanks.add(personalProblemAcRank);
+            }
+            Collections.sort(personalProblemAcRanks);
+            return new MyResponseEntity<>(personalProblemAcRanks);
+        } catch (Exception e) {
+            return new MyResponseEntity<>("服务器错误");
         }
-        Collections.sort(personalProblemAcRanks);
-        return personalProblemAcRanks;
     }
 
 

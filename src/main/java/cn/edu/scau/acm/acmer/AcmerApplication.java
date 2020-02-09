@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class AcmerApplication {
 
     public static void main(String[] args) {
+        System.setProperty("webdriver.chrome.driver", "C:\\Driver\\chromedriver.exe");
         SpringApplication.run(AcmerApplication.class, args);
     }
 
