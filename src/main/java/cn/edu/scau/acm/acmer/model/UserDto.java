@@ -10,7 +10,6 @@ public class UserDto implements Serializable {
     private char[] password;
     private String encryptPwd;
     private int userId;
-    private String salt;
     private List<String> roles;
 
     public int getId(){
@@ -39,14 +38,6 @@ public class UserDto implements Serializable {
 
     public void setPassword(char[] password) {
         this.password = password;
-    }
-
-    public String getSalt() {
-        return salt;
-    }
-
-    public void setSalt(String salt) {
-        this.salt = salt;
     }
 
     public List<String> getRoles() {

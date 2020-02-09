@@ -81,7 +81,7 @@ public class BaseHttpClient {
 	private String getResponseContent(String url, String charset, CloseableHttpResponse response) throws IOException, ProtocolException {
 		try {
             int status = response.getStatusLine().getStatusCode();
-            if (status >= 200 && status < 300) {
+            if (status >= 200 && status < 300 || status == 302) {
                 HttpEntity entity = response.getEntity();
                 return entity != null ? EntityUtils.toString(entity, charset) : null;
             } else {

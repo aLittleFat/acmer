@@ -1,32 +1,39 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
+import cn.edu.scau.acm.acmer.entity.Contest;
+import cn.edu.scau.acm.acmer.entity.ContestProblem;
 import cn.edu.scau.acm.acmer.entity.OjAccount;
+import cn.edu.scau.acm.acmer.entity.Problem;
 import cn.edu.scau.acm.acmer.httpclient.VjudgeClient;
+import cn.edu.scau.acm.acmer.repository.ContestProblemRepository;
+import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.OjAccountRepository;
+import cn.edu.scau.acm.acmer.service.ContestService;
 import cn.edu.scau.acm.acmer.service.OJService;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import cn.edu.scau.acm.acmer.service.VjService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.http.NameValuePair;
+import org.apache.http.ProtocolException;
+import org.apache.http.message.BasicNameValuePair;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
+import java.net.UnknownHostException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -51,6 +58,15 @@ public class VjServiceImpl implements VjService {
 
     @Autowired
     private OJService ojService;
+
+    @Autowired
+    private ContestRepository contestRepository;
+
+    @Autowired
+    private ContestProblemRepository contestProblemRepository;
+
+    @Autowired
+    private ContestService contestService;
 
     @Override
     public boolean checkVjLoginStatus() {
@@ -153,22 +169,71 @@ public class VjServiceImpl implements VjService {
     }
 
     @Override
-    public String addContest(String ojId, String password) throws Exception {
+    public void addContest(String ojId, String password) throws Exception {
         VjudgeClient vjudgeClient = new VjudgeClient();
         login(vjudgeClient);
         String url = "https://vjudge.net/contest/" + ojId;
-
-        String html = vjudgeClient.get(url);
-        Document document = Jsoup.parse(html);
-        JSONObject jsonObject = (JSONObject) JSON.parse(document.body().selectFirst("[name=dataJson]").text());
-        if(jsonObject.getString("authStatus").equals("0")) {
-            if(password.equals(""))
-                return "需要密码";
-            else {
-
+        try {
+            String html = vjudgeClient.get(url);
+            Document document = Jsoup.parse(html);
+            Element element = document.body().selectFirst("[name=dataJson]");
+            JSONObject jsonObject = (JSONObject) JSON.parse(element.text());
+            if(jsonObject.getString("authStatus").equals("0")) {
+                if(password.equals(""))
+                    throw new Exception("需要密码");
+                else {
+                    loginContest(vjudgeClient, ojId, password);
+                }
             }
+            html = vjudgeClient.get(url);
+            document = Jsoup.parse(html);
+            jsonObject = (JSONObject) JSON.parse(document.body().selectFirst("[name=dataJson]").text());
+            log.info(jsonObject.toJSONString());
+            Contest contest = new Contest();
+            contest.setName(jsonObject.getString("title"));
+            contest.setOjName("VJ");
+            contest.setOjid(ojId);
+            Timestamp startTime = new Timestamp(jsonObject.getLong("begin") + 8*60*60*1000);
+            Timestamp endTime = new Timestamp(jsonObject.getLong("end") + 8*60*60*1000);
+            contest.setStartTime(startTime);
+            contest.setEndTime(endTime);
+            contestRepository.save(contest);
+            contest = contestRepository.findByOjNameAndOjid("VJ", ojId).get();
+
+            JSONArray jsonProblems = jsonObject.getJSONArray("problems");
+            for(Object jsonProblemObject : jsonProblems) {
+                JSONObject jsonProblem = (JSONObject) jsonProblemObject;
+                log.info(jsonProblem.toJSONString());
+                problemService.addProblem(jsonProblem.getString("oj"), jsonProblem.getString("probNum"));
+                Problem problem = problemService.findProblem(jsonProblem.getString("oj"), jsonProblem.getString("probNum"));
+                contestService.addContestProblem(contest.getId(), jsonProblem.getString("num"), problem.getId());
+            }
+        } catch (ProtocolException e) {
+            throw new Exception("比赛不存在");
         }
-        log.info(jsonObject.toJSONString());
-        return null;
+
+    }
+
+    @Override
+    public void loginContest(VjudgeClient vjudgeClient, String cId, String password) throws Exception {
+        try {
+            List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("password", password));
+            String result = vjudgeClient.post("https://vjudge.net/contest/login/" + cId, params);
+            log.info(result);
+            log.info("{\"error\":\"Password is not correct!\"}");
+            log.info(String.valueOf(result.equals("{\"error\":\"Password is not correct!\"}")));
+            switch (result) {
+                case "{}": {
+                    return;
+                }
+                case "{\"error\":\"Password is not correct!\"}":
+                    throw new Exception("密码错误");
+                default:
+                    throw new Exception("发生未知错误，请联系管理员");
+            }
+        } catch (UnknownHostException e) {
+            throw new Exception("无法访问vjudge.net，请稍后再试");
+        }
     }
 }

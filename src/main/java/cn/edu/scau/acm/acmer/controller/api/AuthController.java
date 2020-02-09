@@ -108,8 +108,7 @@ public class AuthController {
     }
 
     @ApiOperation("权限不足时返回401")
-    @RequestMapping(value = "/unauth")
-    @ResponseBody
+    @GetMapping(value = "/unauth")
     public ResponseEntity unauth() {
         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
     }

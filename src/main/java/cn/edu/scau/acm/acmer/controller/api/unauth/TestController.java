@@ -1,6 +1,9 @@
 package cn.edu.scau.acm.acmer.controller.api.unauth;
 
+import cn.edu.scau.acm.acmer.entity.Contest;
+import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.PersonalProblemAcRank;
+import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.ProblemAcRecordRepository;
 import cn.edu.scau.acm.acmer.service.*;
 import org.openqa.selenium.By;
@@ -31,19 +34,31 @@ public class TestController {
     @Autowired
     ContestService contestService;
 
+    @Autowired
+    ContestRepository contestRepository;
+
     @GetMapping("/addAc")
     void addAc() {
         problemService.getAllAcProblemsFromOj();
     }
 
     @GetMapping("/test")
-    void test(String ojId) throws Exception {
-        contestService.addContest("VJ", ojId, "");
+    MyResponseEntity<Void> test(String ojName, String ojId, String username, String password) {
+        try {
+            contestService.addContest(ojName, ojId, username, password);
+            return new MyResponseEntity<>();
+        } catch (Exception e) {
+            return new MyResponseEntity<>(e.getMessage());
+        }
+    }
+
+    @GetMapping("showContest")
+    MyResponseEntity<Contest> showContest(String ojName, String ojId) {
+        return new MyResponseEntity(contestRepository.findByOjNameAndOjid(ojName, ojId));
     }
 
     @GetMapping("/testSele")
     void testSele() throws InterruptedException {
-
         WebDriver driver = new ChromeDriver();
         driver.get("https://passport.jisuanke.com/?n=https://www.jisuanke.com/contest/3007?view=rank#/");
         WebElement username = driver.findElements(By.tagName("input")).get(0);

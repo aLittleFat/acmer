@@ -52,10 +52,14 @@ public class ProblemServiceImpl implements ProblemService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private OJService ojService;
+
     @Override
     public void addProblem(String ojName, String problemId) {
         Optional<Problem> problem = problemRepository.findByOjNameAndProblemId(ojName, problemId);
         if(!problem.isPresent()) {
+            ojService.addOj(ojName);
             Problem newProblem = new Problem();
             newProblem.setOjName(ojName);
             newProblem.setProblemId(problemId);
