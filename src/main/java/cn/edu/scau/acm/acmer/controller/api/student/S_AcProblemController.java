@@ -31,6 +31,6 @@ public class S_AcProblemController {
     MyResponseEntity<List<AcProblemInDay>> getMyAcProblems(long time, int days){
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         String studentId = studentRepository.findByUserId(id).get().getId();
-        return problemService.getProblemAcRecordSeveralDays(studentId,new Date(time), days,null);
+        return new MyResponseEntity<>(problemService.getProblemAcRecordSeveralDays(studentId,new Date(time), days,null));
     }
 }

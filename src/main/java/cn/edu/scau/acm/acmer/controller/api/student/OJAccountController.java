@@ -26,32 +26,52 @@ public class OJAccountController {
     @PostMapping("addMyOjAccount")
     MyResponseEntity<Void> addMyOjAccount(String ojName, String username, String password){
         int userId = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
-        return ojAccountService.addOjAccount(ojName, username, password, userId);
+        try {
+            ojAccountService.addOjAccount(ojName, username, password, userId);
+            return new MyResponseEntity<>();
+        } catch (Exception e) {
+            return new MyResponseEntity<>(e.getMessage());
+        }
     }
 
     @ApiOperation("获取登录账户的OJ账户")
     @GetMapping("getMyOjAccount")
     MyResponseEntity<String> getMyOjAccount(String ojName){
         int userId = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
-        return ojAccountService.getOjAccount(ojName, userId);
+        return new MyResponseEntity<>(0, "", ojAccountService.getOjAccount(ojName, userId));
     }
 
     @ApiOperation("修改登录账户的OJ账户")
     @PostMapping("changeMyOjAccount")
     MyResponseEntity<Void> changeMyOjAccount(String ojName, String username, String password){
         int userId = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
-        return ojAccountService.changeOjAccount(ojName, username, password, userId);
+        try {
+            ojAccountService.changeOjAccount(ojName, username, password, userId);
+            return new MyResponseEntity<>();
+        } catch (Exception e) {
+            return new MyResponseEntity<>(e.getMessage());
+        }
     }
 
     @ApiOperation("删除登录账户的OJ账户")
     @PostMapping("deleteMyOjAccount")
     MyResponseEntity<Void> deleteMyOjAccount(String ojName){
         int userId = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
-        return ojAccountService.deleteOjAccount(ojName, userId);
+        try {
+            ojAccountService.deleteOjAccount(ojName, userId);
+            return new MyResponseEntity<>();
+        } catch (Exception e) {
+            return new MyResponseEntity<>(e.getMessage());
+        }
     }
 
     @PostMapping("sendCfVerifyCode")
     MyResponseEntity<Void> sendCfVerifyCode(String username) {
-        return scauCfService.sendCfVerifyCode(username);
+        try {
+            scauCfService.sendCfVerifyCode(username);
+            return new MyResponseEntity<>();
+        } catch (Exception e) {
+            return new MyResponseEntity<>(e.getMessage());
+        }
     }
 }

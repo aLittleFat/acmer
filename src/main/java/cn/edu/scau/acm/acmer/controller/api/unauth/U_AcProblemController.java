@@ -19,6 +19,6 @@ public class U_AcProblemController {
 
     @GetMapping("getPersonalProblemAcRank")
     MyResponseEntity<List<PersonalProblemAcRank>> getPersonalProblemAcRank(int grade, boolean includeRetired) {
-        return problemService.getPersonalProblemAcRank(grade, includeRetired);
+        return new MyResponseEntity<>(problemService.getPersonalProblemAcRank(grade, includeRetired));
     }
 }

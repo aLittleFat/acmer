@@ -11,7 +11,6 @@ import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -55,11 +54,15 @@ public class AuthController {
     @ApiOperation("注册")
     @PostMapping("/register")
     public MyResponseEntity<Void> register(String email, String password, String phone, String name, String verifyCode, String grade, String studentId, String type){
-        if(type.equals("教师")) {
-            return accountService.registerUser(email, password, phone, name, verifyCode);
-        }
-        else {
-            return accountService.registerStudent(email, password, phone, name, verifyCode,Integer.parseInt(grade), studentId);
+        try {
+            if (type.equals("教师")) {
+                accountService.registerUser(email, password, phone, name, verifyCode);
+            } else {
+                accountService.registerStudent(email, password, phone, name, verifyCode, Integer.parseInt(grade), studentId);
+            }
+            return new MyResponseEntity<>();
+        } catch (Exception e) {
+            return new MyResponseEntity<>(e.getMessage());
         }
     }
 
@@ -73,26 +76,41 @@ public class AuthController {
 
     @ApiOperation("发送邮箱验证码到邮箱")
     @PostMapping("/sendVerifyEmailCode")
-    public MyResponseEntity<Void> sendVerifyEmailCode(String email){
-        return accountService.sendVerifyEmail(email);
+    public MyResponseEntity<Void> sendVerifyEmailCode(String email) {
+        try {
+            accountService.sendVerifyEmail(email);
+            return new MyResponseEntity<>();
+        } catch (Exception e) {
+            return new MyResponseEntity<>(e.getMessage());
+        }
     }
 
     @ApiOperation("忘记密码的时候发送验证码到邮箱")
     @PostMapping("/sendForgetPasswordVerifyEmailCode")
     public MyResponseEntity<Void> sendForgetPasswordVerifyEmailCode(String email){
-        return accountService.sendForgetPasswordVerifyEmail(email);
+        try {
+            accountService.sendForgetPasswordVerifyEmail(email);
+            return new MyResponseEntity<>();
+        } catch (Exception e) {
+            return new MyResponseEntity<>(e.getMessage());
+        }
     }
 
     @ApiOperation("忘记密码的时候修改密码")
     @PostMapping(value = "/forgetPassword")
     public MyResponseEntity<Void> forgetPassword(String email, String password, String verifyCode){
-        return accountService.forgetPassword(email, password, verifyCode);
+        try {
+            accountService.forgetPassword(email, password, verifyCode);
+            return new MyResponseEntity<>();
+        } catch (Exception e) {
+            return new MyResponseEntity<>(e.getMessage());
+        }
     }
 
     @ApiOperation("权限不足时返回401")
     @RequestMapping(value = "/unauth")
     @ResponseBody
-    public HttpEntity<Void> unauth() {
+    public ResponseEntity unauth() {
         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
     }
 

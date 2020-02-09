@@ -60,9 +60,9 @@ public class ScauCfServiceImpl implements ScauCfService {
     }
 
     @Override
-    public MyResponseEntity<Void> sendCfVerifyCode(String cfHandle) {
+    public void sendCfVerifyCode(String cfHandle) throws Exception {
         String token = login();
-        if(token == null) return new MyResponseEntity<>("服务器出错");
+        if(token == null) throw new Exception("服务器出错");
 
         String verifyCode = stringRedisTemplate.opsForValue().get(cfHandle + "_Verify");
         if(verifyCode == null){
@@ -83,10 +83,10 @@ public class ScauCfServiceImpl implements ScauCfService {
         JSONObject response = restTemplate.postForObject(url, request, JSONObject.class);
         int status = response.getInteger("status");
         switch (status) {
-            case 0: return new MyResponseEntity<>();
-            case 5: return new MyResponseEntity<>("cf用户名出错");
-            case 7: return new MyResponseEntity<>("发送失败");
-            default: return new MyResponseEntity<>("服务器出错");
+            case 0: break;
+            case 5: throw new Exception("cf用户名出错");
+            case 7: throw new Exception("发送失败");
+            default: throw new Exception("服务器出错");
         }
     }
 }

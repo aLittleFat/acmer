@@ -63,85 +63,64 @@ public class OJAccountServiceImpl implements OJAccountService {
     }
 
     @Override
-    public MyResponseEntity<Void> addOjAccount(String ojName, String username, String password, int id) {
-        try {
-            User u = userRepository.findById(id).get();
-            Student stu = studentRepository.findByUserId(u.getId()).get();
+    public void addOjAccount(String ojName, String username, String password, int id) throws Exception {
+        User u = userRepository.findById(id).get();
+        Student stu = studentRepository.findByUserId(u.getId()).get();
 
-            ojService.addOj(ojName);
+        ojService.addOj(ojName);
 
-            if (ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName).isPresent()) {
-                return new MyResponseEntity<>("已存在" + ojName + "账号");
-            }
-            if (checkOjAccount(ojName, username, password)) {
-                OjAccount ojAccount = new OjAccount();
-                ojAccount.setAccount(username);
-                ojAccount.setOjName(ojName);
-                ojAccount.setStudentId(stu.getId());
-                ojAccountRepository.save(ojAccount);
-                return new MyResponseEntity<>();
-            } else {
-                return new MyResponseEntity<>("添加失败，用户名/密码/网络错误");
-            }
-        } catch (Exception e) {
-            return new MyResponseEntity<>("服务器错误");
+        if (ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName).isPresent()) {
+            throw new Exception("已存在" + ojName + "账号");
+        }
+        if (checkOjAccount(ojName, username, password)) {
+            OjAccount ojAccount = new OjAccount();
+            ojAccount.setAccount(username);
+            ojAccount.setOjName(ojName);
+            ojAccount.setStudentId(stu.getId());
+            ojAccountRepository.save(ojAccount);
+        } else {
+            throw new Exception("添加失败，用户名/密码/网络错误");
         }
     }
 
     @Override
-    public MyResponseEntity<String> getOjAccount(String ojName, int userId) {
-        try {
-            Student stu = studentRepository.findByUserId(userId).get();
-            Optional<OjAccount> ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
-            if (!ojAccount.isPresent()) {
-                return new MyResponseEntity<>(0, null, "");
-            } else {
-                return new MyResponseEntity<>(0, null, ojAccount.get().getAccount());
-            }
-        } catch (Exception e) {
-            return new MyResponseEntity<>(1, "服务器错误", null);
+    public String getOjAccount(String ojName, int userId) {
+        Student stu = studentRepository.findByUserId(userId).get();
+        Optional<OjAccount> ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
+        if (ojAccount.isEmpty()) {
+            return "";
+        } else {
+            return  ojAccount.get().getAccount();
         }
     }
 
     @Override
-    public MyResponseEntity<Void> deleteOjAccount(String ojName, int userId) {
-        try {
-            Student stu = studentRepository.findByUserId(userId).get();
-            Optional<OjAccount> ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
-            if (!ojAccount.isPresent()) {
-                return new MyResponseEntity<>("VJ账号不存在");
-            }
-
-            problemAcRecordRepository.deleteAllByOjAccountId(ojAccount.get().getId());
-
-            ojAccountRepository.delete(ojAccount.get());
-            return new MyResponseEntity<>();
-        } catch (Exception e) {
-            return new MyResponseEntity<>( "服务器错误");
+    public void deleteOjAccount(String ojName, int userId) throws Exception {
+        Student stu = studentRepository.findByUserId(userId).get();
+        Optional<OjAccount> ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
+        if (ojAccount.isEmpty()) {
+            throw new Exception("VJ账号不存在");
         }
+        problemAcRecordRepository.deleteAllByOjAccountId(ojAccount.get().getId());
+        ojAccountRepository.delete(ojAccount.get());
     }
 
     @Override
-    public MyResponseEntity<Void> changeOjAccount(String ojName, String username, String password, int userId) {
-        try {
-            Student stu = studentRepository.findByUserId(userId).get();
-            Optional<OjAccount> ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
-            if (!ojAccount.isPresent()) {
-                return new MyResponseEntity<>("目前不存在" + ojName + "账户");
-            }
-            if (ojAccount.get().getAccount().equals(username)) {
-                return new MyResponseEntity<>("你修改的用户名和之前的一样，无需修改");
-            }
-            if (checkOjAccount(ojName, username, password)) {
-                OjAccount newOjAccount = ojAccount.get();
-                newOjAccount.setAccount(username);
-                ojAccountRepository.save(newOjAccount);
-                return new MyResponseEntity<>();
-            } else {
-                return new MyResponseEntity<>("修改失败，用户名或密码错误");
-            }
-        } catch (Exception e) {
-            return new MyResponseEntity<>("服务器错误");
+    public void changeOjAccount(String ojName, String username, String password, int userId) throws Exception {
+        Student stu = studentRepository.findByUserId(userId).get();
+        Optional<OjAccount> ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
+        if (!ojAccount.isPresent()) {
+            throw new Exception("目前不存在" + ojName + "账户");
+        }
+        if (ojAccount.get().getAccount().equals(username)) {
+            throw new Exception("你修改的用户名和之前的一样，无需修改");
+        }
+        if (checkOjAccount(ojName, username, password)) {
+            OjAccount newOjAccount = ojAccount.get();
+            newOjAccount.setAccount(username);
+            ojAccountRepository.save(newOjAccount);
+        } else {
+            throw new Exception("修改失败，用户名或密码错误");
         }
     }
 }

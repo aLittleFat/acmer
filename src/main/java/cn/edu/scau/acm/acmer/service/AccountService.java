@@ -7,20 +7,20 @@ import cn.edu.scau.acm.acmer.model.User_Student;
 import org.springframework.data.domain.Page;
 
 public interface AccountService {
-    MyResponseEntity<Void> registerUser(String email, String password, String phone, String name, String verifyCode);
-    MyResponseEntity<Void> registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId);
+    void registerUser(String email, String password, String phone, String name, String verifyCode) throws Exception;
+    void registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId) throws Exception;
     boolean isVerify(String email);
-    MyResponseEntity<Void> verifyAccount(int id);
+    void verifyAccount(int id) throws Exception;
     String verifyEmail(String email, String verifyCode);
     String verifyForgetPasswordEmail(String email, String verifyCode);
-    MyResponseEntity<Void> sendVerifyEmail(String email);
-    MyResponseEntity<Void> sendForgetPasswordVerifyEmail(String email);
+    void sendVerifyEmail(String email) throws Exception;
+    void sendForgetPasswordVerifyEmail(String email) throws Exception;
     boolean isStudent(int id);
     boolean isAdmin(int id);
     String genVerifyCode();
-    MyResponseEntity<Void> forgetPassword(String email, String password, String verifyCode);
-    MyResponseEntity<Page<User_Student>> getUserUnverify(Integer page, Integer size);
-    MyResponseEntity<Void> deleteAccount(Integer id);
-    MyResponseEntity<User_Student> getUserStudentById(int id);
-    MyResponseEntity<Void> changePhoneAndIcpcEmail(String phone, String icpcEmail, int id);
+    void forgetPassword(String email, String password, String verifyCode) throws Exception;
+    Page<User_Student> getUserUnverify(Integer page, Integer size);
+    void deleteAccount(Integer id);
+    User_Student getUserStudentById(int id);
+    void changePhoneAndIcpcEmail(String phone, String icpcEmail, int id);
 }

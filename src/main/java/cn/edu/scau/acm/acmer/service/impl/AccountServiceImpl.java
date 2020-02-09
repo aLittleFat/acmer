@@ -43,15 +43,15 @@ public class AccountServiceImpl implements AccountService {
     private MailService mailService;
 
     @Override
-    public MyResponseEntity<Void> registerUser(String email, String password, String phone, String name, String verifyCode) {
+    public void registerUser(String email, String password, String phone, String name, String verifyCode) throws Exception {
         if(userRepository.findByEmail(email).isPresent()){
-            return new MyResponseEntity<>("该邮箱已被注册");
+            throw new Exception("该邮箱已被注册");
         }
 
         String verifyStatus = verifyEmail(email, verifyCode);
 
         if(!verifyStatus.equals("true")){
-            return new MyResponseEntity<>(verifyStatus);
+            throw new Exception(verifyStatus);
         }
         User u = new User();
         u.setEmail(email);
@@ -67,19 +67,18 @@ public class AccountServiceImpl implements AccountService {
             u.setVerify((byte) 0);
         }
         userRepository.save(u);
-        return new MyResponseEntity<>();
     }
 
     @Override
-    public MyResponseEntity<Void> registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId) {
+    public void registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId) throws Exception {
         if(userRepository.findByEmail(email).isPresent()){
-            return new MyResponseEntity<>("该邮箱已被注册");
+            throw new Exception("该邮箱已被注册");
         }
 
         String verifyStatus = verifyEmail(email, verifyCode);
 
         if(!verifyStatus.equals("true")){
-            return new MyResponseEntity<>(verifyStatus);
+            throw new Exception(verifyStatus);
         }
         User u = new User();
         u.setEmail(email);
@@ -100,7 +99,7 @@ public class AccountServiceImpl implements AccountService {
             u.setVerify((byte) 0);
         }
         if(studentRepository.findById(stuId).isPresent()){
-            return new MyResponseEntity<>("该学号已被注册");
+            throw new Exception("该学号已被注册");
         }
         userRepository.save(u);
         Student stu = new Student();
@@ -109,7 +108,6 @@ public class AccountServiceImpl implements AccountService {
         stu.setStatus("现役");
         stu.setUserId(userRepository.findByEmail(email).get().getId());
         studentRepository.save(stu);
-        return new MyResponseEntity<>();
     }
 
     @Override
@@ -118,15 +116,14 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public MyResponseEntity<Void> verifyAccount(int id) {
+    public void verifyAccount(int id) throws Exception {
         try {
             User u = userRepository.findById(id).get();
             u.setVerify((byte) 1);
             userRepository.save(u);
             mailService.sendTextMail(u.getEmail(), "ACMER账号审核通过", "你在ACMER网站注册的账号 " + u.getEmail() + " 已通过审核，请尽快登录并完善个人信息");
-            return new MyResponseEntity<>();
         } catch (Exception e) {
-            return new MyResponseEntity<>("服务器错误");
+            throw new Exception("服务器错误");
         }
     }
 
@@ -159,9 +156,9 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public MyResponseEntity<Void> sendVerifyEmail(String email) {
+    public void sendVerifyEmail(String email) throws Exception {
         if(userRepository.findByEmail(email).isPresent()){
-            return new MyResponseEntity<>("该邮箱已被注册");
+            throw new Exception("该邮箱已被注册");
         }
         String verifyCode = stringRedisTemplate.opsForValue().get(email + "_Verify");
         if(verifyCode == null){
@@ -169,13 +166,12 @@ public class AccountServiceImpl implements AccountService {
             stringRedisTemplate.opsForValue().set(email + "_Verify", verifyCode, 10, TimeUnit.MINUTES);
         }
         mailService.sendTextMail(email, "SCAUACMER网站邮箱验证码", "验证码为：" + verifyCode + ". 有效期为10分钟.");
-        return new MyResponseEntity<>();
     }
 
     @Override
-    public MyResponseEntity<Void> sendForgetPasswordVerifyEmail(String email) {
+    public void sendForgetPasswordVerifyEmail(String email) throws Exception {
         if(!userRepository.findByEmail(email).isPresent()){
-            return new MyResponseEntity<>("该邮箱不存在");
+            throw new Exception("该邮箱不存在");
         }
         String verifyCode = stringRedisTemplate.opsForValue().get(email + "_ForgetPasswordVerify");
         if(verifyCode == null){
@@ -183,7 +179,6 @@ public class AccountServiceImpl implements AccountService {
             stringRedisTemplate.opsForValue().set(email + "_ForgetPasswordVerify", verifyCode, 10, TimeUnit.MINUTES);
         }
         mailService.sendTextMail(email, "SCAUACMER网站邮箱验证码", "验证码为：" + verifyCode + ". 有效期为10分钟.");
-        return new MyResponseEntity<>();
     }
 
     @Override
@@ -208,73 +203,51 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public MyResponseEntity<Void> forgetPassword(String email, String password, String verifyCode) {
+    public void forgetPassword(String email, String password, String verifyCode) throws Exception {
         Optional<User> u = userRepository.findByEmail(email);
         if(!u.isPresent()){
-            return new MyResponseEntity<>("该邮箱不存在");
+            throw new Exception("该邮箱不存在");
         }
         String verifyStatus = verifyForgetPasswordEmail(email, verifyCode);
         if(verifyStatus != "true"){
-            return new MyResponseEntity<>(verifyStatus);
+            throw new Exception(verifyStatus);
         }
         User user = u.get();
         user.setPassword(new Sha256Hash(password, encryptSalt).toHex());
         userRepository.save(user);
-        return new MyResponseEntity<>();
     }
 
     @Override
-    public MyResponseEntity<Page<User_Student>> getUserUnverify(Integer page, Integer size) {
-        try {
-            Pageable pr = PageRequest.of(page - 1, size, Sort.Direction.ASC, "name");
-            Page<User_Student> user_students = userRepository.findAllUnVerify(pr);
-            return new MyResponseEntity<>(user_students);
-        } catch (Exception e) {
-            return new MyResponseEntity<>("服务器出错");
+    public Page<User_Student> getUserUnverify(Integer page, Integer size) {
+        Pageable pr = PageRequest.of(page - 1, size, Sort.Direction.ASC, "name");
+        return userRepository.findAllUnVerify(pr);
+    }
+
+    @Override
+    public void deleteAccount(Integer id) {
+        User u = userRepository.findById(id).get();
+        Optional<Student> student = studentRepository.findByUserId(id);
+        student.ifPresent(value -> studentRepository.delete(value));
+        userRepository.delete(u);
+        mailService.sendTextMail(u.getEmail(), "ACMER账号审核不通过", "你在ACMER网站注册的账号 " + u.getEmail() + " 没有通过审核，账号已删除，请重新注册");
+    }
+
+    @Override
+    public User_Student getUserStudentById(int id) {
+        return new User_Student(userRepository.findById(id).get(), studentRepository.findByUserId(id).orElse(null));
+    }
+
+    @Override
+    public void changePhoneAndIcpcEmail(String phone, String icpcEmail, int id) {
+        User u = userRepository.findById(id).get();
+        Student stu = studentRepository.findByUserId(id).get();
+        if (!phone.equals("")) {
+            u.setPhone(phone);
+            userRepository.save(u);
         }
-    }
-
-    @Override
-    public MyResponseEntity<Void> deleteAccount(Integer id) {
-        try {
-            User u = userRepository.findById(id).get();
-            Optional<Student> student = studentRepository.findByUserId(id);
-            if (student.isPresent()) {
-                studentRepository.delete(student.get());
-            }
-            userRepository.delete(u);
-            mailService.sendTextMail(u.getEmail(), "ACMER账号审核不通过", "你在ACMER网站注册的账号 " + u.getEmail() + " 没有通过审核，账号已删除，请重新注册");
-            return new MyResponseEntity<>();
-        } catch (Exception e) {
-            return new MyResponseEntity<>("服务器错误");
-        }
-    }
-
-    @Override
-    public MyResponseEntity<User_Student> getUserStudentById(int id) {
-        try {
-            return new MyResponseEntity<User_Student>(new User_Student(userRepository.findById(id).get(), studentRepository.findByUserId(id).orElse(null)));
-        } catch (Exception e) {
-            return new MyResponseEntity<>("服务器错误");
-        }
-    }
-
-    @Override
-    public MyResponseEntity<Void> changePhoneAndIcpcEmail(String phone, String icpcEmail, int id) {
-        try {
-            User u = userRepository.findById(id).get();
-            Student stu = studentRepository.findByUserId(id).get();
-            if (!phone.equals("")) {
-                u.setPhone(phone);
-                userRepository.save(u);
-            }
-            if (!icpcEmail.equals("")) {
-                stu.setIcpcEmail(icpcEmail);
-                studentRepository.save(stu);
-            }
-            return new MyResponseEntity<>();
-        } catch (Exception e) {
-            return new MyResponseEntity<>("服务器错误");
+        if (!icpcEmail.equals("")) {
+            stu.setIcpcEmail(icpcEmail);
+            studentRepository.save(stu);
         }
     }
 

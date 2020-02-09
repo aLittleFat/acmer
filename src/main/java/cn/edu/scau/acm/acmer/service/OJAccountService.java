@@ -6,11 +6,11 @@ public interface OJAccountService {
 
     boolean checkOjAccount(String ojName, String username, String password);
 
-    MyResponseEntity<Void> addOjAccount(String ojName, String username, String password, int id);
+    void addOjAccount(String ojName, String username, String password, int id) throws Exception;
 
-    MyResponseEntity<String> getOjAccount(String ojName, int userId);
+    String getOjAccount(String ojName, int userId);
 
-    MyResponseEntity<Void> deleteOjAccount(String ojName, int userId);
+    void deleteOjAccount(String ojName, int userId) throws Exception;
 
-    MyResponseEntity<Void> changeOjAccount(String ojName, String username, String password, int userId);
+    void changeOjAccount(String ojName, String username, String password, int userId) throws Exception;
 }
