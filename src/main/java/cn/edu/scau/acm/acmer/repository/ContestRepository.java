@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface ContestRepository extends JpaRepository<Contest, Integer> {
-    Optional<Contest> findByOjNameAndOjid(String ojName, String ojId);
+    Optional<Contest> findByOjNameAndCId(String ojName, String cId);
 }

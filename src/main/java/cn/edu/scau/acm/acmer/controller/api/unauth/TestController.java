@@ -2,7 +2,6 @@ package cn.edu.scau.acm.acmer.controller.api.unauth;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
-import cn.edu.scau.acm.acmer.model.PersonalProblemAcRank;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.ProblemAcRecordRepository;
 import cn.edu.scau.acm.acmer.service.*;
@@ -14,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 
 @RestController
@@ -37,15 +34,28 @@ public class TestController {
     @Autowired
     ContestRepository contestRepository;
 
+    @Autowired
+    ScheduledService scheduledService;
+
     @GetMapping("/addAc")
     void addAc() {
-        problemService.getAllAcProblemsFromOj();
+        scheduledService.getAllAcProblemsFromOj();
     }
 
-    @GetMapping("/test")
-    MyResponseEntity<Void> test(String ojName, String ojId, String username, String password) {
+    @GetMapping("/addContest")
+    MyResponseEntity<Void> addContest(String ojName, String cId, String username, String password) {
         try {
-            contestService.addContest(ojName, ojId, username, password);
+            contestService.addContest(ojName, cId, username, password);
+            return new MyResponseEntity<>();
+        } catch (Exception e) {
+            return new MyResponseEntity<>(e.getMessage());
+        }
+    }
+
+    @GetMapping("/addPersonalContestRecord")
+    MyResponseEntity<Void> addPersonalContestRecord(String ojName, String cId, String account, String password, String studentId) {
+        try {
+            contestService.addPersonalContestRecord(ojName, cId, password, studentId, account);
             return new MyResponseEntity<>();
         } catch (Exception e) {
             return new MyResponseEntity<>(e.getMessage());
@@ -54,7 +64,7 @@ public class TestController {
 
     @GetMapping("showContest")
     MyResponseEntity<Contest> showContest(String ojName, String ojId) {
-        return new MyResponseEntity(contestRepository.findByOjNameAndOjid(ojName, ojId));
+        return new MyResponseEntity(contestRepository.findByOjNameAndCId(ojName, ojId));
     }
 
     @GetMapping("/testSele")

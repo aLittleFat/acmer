@@ -6,16 +6,18 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "Contest", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"OjName", "OJID"})
+        @UniqueConstraint(name = "uni", columnNames = {"OjName", "CID"})
 })
 public class Contest {
     private int id;
     private Timestamp startTime;
     private Timestamp endTime;
-    private String ojid;
+    private String cId;
     private String name;
+    private String username;
     private String password;
     private String ojName;
+    private int problemNumber;
 
     @Id
     @Column(name = "ID")
@@ -49,13 +51,13 @@ public class Contest {
     }
 
     @Basic
-    @Column(name = "OJID")
-    public String getOjid() {
-        return ojid;
+    @Column(name = "CID")
+    public String getCId() {
+        return cId;
     }
 
-    public void setOjid(String ojid) {
-        this.ojid = ojid;
+    public void setCId(String cId) {
+        this.cId = cId;
     }
 
     @Basic
@@ -67,6 +69,12 @@ public class Contest {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Basic
+    @Column(name = "Username")
+    public String getUsername() { return username; }
+
+    public void setUsername(String username) { this.username = username; }
 
     @Basic
     @Column(name = "Password")
@@ -88,6 +96,16 @@ public class Contest {
         this.ojName = ojName;
     }
 
+    @Basic
+    @Column(name = "ProblemNumber")
+    public int getProblemNumber() {
+        return problemNumber;
+    }
+
+    public void setProblemNumber(int problemNumber) {
+        this.problemNumber = problemNumber;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -96,14 +114,16 @@ public class Contest {
         return id == contest.id &&
                 Objects.equals(startTime, contest.startTime) &&
                 Objects.equals(endTime, contest.endTime) &&
-                Objects.equals(ojid, contest.ojid) &&
+                Objects.equals(cId, contest.cId) &&
                 Objects.equals(name, contest.name) &&
+                Objects.equals(username, contest.username) &&
                 Objects.equals(password, contest.password) &&
-                Objects.equals(ojName, contest.ojName);
+                Objects.equals(ojName, contest.ojName) &&
+                problemNumber == contest.problemNumber;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startTime, endTime, ojid, name, password, ojName);
+        return Objects.hash(id, startTime, endTime, cId, name, username, password, ojName, problemNumber);
     }
 }

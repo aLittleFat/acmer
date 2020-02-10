@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -35,6 +36,7 @@ public class CfServiceImpl implements CfService {
     private StringRedisTemplate stringRedisTemplate;
 
     @Override
+    @Async
     public void getAcProblemsByCfAccount(OjAccount cfAccount) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -79,6 +81,7 @@ public class CfServiceImpl implements CfService {
     }
 
     @Override
+    @Async
     public void getAllAcProblems() {
         List<OjAccount> ojAccounts = ojAccountRepository.findAllByOjName("CodeForces");
         for(OjAccount ojAccount : ojAccounts) {

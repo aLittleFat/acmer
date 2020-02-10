@@ -26,11 +26,11 @@ public class ContestProblem {
 
     @Basic
     @Column(name = "IDinContest")
-    public String getiDinContest() {
+    public String getIDinContest() {
         return iDinContest;
     }
 
-    public void setiDinContest(String iDinContest) {
+    public void setIDinContest(String iDinContest) {
         this.iDinContest = iDinContest;
     }
 

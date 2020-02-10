@@ -12,7 +12,9 @@ public interface HduService {
     void getAcProblemsByHduAccount(OjAccount hduAccount);
     void getAllAcProblems();
 
-    void addContest(String ojId, String username, String password) throws Exception;
+    void addContest(String cId, String username, String password) throws Exception;
 
     void loginContest(HduClient hduClient, String ojId, String username, String password) throws Exception;
+
+    void addPersonalContestRecord(int contestId, String studentId, String account);
 }

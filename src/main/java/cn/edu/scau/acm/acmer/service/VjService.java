@@ -12,4 +12,6 @@ public interface VjService {
     void login(VjudgeClient vjudgeClient) throws Exception;
     void addContest(String ojId, String password) throws Exception;
     void loginContest(VjudgeClient vjudgeClient, String cId, String password) throws Exception;
+
+    void addPersonalContestRecord(int contestId, String studentId, String account) throws Exception;
 }

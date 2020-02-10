@@ -1,16 +1,16 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
+import cn.edu.scau.acm.acmer.entity.ContestProblem;
 import cn.edu.scau.acm.acmer.entity.OjAccount;
 import cn.edu.scau.acm.acmer.entity.Problem;
 import cn.edu.scau.acm.acmer.httpclient.HduClient;
+import cn.edu.scau.acm.acmer.repository.ContestProblemRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.OjAccountRepository;
-import cn.edu.scau.acm.acmer.service.ContestService;
 import cn.edu.scau.acm.acmer.service.HduService;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import org.apache.http.NameValuePair;
-import org.apache.http.ProtocolException;
 import org.apache.http.message.BasicNameValuePair;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -23,16 +23,15 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -50,10 +49,10 @@ public class HduServiceImpl implements HduService {
     private ProblemService problemService;
 
     @Autowired
-    private ContestService contestService;
+    private ContestRepository contestRepository;
 
     @Autowired
-    private ContestRepository contestRepository;
+    private ContestProblemRepository contestProblemRepository;
 
     @Override
     public void hduLogout() {
@@ -81,6 +80,7 @@ public class HduServiceImpl implements HduService {
     }
 
     @Override
+    @Async
     public void getAcProblemsByHduAccount(OjAccount hduAccount) {
         String url = "http://acm.hdu.edu.cn/status.php?first=&pid=&user=" + hduAccount.getAccount() +"&lang=0&status=5";
         int retry = 10;
@@ -123,6 +123,7 @@ public class HduServiceImpl implements HduService {
     }
 
     @Override
+    @Async
     public void getAllAcProblems() {
         List<OjAccount> ojAccounts = ojAccountRepository.findAllByOjName("HDU");
         for(OjAccount ojAccount : ojAccounts) {
@@ -131,22 +132,23 @@ public class HduServiceImpl implements HduService {
     }
 
     @Override
-    public void addContest(String ojId, String username, String password) throws Exception {
+    public void addContest(String cId, String username, String password) throws Exception {
         HduClient hduClient = new HduClient();
-        String url = "http://acm.hdu.edu.cn/contests/contest_show.php?cid=" + ojId;
+        String url = "http://acm.hdu.edu.cn/contests/contest_show.php?cid=" + cId;
         String html = hduClient.get(url);
         String title = Jsoup.parse(html).title();
         if(title.equals("User Login")) {
             if(username.equals("") || password.equals("")) {
                 throw new Exception("该比赛需要登录");
             }
-            loginContest(hduClient, ojId, username, password);
+            loginContest(hduClient, cId, username, password);
         }
         html = hduClient.get(url);
         Element element = Jsoup.parse(html);
+        Elements table = Jsoup.parse(html).selectFirst("tbody").select("tr");
         Contest contest = new Contest();
         contest.setOjName("HDU");
-        contest.setOjid(ojId);
+        contest.setCId(cId);
         contest.setName(element.selectFirst("h1").text());
         String time = element.selectFirst("div:contains(Start Time)").child(1).text();
         String startTime = time.substring(time.indexOf(':') + 2,time.indexOf('E')-1);
@@ -154,12 +156,15 @@ public class HduServiceImpl implements HduService {
         String endTime = time.substring(time.indexOf(':') + 2,time.indexOf('C')-1);
         contest.setStartTime(Timestamp.valueOf(startTime));
         contest.setEndTime(Timestamp.valueOf(endTime));
+        contest.setProblemNumber(table.size()-1);
         contestRepository.save(contest);
-        contest = contestRepository.findByOjNameAndOjid("HDU", ojId).get();
-        Elements table = Jsoup.parse(html).selectFirst("tbody").select("tr");
+        contest = contestRepository.findByOjNameAndCId("HDU", cId).get();
         for (int i = 1; i < table.size(); ++i) {
             Element line = table.get(i);
-            contestService.addContestProblem(contest.getId(),line.select("td").get(1).text(), null);
+            ContestProblem contestProblem = new ContestProblem();
+            contestProblem.setContestId(contest.getId());
+            contestProblem.setIDinContest(line.select("td").get(1).text());
+            contestProblemRepository.save(contestProblem);
         }
     }
 
@@ -177,5 +182,10 @@ public class HduServiceImpl implements HduService {
         } catch (UnknownHostException e) {
             throw new Exception("无法访问acm.hdu.edu.cn，请稍后再试");
         }
+    }
+
+    @Override
+    public void addPersonalContestRecord(int contestId, String studentId, String account) {
+
     }
 }

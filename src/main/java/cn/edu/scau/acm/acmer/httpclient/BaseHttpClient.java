@@ -3,6 +3,7 @@ package cn.edu.scau.acm.acmer.httpclient;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.ProtocolException;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -32,10 +33,15 @@ public class BaseHttpClient {
 					"acmTrust".toCharArray(), new TrustSelfSignedStrategy()).build();
 			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
 			        sslContext, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-			httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+			RequestConfig requestConfig = RequestConfig.custom()
+					.setConnectTimeout(20000).setConnectionRequestTimeout(2000)
+					.setSocketTimeout(5000).build();
+			httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).setDefaultRequestConfig(requestConfig).build();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+
 		return httpclient;
 	}
 	

@@ -32,18 +32,6 @@ public class ProblemServiceImpl implements ProblemService {
     private ProblemAcRecordRepository problemAcRecordRepository;
 
     @Autowired
-    private BzojService bzojService;
-
-    @Autowired
-    private CfService cfService;
-
-    @Autowired
-    private HduService hduService;
-
-    @Autowired
-    private VjService vjService;
-
-    @Autowired
     private OjAccountRepository ojAccountRepository;
 
     @Autowired
@@ -58,7 +46,7 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public void addProblem(String ojName, String problemId) {
         Optional<Problem> problem = problemRepository.findByOjNameAndProblemId(ojName, problemId);
-        if(!problem.isPresent()) {
+        if(problem.isEmpty()) {
             ojService.addOj(ojName);
             Problem newProblem = new Problem();
             newProblem.setOjName(ojName);
@@ -145,15 +133,6 @@ public class ProblemServiceImpl implements ProblemService {
             }
         }
         return acProblemInDays;
-    }
-
-    @Override
-    @Scheduled(cron = "0 49 21 * * ?")
-    public void getAllAcProblemsFromOj() {
-        bzojService.getAllAcProblems();
-        cfService.getAllAcProblems();
-        hduService.getAllAcProblems();
-        vjService.getAllAcProblems();
     }
 
     @Override
