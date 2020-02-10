@@ -1,7 +1,7 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.*;
-import cn.edu.scau.acm.acmer.httpclient.VjudgeClient;
+import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
 import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.OJService;
 import cn.edu.scau.acm.acmer.service.ProblemService;
@@ -19,7 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -164,17 +167,23 @@ public class VjServiceImpl implements VjService {
     }
 
     @Override
-    public void login(VjudgeClient vjudgeClient) throws Exception {
-        vjudgeClient.login(adminUsername, adminPassword);
+    public void login(BaseHttpClient httpClient) throws Exception {
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("username", adminUsername));
+        params.add(new BasicNameValuePair("password", adminPassword));
+        String result = httpClient.post("https://vjudge.net/user/login" , params);
+        if(!result.equals("success")) {
+            throw new Exception("登录VJ失败");
+        }
     }
 
     @Override
-    public void addContest(String cId, String password) throws Exception {
-        VjudgeClient vjudgeClient = new VjudgeClient();
-        login(vjudgeClient);
+    public void addContest(BaseHttpClient httpClient, String cId, String password) throws Exception {
+        httpClient = new BaseHttpClient();
+        login(httpClient);
         String url = "https://vjudge.net/contest/" + cId;
         try {
-            String html = vjudgeClient.get(url);
+            String html = httpClient.get(url);
             Document document = Jsoup.parse(html);
             Element element = document.body().selectFirst("[name=dataJson]");
             JSONObject jsonObject = (JSONObject) JSON.parse(element.text());
@@ -182,10 +191,10 @@ public class VjServiceImpl implements VjService {
                 if(password.equals(""))
                     throw new Exception("需要密码");
                 else {
-                    loginContest(vjudgeClient, cId, password);
+                    loginContest(httpClient, cId, password);
                 }
             }
-            html = vjudgeClient.get(url);
+            html = httpClient.get(url);
             document = Jsoup.parse(html);
             jsonObject = (JSONObject) JSON.parse(document.body().selectFirst("[name=dataJson]").text());
             JSONArray jsonProblems = jsonObject.getJSONArray("problems");
@@ -220,11 +229,11 @@ public class VjServiceImpl implements VjService {
     }
 
     @Override
-    public void loginContest(VjudgeClient vjudgeClient, String cId, String password) throws Exception {
+    public void loginContest(BaseHttpClient httpClient, String cId, String password) throws Exception {
         try {
             List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("password", password));
-            String result = vjudgeClient.post("https://vjudge.net/contest/login/" + cId, params);
+            String result = httpClient.post("https://vjudge.net/contest/login/" + cId, params);
             log.info(result);
             log.info("{\"error\":\"Password is not correct!\"}");
             log.info(String.valueOf(result.equals("{\"error\":\"Password is not correct!\"}")));
@@ -243,13 +252,14 @@ public class VjServiceImpl implements VjService {
     }
 
     @Override
-    public void addPersonalContestRecord(int contestId, String studentId, String account) throws Exception {
-
-        VjudgeClient vjudgeClient = new VjudgeClient();
-        login(vjudgeClient);
+    public void addPersonalContestRecord(BaseHttpClient httpClient, int contestId, String studentId, String account) throws Exception {
+        if(httpClient == null) {
+            httpClient = new BaseHttpClient();
+            login(httpClient);
+        }
         Contest contest = contestRepository.findById(contestId).get();
         String url = "https://vjudge.net/contest/rank/single/" + contest.getCId();
-        JSONObject jsonObject = JSON.parseObject(vjudgeClient.get(url));
+        JSONObject jsonObject = JSON.parseObject(httpClient.get(url));
         int participantId = 0;
         JSONObject participants = jsonObject.getJSONObject("participants");
         for(String key : participants.keySet()) {

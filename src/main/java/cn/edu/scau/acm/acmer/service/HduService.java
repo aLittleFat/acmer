@@ -1,10 +1,7 @@
 package cn.edu.scau.acm.acmer.service;
 
 import cn.edu.scau.acm.acmer.entity.OjAccount;
-import cn.edu.scau.acm.acmer.httpclient.HduClient;
-import org.apache.http.ProtocolException;
-
-import java.io.IOException;
+import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
 
 public interface HduService {
     void hduLogout();
@@ -12,9 +9,9 @@ public interface HduService {
     void getAcProblemsByHduAccount(OjAccount hduAccount);
     void getAllAcProblems();
 
-    void addContest(String cId, String username, String password) throws Exception;
+    void addContest(BaseHttpClient httpClient, String cId, String username, String password) throws Exception;
 
-    void loginContest(HduClient hduClient, String ojId, String username, String password) throws Exception;
+    void loginContest(BaseHttpClient httpClient, String ojId, String username, String password) throws Exception;
 
-    void addPersonalContestRecord(int contestId, String studentId, String account);
+    void addPersonalContestRecord(BaseHttpClient httpClient, int contestId, String studentId, String account);
 }

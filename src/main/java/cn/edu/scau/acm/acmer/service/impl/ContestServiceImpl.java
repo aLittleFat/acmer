@@ -3,6 +3,7 @@ package cn.edu.scau.acm.acmer.service.impl;
 import cn.edu.scau.acm.acmer.entity.Contest;
 import cn.edu.scau.acm.acmer.entity.PersonalContestProblemRecord;
 import cn.edu.scau.acm.acmer.entity.PersonalContestRecord;
+import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
 import cn.edu.scau.acm.acmer.model.PersonalContestRank;
 import cn.edu.scau.acm.acmer.repository.ContestProblemRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
@@ -42,14 +43,15 @@ public class ContestServiceImpl implements ContestService {
 
     @Override
     public void addPersonalContestRecord(String ojName, String cId, String password, String studentId, String account) throws Exception {
-        int contestId = addContest(ojName, cId, account, password);
+        BaseHttpClient httpClient = null;
+        int contestId = addContest(httpClient, ojName, cId, account, password);
         Optional<PersonalContestRecord> personalContestRecord = personalContestRecordRepository.findByContestIdAndStudentId(contestId, studentId);
         if(personalContestRecord.isPresent()) {
             throw new Exception("已经添加该竞赛");
         }
         switch (ojName) {
-            case "VJ": vjService.addPersonalContestRecord(contestId, studentId, account); break;
-            case "HDU": hduService.addPersonalContestRecord(contestId, studentId, account); break;
+            case "VJ": vjService.addPersonalContestRecord(httpClient, contestId, studentId, account); break;
+            case "HDU": hduService.addPersonalContestRecord(httpClient, contestId, studentId, account); break;
             case "CodeForces": break;
             case "计蒜客": break;
             case "牛客": break;
@@ -57,12 +59,13 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
-    public int addContest(String ojName, String cId, String username, String password) throws Exception {
+    public int addContest(BaseHttpClient httpClient, String ojName, String cId, String username, String password) throws Exception {
         Optional<Contest> contest = contestRepository.findByOjNameAndCId(ojName, cId);
+
         if(contest.isPresent()) return contest.get().getId();
         switch (ojName) {
-            case "VJ": vjService.addContest(cId, password); break;
-            case "HDU": hduService.addContest(cId, username, password); break;
+            case "VJ": vjService.addContest(httpClient, cId, password); break;
+            case "HDU": hduService.addContest(httpClient, cId, username, password); break;
             case "CodeForces": break;
             case "计蒜客": break;
             case "牛客": break;
@@ -74,7 +77,7 @@ public class ContestServiceImpl implements ContestService {
     @Override
     public List<PersonalContestRank> getPersonalContestRank(String studentId) {
         List<PersonalContestRank> personalContestRanks = new ArrayList<>();
-        List<PersonalContestRecord> personalContestRecords = personalContestRecordRepository.findAllByStudentId(studentId);
+        List<PersonalContestRecord> personalContestRecords = personalContestRecordRepository.findAllByStudentIdOrderByTimeDesc(studentId);
         for (PersonalContestRecord personalContestRecord : personalContestRecords) {
             int solved = 0;
             int penalty = 0;

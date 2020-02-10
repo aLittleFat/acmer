@@ -1,6 +1,7 @@
 package cn.edu.scau.acm.acmer.controller.api.unauth;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
+import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.ProblemAcRecordRepository;
@@ -45,7 +46,8 @@ public class TestController {
     @GetMapping("/addContest")
     MyResponseEntity<Void> addContest(String ojName, String cId, String username, String password) {
         try {
-            contestService.addContest(ojName, cId, username, password);
+            BaseHttpClient httpClient = null;
+            contestService.addContest(httpClient, ojName, cId, username, password);
             return new MyResponseEntity<>();
         } catch (Exception e) {
             return new MyResponseEntity<>(e.getMessage());

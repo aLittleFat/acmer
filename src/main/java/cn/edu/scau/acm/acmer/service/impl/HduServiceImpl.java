@@ -4,7 +4,7 @@ import cn.edu.scau.acm.acmer.entity.Contest;
 import cn.edu.scau.acm.acmer.entity.ContestProblem;
 import cn.edu.scau.acm.acmer.entity.OjAccount;
 import cn.edu.scau.acm.acmer.entity.Problem;
-import cn.edu.scau.acm.acmer.httpclient.HduClient;
+import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
 import cn.edu.scau.acm.acmer.repository.ContestProblemRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.OjAccountRepository;
@@ -132,18 +132,18 @@ public class HduServiceImpl implements HduService {
     }
 
     @Override
-    public void addContest(String cId, String username, String password) throws Exception {
-        HduClient hduClient = new HduClient();
+    public void addContest(BaseHttpClient httpClient, String cId, String username, String password) throws Exception {
+        httpClient = new BaseHttpClient();
         String url = "http://acm.hdu.edu.cn/contests/contest_show.php?cid=" + cId;
-        String html = hduClient.get(url);
+        String html = httpClient.get(url);
         String title = Jsoup.parse(html).title();
         if(title.equals("User Login")) {
             if(username.equals("") || password.equals("")) {
                 throw new Exception("该比赛需要登录");
             }
-            loginContest(hduClient, cId, username, password);
+            loginContest(httpClient, cId, username, password);
         }
-        html = hduClient.get(url);
+        html = httpClient.get(url);
         Element element = Jsoup.parse(html);
         Elements table = Jsoup.parse(html).selectFirst("tbody").select("tr");
         Contest contest = new Contest();
@@ -169,13 +169,13 @@ public class HduServiceImpl implements HduService {
     }
 
     @Override
-    public void loginContest(HduClient hduClient, String cId, String username, String password) throws Exception {
+    public void loginContest(BaseHttpClient httpClient, String cId, String username, String password) throws Exception {
         try {
             List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("username", username));
             params.add(new BasicNameValuePair("userpass", password));
             params.add(new BasicNameValuePair("login", "Sign In"));
-            String result = hduClient.post("http://acm.hdu.edu.cn/userloginex.php?action=login&cid=" + cId + "&notice=0", params);
+            String result = httpClient.post("http://acm.hdu.edu.cn/userloginex.php?action=login&cid=" + cId + "&notice=0", params);
             if(Jsoup.parse(result).title().equals("User Login")) {
                 throw new Exception("用户名或密码错误");
             }
@@ -185,7 +185,7 @@ public class HduServiceImpl implements HduService {
     }
 
     @Override
-    public void addPersonalContestRecord(int contestId, String studentId, String account) {
+    public void addPersonalContestRecord(BaseHttpClient httpClient, int contestId, String studentId, String account) {
 
     }
 }

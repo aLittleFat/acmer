@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 public interface PersonalContestRecordRepository extends JpaRepository<PersonalContestRecord, Integer> {
     Optional<PersonalContestRecord> findByContestIdAndStudentId(Integer contestId, String studentId);
-    List<PersonalContestRecord> findAllByStudentId(String studentId);
+    List<PersonalContestRecord> findAllByStudentIdOrderByTimeDesc(String studentId);
 }
