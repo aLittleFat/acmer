@@ -4,7 +4,7 @@ import cn.edu.scau.acm.acmer.entity.Contest;
 import cn.edu.scau.acm.acmer.entity.PersonalContestProblemRecord;
 import cn.edu.scau.acm.acmer.entity.PersonalContestRecord;
 import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
-import cn.edu.scau.acm.acmer.model.PersonalContestRank;
+import cn.edu.scau.acm.acmer.model.PersonalContestLine;
 import cn.edu.scau.acm.acmer.repository.ContestProblemRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.PersonalContestProblemRecordRepository;
@@ -75,15 +75,19 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
-    public List<PersonalContestRank> getPersonalContestRank(String studentId) {
-        List<PersonalContestRank> personalContestRanks = new ArrayList<>();
+    public List<PersonalContestLine> getPersonalContestByStudentId(String studentId) {
+        List<PersonalContestLine> personalContestLines = new ArrayList<>();
         List<PersonalContestRecord> personalContestRecords = personalContestRecordRepository.findAllByStudentIdOrderByTimeDesc(studentId);
         for (PersonalContestRecord personalContestRecord : personalContestRecords) {
+            Contest contest = contestRepository.findById(personalContestRecord.getContestId()).get();
+            if(contest.getEndTime().getTime() > System.currentTimeMillis()) continue;
             int solved = 0;
             int penalty = 0;
-            PersonalContestRank personalContestRank = new PersonalContestRank();
-            personalContestRank.setPersonalContestRecord(personalContestRecord);
-            personalContestRank.setContest(contestRepository.findById(personalContestRecord.getContestId()).get());
+            PersonalContestLine personalContestLine = new PersonalContestLine();
+            personalContestLine.setContestId(personalContestRecord.getContestId());
+            personalContestLine.setTitle(contest.getName());
+            personalContestLine.setTime(personalContestRecord.getTime());
+            personalContestLine.setProNum(contest.getProblemNumber());
             List<PersonalContestProblemRecord> personalContestProblemRecords = personalContestProblemRecordRepository.findAllByPersonalContestRecordId(personalContestRecord.getId());
             for(PersonalContestProblemRecord personalContestProblemRecord : personalContestProblemRecords) {
                 if(personalContestProblemRecord.getStatus().equals("Solved")) {
@@ -91,11 +95,11 @@ public class ContestServiceImpl implements ContestService {
                     penalty += personalContestProblemRecord.getAcTime();
                 }
             }
-            personalContestRank.setPersonalContestProblemRecords(personalContestProblemRecords);
-            personalContestRank.setSolved(solved);
-            personalContestRank.setPenalty(penalty);
-            personalContestRanks.add(personalContestRank);
+            personalContestLine.setPersonalContestProblemRecords(personalContestProblemRecords);
+            personalContestLine.setSolved(solved);
+            personalContestLine.setPenalty(penalty);
+            personalContestLines.add(personalContestLine);
         }
-        return personalContestRanks;
+        return personalContestLines;
     }
 }

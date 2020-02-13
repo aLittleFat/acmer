@@ -16,6 +16,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import java.io.File;
@@ -23,6 +25,9 @@ import java.io.IOException;
 import java.util.List;
 
 public class BaseHttpClient {
+
+	Logger log = LoggerFactory.getLogger(this.getClass());
+
 	HttpClientContext context = HttpClientContext.create();
 	
 	public static CloseableHttpClient createHttpClient() {
@@ -34,8 +39,8 @@ public class BaseHttpClient {
 			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
 			        sslContext, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectTimeout(20000).setConnectionRequestTimeout(2000)
-					.setSocketTimeout(5000).build();
+					.setConnectTimeout(2000).setConnectionRequestTimeout(2000)
+					.setSocketTimeout(10000).build();
 			httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).setDefaultRequestConfig(requestConfig).build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -45,43 +50,48 @@ public class BaseHttpClient {
 		return httpclient;
 	}
 	
-	public String get(String url) throws ProtocolException, IOException {
+	public String get(String url) throws Exception {
 		return get(url, "utf-8");
 	}
 
-	public String get(String url, String charset) throws ProtocolException, IOException {
+	public String get(String url, String charset) throws Exception {
 		CloseableHttpClient client = createHttpClient();
 		HttpGet httpGet = new HttpGet(url);
-		try {
-			CloseableHttpResponse response = client.execute(httpGet, context);
-			return getResponseContent(url, charset, response);
-		} finally {
+		int retry = 5;
+		while (retry > 0) {
 			try {
-				client.close();
-			} catch (IOException e) {
+				CloseableHttpResponse response = client.execute(httpGet, context);
+				return getResponseContent(url, charset, response);
+			} catch (IOException | ProtocolException e) {
 				e.printStackTrace();
+				retry--;
+				log.error("连接出错，第{}次重试，{}", 5-retry, e.getMessage());
 			}
 		}
+		client.close();
+		throw new Exception("连接服务器错误");
+
 	}
 
-	public String post(String url, List<NameValuePair> params) throws IOException, ProtocolException {
+	public String post(String url, List<NameValuePair> params) throws Exception {
 		return post(url, "utf-8", params);
 	}
 
-	public String post(String url, String charset, List<NameValuePair> params) throws IOException, ProtocolException {
+	public String post(String url, String charset, List<NameValuePair> params) throws Exception {
 		CloseableHttpClient client = createHttpClient();
 		HttpPost httpPost = new HttpPost(url);
-		try {
-			httpPost.setEntity(new UrlEncodedFormEntity(params));
-			CloseableHttpResponse response = client.execute(httpPost, context);
-			return getResponseContent(url, charset, response);
-		} finally {
+		int retry = 5;
+		while (retry > 0) {
 			try {
-				client.close();
+				httpPost.setEntity(new UrlEncodedFormEntity(params));
+				CloseableHttpResponse response = client.execute(httpPost, context);
+				return getResponseContent(url, charset, response);
 			} catch (IOException e) {
-				e.printStackTrace();
+				retry--;
+				log.error("连接出错，第{}次重试，{}", 5-retry, e.getMessage());
 			}
 		}
+		throw new Exception("连接服务器错误");
 	}
 
 	private String getResponseContent(String url, String charset, CloseableHttpResponse response) throws IOException, ProtocolException {
