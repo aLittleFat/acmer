@@ -1,4 +1,4 @@
-package cn.edu.scau.acm.acmer.controller.api.unauth;
+package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
 import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping(value = "api/unauth/test", produces = "application/json; charset=utf-8")
+@RequestMapping(value = "api/test", produces = "application/json; charset=utf-8")
 public class TestController {
 
     @Autowired

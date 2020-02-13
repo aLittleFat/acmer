@@ -138,10 +138,10 @@ public class ShiroConfig {
         chainDefinition.put("/auth/login", "anon");
         chainDefinition.put("/auth/logout", "authc[permissive]");
         chainDefinition.put("/image/**", "anon");
-        chainDefinition.put("/api/admin/**", "authc,anyRole[admin]"); //只允许admin角色的用户访问
-        chainDefinition.put("/api/student/**", "authc,anyRole[student]"); //只允许student角色的用户访问
-        chainDefinition.put("/api/common/**", "authc");
-        chainDefinition.put("/api/unauth/**", "anon");
+//        chainDefinition.put("/api/admin/**", "authc,anyRole[admin]"); //只允许admin角色的用户访问
+//        chainDefinition.put("/api/student/**", "authc,anyRole[student]"); //只允许student角色的用户访问
+//        chainDefinition.put("/api/common/**", "authc");
+//        chainDefinition.put("/api/unauth/**", "anon");
         chainDefinition.put("/article/list", "authc");
         chainDefinition.put("/article/*", "authc[permissive]");
         chainDefinition.put("/**", "anon");
@@ -174,13 +174,13 @@ public class ShiroConfig {
         return authorizationAttributeSourceAdvisor;
     }
 
-//    /**
-//     * 注册全局异常处理
-//     * @return
-//     */
-//    @Bean(name = "exceptionHandler")
-//    public HandlerExceptionResolver handlerExceptionResolver() {
-//        return new MyExceptionHandler();
-//    }
+    /**
+     * 注册全局异常处理
+     * @return
+     */
+    @Bean(name = "exceptionHandler")
+    public HandlerExceptionResolver handlerExceptionResolver() {
+        return new MyExceptionHandler();
+    }
 
 }

@@ -23,9 +23,9 @@ public interface ProblemAcRecordRepository extends JpaRepository<ProblemAcRecord
     @Transactional
     void deleteAllByOjAccountId(int ojAccountId);
 
-    @Query("select new cn.edu.scau.acm.acmer.model.AcProblem(problem, problemAcRecord) from ProblemAcRecord as problemAcRecord left join Problem as problem on problemAcRecord.problemId = problem.id where problemAcRecord.ojAccountId = :ojAccountId and problemAcRecord.time between :startTime and :endTime")
+    @Query(value = "select new cn.edu.scau.acm.acmer.model.AcProblem(problem, problemAcRecord) from ProblemAcRecord as problemAcRecord left join Problem as problem on problemAcRecord.problemId = problem.id where problemAcRecord.ojAccountId = :ojAccountId and problemAcRecord.time between :startTime and :endTime")
     List<AcProblem> findAcProblemByOjAccountIdAndTimeBetween(@Param("ojAccountId") int ojAccountId, @Param("startTime") Date startTime, @Param("endTime") Date endTime);
 
-    @Query("select count (distinct problem) from ProblemAcRecord as problemAcRecord left join Problem as problem on problemAcRecord.problemId=problem.id left join OjAccount as ojAccount on ojAccount.id=problemAcRecord.ojAccountId where ojAccount.studentId=:studentId")
+    @Query(value = "select count (distinct problem) from ProblemAcRecord as problemAcRecord left join Problem as problem on problemAcRecord.problemId=problem.id left join OjAccount as ojAccount on ojAccount.id=problemAcRecord.ojAccountId where ojAccount.studentId=:studentId")
     int countAllByStudentId(@Param("studentId") String studentId);
 }

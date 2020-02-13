@@ -18,13 +18,13 @@ public class MyExceptionHandler implements HandlerExceptionResolver {
         FastJsonJsonView view = new FastJsonJsonView();
         Map<String, Object> attributes = new HashMap<String, Object>();
         if (ex instanceof UnauthenticatedException) {
-            attributes.put("code", "1000001");
-            attributes.put("msg", "token错误");
+            attributes.put("status", "2");
+            attributes.put("msg", "未登录");
         } else if (ex instanceof UnauthorizedException) {
-            attributes.put("code", "1000002");
+            attributes.put("status", "3");
             attributes.put("msg", "用户无权限");
         } else {
-            attributes.put("code", "1000003");
+            attributes.put("code", "1");
             attributes.put("msg", ex.getMessage());
         }
 

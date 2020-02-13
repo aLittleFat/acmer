@@ -53,17 +53,13 @@ public class AuthController {
 
     @ApiOperation("注册")
     @PostMapping("/register")
-    public MyResponseEntity<Void> register(String email, String password, String phone, String name, String verifyCode, String grade, String studentId, String type){
-        try {
-            if (type.equals("教师")) {
-                accountService.registerUser(email, password, phone, name, verifyCode);
-            } else {
-                accountService.registerStudent(email, password, phone, name, verifyCode, Integer.parseInt(grade), studentId);
-            }
-            return new MyResponseEntity<>();
-        } catch (Exception e) {
-            return new MyResponseEntity<>(e.getMessage());
+    public MyResponseEntity<Void> register(String email, String password, String phone, String name, String verifyCode, String grade, String studentId, String type) throws Exception {
+        if (type.equals("教师")) {
+            accountService.registerUser(email, password, phone, name, verifyCode);
+        } else {
+            accountService.registerStudent(email, password, phone, name, verifyCode, Integer.parseInt(grade), studentId);
         }
+        return new MyResponseEntity<>();
     }
 
     @ApiOperation("注销")
@@ -76,35 +72,23 @@ public class AuthController {
 
     @ApiOperation("发送邮箱验证码到邮箱")
     @PostMapping("/sendVerifyEmailCode")
-    public MyResponseEntity<Void> sendVerifyEmailCode(String email) {
-        try {
-            accountService.sendVerifyEmail(email);
-            return new MyResponseEntity<>();
-        } catch (Exception e) {
-            return new MyResponseEntity<>(e.getMessage());
-        }
+    public MyResponseEntity<Void> sendVerifyEmailCode(String email) throws Exception {
+        accountService.sendVerifyEmail(email);
+        return new MyResponseEntity<>();
     }
 
     @ApiOperation("忘记密码的时候发送验证码到邮箱")
     @PostMapping("/sendForgetPasswordVerifyEmailCode")
-    public MyResponseEntity<Void> sendForgetPasswordVerifyEmailCode(String email){
-        try {
-            accountService.sendForgetPasswordVerifyEmail(email);
-            return new MyResponseEntity<>();
-        } catch (Exception e) {
-            return new MyResponseEntity<>(e.getMessage());
-        }
+    public MyResponseEntity<Void> sendForgetPasswordVerifyEmailCode(String email) throws Exception {
+        accountService.sendForgetPasswordVerifyEmail(email);
+        return new MyResponseEntity<>();
     }
 
     @ApiOperation("忘记密码的时候修改密码")
     @PostMapping(value = "/forgetPassword")
-    public MyResponseEntity<Void> forgetPassword(String email, String password, String verifyCode){
-        try {
-            accountService.forgetPassword(email, password, verifyCode);
-            return new MyResponseEntity<>();
-        } catch (Exception e) {
-            return new MyResponseEntity<>(e.getMessage());
-        }
+    public MyResponseEntity<Void> forgetPassword(String email, String password, String verifyCode) throws Exception {
+        accountService.forgetPassword(email, password, verifyCode);
+        return new MyResponseEntity<>();
     }
 
     @ApiOperation("权限不足时返回401")

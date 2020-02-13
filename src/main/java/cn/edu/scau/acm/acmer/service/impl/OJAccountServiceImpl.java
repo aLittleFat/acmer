@@ -13,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.beans.Transient;
 import java.util.Optional;
 
 @Service
@@ -95,27 +97,28 @@ public class OJAccountServiceImpl implements OJAccountService {
     }
 
     @Override
+    @Transactional
     public void deleteOjAccount(String ojName, int userId) throws Exception {
         Student stu = studentRepository.findByUserId(userId).get();
         Optional<OjAccount> ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
-        if (ojAccount.isEmpty()) {
-            throw new Exception("VJ账号不存在");
-        }
+        if (ojAccount.isEmpty()) throw new Exception("VJ账号不存在");
         problemAcRecordRepository.deleteAllByOjAccountId(ojAccount.get().getId());
         ojAccountRepository.delete(ojAccount.get());
     }
 
     @Override
+    @Transactional
     public void changeOjAccount(String ojName, String username, String password, int userId) throws Exception {
         Student stu = studentRepository.findByUserId(userId).get();
         Optional<OjAccount> ojAccount = ojAccountRepository.findByStudentIdAndOjName(stu.getId(), ojName);
-        if (!ojAccount.isPresent()) {
+        if (ojAccount.isEmpty()) {
             throw new Exception("目前不存在" + ojName + "账户");
         }
         if (ojAccount.get().getAccount().equals(username)) {
             throw new Exception("你修改的用户名和之前的一样，无需修改");
         }
         if (checkOjAccount(ojName, username, password)) {
+            problemAcRecordRepository.deleteAllByOjAccountId(ojAccount.get().getId());
             OjAccount newOjAccount = ojAccount.get();
             newOjAccount.setAccount(username);
             ojAccountRepository.save(newOjAccount);

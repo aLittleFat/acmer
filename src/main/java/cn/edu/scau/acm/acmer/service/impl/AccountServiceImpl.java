@@ -241,14 +241,14 @@ public class AccountServiceImpl implements AccountService {
     public void changePhoneAndIcpcEmail(String phone, String icpcEmail, int id) {
         User u = userRepository.findById(id).get();
         Student stu = studentRepository.findByUserId(id).get();
-        if (!phone.equals("")) {
+//        if (!phone.equals("")) {
             u.setPhone(phone);
             userRepository.save(u);
-        }
-        if (!icpcEmail.equals("")) {
+//        }
+//        if (!icpcEmail.equals("")) {
             stu.setIcpcEmail(icpcEmail);
             studentRepository.save(stu);
-        }
+//        }
     }
 
 }
