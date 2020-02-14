@@ -25,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -179,6 +180,7 @@ public class VjServiceImpl implements VjService {
     }
 
     @Override
+    @Transactional
     public void addContest(BaseHttpClient httpClient, String cId, String password) throws Exception {
         httpClient = new BaseHttpClient();
         login(httpClient);
@@ -234,11 +236,11 @@ public class VjServiceImpl implements VjService {
             log.info(jsonProblem.toJSONString());
             problemService.addProblem(jsonProblem.getString("oj"), jsonProblem.getString("probNum"));
             Problem problem = problemService.findProblem(jsonProblem.getString("oj"), jsonProblem.getString("probNum"));
-            Optional<ContestProblem> contestProblem = contestProblemRepository.findByContestIdAndIndex(contest.getId(), jsonProblem.getString("num"));
+            Optional<ContestProblem> contestProblem = contestProblemRepository.findByContestIdAndProblemIndex(contest.getId(), jsonProblem.getString("num"));
             if(contestProblem.isPresent()) continue;
             ContestProblem contestProblem1 = new ContestProblem();
             contestProblem1.setContestId(contest.getId());
-            contestProblem1.setIndex(jsonProblem.getString("num"));
+            contestProblem1.setProblemIndex(jsonProblem.getString("num"));
             contestProblem1.setProblemId(problem.getId());
             contestProblemRepository.save(contestProblem1);
         }
@@ -312,7 +314,7 @@ public class VjServiceImpl implements VjService {
             }
         }
 
-        List<ContestProblem> contestProblems = contestProblemRepository.findAllByContestIdOrderByIndexAsc(contest.getId());
+        List<ContestProblem> contestProblems = contestProblemRepository.findAllByContestIdOrderByProblemIndexAsc(contest.getId());
         List<ContestProblemRecord> contestProblemRecords = new ArrayList<>();
         for (ContestProblem contestProblem : contestProblems) {
             ContestProblemRecord contestProblemRecord = contestProblemRecordRepository.findByContestRecordIdAndContestProblemId(contestRecord.getId(), contestProblem.getId()).orElse(new ContestProblemRecord());

@@ -1,10 +1,10 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
-import cn.edu.scau.acm.acmer.model.PersonalContestLine;
 import cn.edu.scau.acm.acmer.model.UserDto;
 import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.service.ContestService;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +24,29 @@ public class ContestController {
     @Autowired
     private StudentRepository studentRepository;
 
+//    @GetMapping("personalContest")
+//    @RequiresRoles({"student"})
+//    MyResponseEntity<List<PersonalContestLine>> getMyContest(){
+//        int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
+//        String studentId = studentRepository.findByUserId(id).get().getId();
+//        return new MyResponseEntity<>(contestService.getPersonalContestByStudentId(studentId));
+//    }
     @GetMapping("personalContest")
     @RequiresRoles({"student"})
-    MyResponseEntity<List<PersonalContestLine>> getMyContest(){
+    MyResponseEntity<List<JSONObject>> getMyContest(){
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         String studentId = studentRepository.findByUserId(id).get().getId();
         return new MyResponseEntity<>(contestService.getPersonalContestByStudentId(studentId));
     }
 
+
+//    @GetMapping("personalContest/{studentId}")
+//    MyResponseEntity<List<PersonalContestLine>> getPersonalContestByStudentId(@PathVariable String studentId){
+//        return new MyResponseEntity<>(contestService.getPersonalContestByStudentId(studentId));
+//    }
+
     @GetMapping("personalContest/{studentId}")
-    MyResponseEntity<List<PersonalContestLine>> getPersonalContestByStudentId(@PathVariable String studentId){
+    MyResponseEntity<List<JSONObject>> getPersonalContestByStudentId(@PathVariable String studentId){
         return new MyResponseEntity<>(contestService.getPersonalContestByStudentId(studentId));
     }
 }

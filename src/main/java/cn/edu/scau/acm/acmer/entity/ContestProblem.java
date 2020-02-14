@@ -5,16 +5,17 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "contest_problem", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"index", "contest_id"})
+        @UniqueConstraint(name = "uni", columnNames = {"problem_index", "contest_id"})
 })
 public class ContestProblem {
     private int id;
-    private String index;
+    private String problemIndex;
     private Integer contestId;
     private Integer problemId;
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
     }
@@ -24,13 +25,13 @@ public class ContestProblem {
     }
 
     @Basic
-    @Column(name = "index")
-    public String getIndex() {
-        return index;
+    @Column(name = "problem_index")
+    public String getProblemIndex() {
+        return problemIndex;
     }
 
-    public void setIndex(String index) {
-        this.index = index;
+    public void setProblemIndex(String problemIndex) {
+        this.problemIndex = problemIndex;
     }
 
     @Basic
@@ -59,13 +60,13 @@ public class ContestProblem {
         if (o == null || getClass() != o.getClass()) return false;
         ContestProblem that = (ContestProblem) o;
         return id == that.id &&
-                Objects.equals(index, that.index) &&
+                Objects.equals(problemIndex, that.problemIndex) &&
                 Objects.equals(contestId, that.contestId) &&
                 Objects.equals(problemId, that.problemId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, index, contestId, problemId);
+        return Objects.hash(id, problemIndex, contestId, problemId);
     }
 }

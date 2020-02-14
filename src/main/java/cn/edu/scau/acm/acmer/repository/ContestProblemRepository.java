@@ -9,6 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface ContestProblemRepository extends JpaRepository<ContestProblem, Integer> {
-    List<ContestProblem> findAllByContestIdOrderByIndexAsc(int contestId);
-    Optional<ContestProblem> findByContestIdAndIndex(Integer contestId, String index);
+    List<ContestProblem> findAllByContestIdOrderByProblemIndexAsc(int contestId);
+    Optional<ContestProblem> findByContestIdAndProblemIndex(Integer contestId, String index);
 }

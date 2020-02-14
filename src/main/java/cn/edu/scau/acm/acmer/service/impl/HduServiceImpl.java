@@ -163,7 +163,7 @@ public class HduServiceImpl implements HduService {
             Element line = table.get(i);
             ContestProblem contestProblem = new ContestProblem();
             contestProblem.setContestId(contest.getId());
-            contestProblem.setIndex(line.select("td").get(1).text());
+            contestProblem.setProblemIndex(line.select("td").get(1).text());
             contestProblemRepository.save(contestProblem);
         }
     }
