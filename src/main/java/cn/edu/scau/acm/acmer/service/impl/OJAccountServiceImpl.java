@@ -3,7 +3,6 @@ package cn.edu.scau.acm.acmer.service.impl;
 import cn.edu.scau.acm.acmer.entity.OjAccount;
 import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.entity.User;
-import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.repository.OjAccountRepository;
 import cn.edu.scau.acm.acmer.repository.ProblemAcRecordRepository;
 import cn.edu.scau.acm.acmer.repository.StudentRepository;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.beans.Transient;
 import java.util.Optional;
 
 @Service

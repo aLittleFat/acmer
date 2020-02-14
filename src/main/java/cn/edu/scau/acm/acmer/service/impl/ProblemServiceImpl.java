@@ -6,14 +6,12 @@ import cn.edu.scau.acm.acmer.entity.ProblemAcRecord;
 import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.model.AcProblem;
 import cn.edu.scau.acm.acmer.model.AcProblemInDay;
-import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.PersonalProblemAcRank;
 import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -73,48 +71,42 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public AcProblemInDay getProblemAcRecordInDay(List<OjAccount> ojAccounts, List<OjAccount> exOjAccounts, Date startTime, Date endTime) {
+    public AcProblemInDay getProblemAcRecordInDay(List<Integer> ojAccounts, List<Integer> exOjAccounts, Date startTime, Date endTime) {
         AcProblemInDay acProblemInDay = new AcProblemInDay();
         acProblemInDay.setTime(new SimpleDateFormat("yyyy-MM-dd").format(startTime));
         log.info(acProblemInDay.getTime());
-
-        for(OjAccount ojAccount : ojAccounts) {
-            List<AcProblem> acProblems = problemAcRecordRepository.findAcProblemByOjAccountIdAndTimeBetween(ojAccount.getId(), startTime, endTime);
-            for(AcProblem acProblem: acProblems) {
-                boolean add = true;
-
-                for(OjAccount exOjAccount : exOjAccounts) {
-                    if(problemAcRecordRepository.findProblemACRecordByOjAccountIdAndProblemId(exOjAccount.getId(), acProblem.getProblem().getId()).isPresent()) {
-                        add = false;
-                        break;
-                    }
-                }
-
-                if(add) {
-                    acProblemInDay.getAcProblems().add(acProblem);
-                }
-            }
-        }
-
+        acProblemInDay.setAcProblems(problemAcRecordRepository.findAcProblemByOjAccountsAndTimeBetweenAndExceptByOjAccounts(ojAccounts, startTime, endTime, exOjAccounts));
         return acProblemInDay;
     }
 
     @Override
     public List<AcProblemInDay> getProblemAcRecordSeveralDays(String studentId, Date time, int days, String exStudentId) {
         List<OjAccount> ojAccounts = ojAccountRepository.findAllByStudentId(studentId);
+        List<Integer> ojAccountIds = new ArrayList<>();
+        List<Integer> exOjAccountIds = new ArrayList<>();
+        for(OjAccount ojAccount : ojAccounts) {
+            ojAccountIds.add(ojAccount.getId());
+        }
         List<OjAccount> exOjAccounts = new ArrayList<>();
         if (exStudentId != null) {
             exOjAccounts = ojAccountRepository.findAllByStudentId(exStudentId);
         }
+        for(OjAccount ojAccount : exOjAccounts) {
+            exOjAccountIds.add(ojAccount.getId());
+        }
         List<AcProblemInDay> acProblemInDays = new ArrayList<>();
+        if(ojAccountIds.size() == 0) return acProblemInDays;
+        if(exOjAccountIds.size() == 0) {
+            exOjAccountIds.add(0);
+        }
         while (days > 0) {
-            Date preTime = new Date(0);
-            for (OjAccount ojAccount : ojAccounts) {
-                Optional<ProblemAcRecord> problemACRecord = problemAcRecordRepository.findFirstByOjAccountIdAndTimeBeforeOrderByTimeDesc(ojAccount.getId(), time);
-                if (problemACRecord.isPresent() && problemACRecord.get().getTime().after(preTime)) {
-                    preTime = problemACRecord.get().getTime();
-                }
+            Date preTime;
+            try {
+                preTime = problemAcRecordRepository.findFirstByStudentIdAndTimeBeforeOrderByTimeDescAndStudentIdNotEquals(ojAccountIds, time, exOjAccountIds).get(0).getTime();
+            } catch (Exception e) {
+                return acProblemInDays;
             }
+            log.info(String.valueOf(preTime));
             preTime.setHours(0);
             preTime.setMinutes(0);
             preTime.setSeconds(0);
@@ -122,7 +114,7 @@ public class ProblemServiceImpl implements ProblemService {
             calendar.setTime(preTime);
             calendar.add(Calendar.DAY_OF_MONTH, 1);
             time = calendar.getTime();
-            AcProblemInDay acProblemInDay = getProblemAcRecordInDay(ojAccounts, exOjAccounts, preTime, time);
+            AcProblemInDay acProblemInDay = getProblemAcRecordInDay(ojAccountIds, exOjAccountIds, preTime, time);
             if (acProblemInDay.getAcProblems().size() > 0) {
                 days--;
                 acProblemInDays.add(acProblemInDay);

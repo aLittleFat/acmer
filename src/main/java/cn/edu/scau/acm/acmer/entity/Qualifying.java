@@ -4,18 +4,15 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Qualifying", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"SeasonID", "ContestID"})
-})
 public class Qualifying {
     private int id;
-    private String name;
+    private String title;
     private Double proportion;
     private Integer seasonId;
     private Integer contestId;
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
@@ -26,17 +23,17 @@ public class Qualifying {
     }
 
     @Basic
-    @Column(name = "Name")
-    public String getName() {
-        return name;
+    @Column(name = "title")
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     @Basic
-    @Column(name = "Proportion")
+    @Column(name = "proportion")
     public Double getProportion() {
         return proportion;
     }
@@ -46,7 +43,7 @@ public class Qualifying {
     }
 
     @Basic
-    @Column(name = "SeasonID")
+    @Column(name = "season_id")
     public Integer getSeasonId() {
         return seasonId;
     }
@@ -56,7 +53,7 @@ public class Qualifying {
     }
 
     @Basic
-    @Column(name = "ContestID")
+    @Column(name = "contest_id")
     public Integer getContestId() {
         return contestId;
     }
@@ -71,7 +68,7 @@ public class Qualifying {
         if (o == null || getClass() != o.getClass()) return false;
         Qualifying that = (Qualifying) o;
         return id == that.id &&
-                Objects.equals(name, that.name) &&
+                Objects.equals(title, that.title) &&
                 Objects.equals(proportion, that.proportion) &&
                 Objects.equals(seasonId, that.seasonId) &&
                 Objects.equals(contestId, that.contestId);
@@ -79,6 +76,6 @@ public class Qualifying {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, proportion, seasonId, contestId);
+        return Objects.hash(id, title, proportion, seasonId, contestId);
     }
 }

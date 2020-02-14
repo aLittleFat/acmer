@@ -4,13 +4,13 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "problem_tag", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"student_id", "problem_id", "tag_name"})
+@Table(name = "training_plan_participant", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"student_id", "traning_plan_id", "student_id"})
 })
-public class ProblemTag {
+public class TrainingPlanParticipant {
     private int id;
-    private String tagName;
-    private Integer problemId;
+    private Integer traningPlanId;
+    private Integer teamId;
     private String studentId;
 
     @Id
@@ -25,23 +25,23 @@ public class ProblemTag {
     }
 
     @Basic
-    @Column(name = "tag_name")
-    public String getTagName() {
-        return tagName;
+    @Column(name = "traning_plan_id")
+    public Integer getTraningPlanId() {
+        return traningPlanId;
     }
 
-    public void setTagName(String tagName) {
-        this.tagName = tagName;
+    public void setTraningPlanId(Integer traningPlanId) {
+        this.traningPlanId = traningPlanId;
     }
 
     @Basic
-    @Column(name = "problem_id")
-    public Integer getProblemId() {
-        return problemId;
+    @Column(name = "team_id")
+    public Integer getTeamId() {
+        return teamId;
     }
 
-    public void setProblemId(Integer problemId) {
-        this.problemId = problemId;
+    public void setTeamId(Integer teamId) {
+        this.teamId = teamId;
     }
 
     @Basic
@@ -58,15 +58,15 @@ public class ProblemTag {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ProblemTag that = (ProblemTag) o;
+        TrainingPlanParticipant that = (TrainingPlanParticipant) o;
         return id == that.id &&
-                Objects.equals(tagName, that.tagName) &&
-                Objects.equals(problemId, that.problemId) &&
+                Objects.equals(traningPlanId, that.traningPlanId) &&
+                Objects.equals(teamId, that.teamId) &&
                 Objects.equals(studentId, that.studentId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, tagName, problemId, studentId);
+        return Objects.hash(id, traningPlanId, teamId, studentId);
     }
 }

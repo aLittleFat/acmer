@@ -66,7 +66,7 @@ public class TestController {
 
     @GetMapping("showContest")
     MyResponseEntity<Contest> showContest(String ojName, String ojId) {
-        return new MyResponseEntity(contestRepository.findByOjNameAndCId(ojName, ojId));
+        return new MyResponseEntity(contestRepository.findByOjNameAndCid(ojName, ojId));
     }
 
     @GetMapping("/testSele")

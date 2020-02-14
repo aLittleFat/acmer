@@ -14,8 +14,8 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String Email);
 
-    @Query(value = "select new cn.edu.scau.acm.acmer.model.User_Student(user, student) from User as user left join Student as student on user.id = student.userId where user.verify = 0",
-        countQuery = "select count(user) from User as user where user.verify = 0")
+    @Query(value = "select new cn.edu.scau.acm.acmer.model.User_Student(user, student) from User as user left join Student as student on user.id = student.userId where user.verified = 0",
+        countQuery = "select count(user) from User as user where user.verified = 0")
     Page<User_Student> findAllUnVerify(Pageable pageable);
 
 

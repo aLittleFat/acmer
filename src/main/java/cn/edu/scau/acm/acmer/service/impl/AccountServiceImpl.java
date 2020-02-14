@@ -2,7 +2,6 @@ package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.entity.User;
-import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.User_Student;
 import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
@@ -61,10 +60,10 @@ public class AccountServiceImpl implements AccountService {
         u.setName(name);
         u.setIsAdmin((byte) 1);
         if(userRepository.count() == 0){
-            u.setVerify((byte) 1);
+            u.setVerified((byte) 1);
         }
         else {
-            u.setVerify((byte) 0);
+            u.setVerified((byte) 0);
         }
         userRepository.save(u);
     }
@@ -93,10 +92,10 @@ public class AccountServiceImpl implements AccountService {
             u.setIsAdmin((byte) 0);
         }
         if(userRepository.count() == 0){
-            u.setVerify((byte) 1);
+            u.setVerified((byte) 1);
         }
         else {
-            u.setVerify((byte) 0);
+            u.setVerified((byte) 0);
         }
         if(studentRepository.findById(stuId).isPresent()){
             throw new Exception("该学号已被注册");
@@ -112,14 +111,14 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean isVerify(String email) {
-        return userRepository.findByEmail(email).get().getVerify() == (byte)1;
+        return userRepository.findByEmail(email).get().getVerified() == (byte)1;
     }
 
     @Override
     public void verifyAccount(int id) throws Exception {
         try {
             User u = userRepository.findById(id).get();
-            u.setVerify((byte) 1);
+            u.setVerified((byte) 1);
             userRepository.save(u);
             mailService.sendTextMail(u.getEmail(), "ACMER账号审核通过", "你在ACMER网站注册的账号 " + u.getEmail() + " 已通过审核，请尽快登录并完善个人信息");
         } catch (Exception e) {
@@ -193,7 +192,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public String genVerifyCode() {
-        StringBuffer code = new StringBuffer();
+        StringBuilder code = new StringBuilder();
         Random rand = new Random();
         for(int i = 0; i < 6; ++i){
             code.append(rand.nextInt(10));
@@ -205,11 +204,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void forgetPassword(String email, String password, String verifyCode) throws Exception {
         Optional<User> u = userRepository.findByEmail(email);
-        if(!u.isPresent()){
+        if(u.isEmpty()){
             throw new Exception("该邮箱不存在");
         }
         String verifyStatus = verifyForgetPasswordEmail(email, verifyCode);
-        if(verifyStatus != "true"){
+        if(!verifyStatus.equals("true")){
             throw new Exception(verifyStatus);
         }
         User user = u.get();

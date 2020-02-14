@@ -9,7 +9,7 @@ public class TeamStudentPK implements Serializable {
     private int teamId;
     private String studentId;
 
-    @Column(name = "TeamID")
+    @Column(name = "team_id")
     @Id
     public int getTeamId() {
         return teamId;
@@ -19,7 +19,7 @@ public class TeamStudentPK implements Serializable {
         this.teamId = teamId;
     }
 
-    @Column(name = "StudentID")
+    @Column(name = "student_id")
     @Id
     public String getStudentId() {
         return studentId;

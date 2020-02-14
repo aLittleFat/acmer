@@ -1,14 +1,14 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
-import cn.edu.scau.acm.acmer.entity.PersonalContestProblemRecord;
-import cn.edu.scau.acm.acmer.entity.PersonalContestRecord;
+import cn.edu.scau.acm.acmer.entity.ContestProblemRecord;
+import cn.edu.scau.acm.acmer.entity.ContestRecord;
 import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
 import cn.edu.scau.acm.acmer.model.PersonalContestLine;
+import cn.edu.scau.acm.acmer.repository.ContestProblemRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestProblemRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
-import cn.edu.scau.acm.acmer.repository.PersonalContestProblemRecordRepository;
-import cn.edu.scau.acm.acmer.repository.PersonalContestRecordRepository;
+import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.service.ContestService;
 import cn.edu.scau.acm.acmer.service.HduService;
 import cn.edu.scau.acm.acmer.service.VjService;
@@ -35,17 +35,17 @@ public class ContestServiceImpl implements ContestService {
     private ContestProblemRepository contestProblemRepository;
 
     @Autowired
-    private PersonalContestRecordRepository personalContestRecordRepository;
+    private ContestRecordRepository contestRecordRepository;
 
     @Autowired
-    private PersonalContestProblemRecordRepository personalContestProblemRecordRepository;
+    private ContestProblemRecordRepository contestProblemRecordRepository;
 
 
     @Override
     public void addPersonalContestRecord(String ojName, String cId, String password, String studentId, String account) throws Exception {
         BaseHttpClient httpClient = null;
         int contestId = addContest(httpClient, ojName, cId, account, password);
-        Optional<PersonalContestRecord> personalContestRecord = personalContestRecordRepository.findByContestIdAndStudentId(contestId, studentId);
+        Optional<ContestRecord> personalContestRecord = contestRecordRepository.findByContestIdAndStudentId(contestId, studentId);
         if(personalContestRecord.isPresent()) {
             throw new Exception("已经添加该竞赛");
         }
@@ -60,7 +60,7 @@ public class ContestServiceImpl implements ContestService {
 
     @Override
     public int addContest(BaseHttpClient httpClient, String ojName, String cId, String username, String password) throws Exception {
-        Optional<Contest> contest = contestRepository.findByOjNameAndCId(ojName, cId);
+        Optional<Contest> contest = contestRepository.findByOjNameAndCid(ojName, cId);
 
         if(contest.isPresent()) return contest.get().getId();
         switch (ojName) {
@@ -71,31 +71,31 @@ public class ContestServiceImpl implements ContestService {
             case "牛客": break;
             default: throw new Exception("不存在的OJ名");
         }
-        return contestRepository.findByOjNameAndCId(ojName, cId).get().getId();
+        return contestRepository.findByOjNameAndCid(ojName, cId).get().getId();
     }
 
     @Override
     public List<PersonalContestLine> getPersonalContestByStudentId(String studentId) {
         List<PersonalContestLine> personalContestLines = new ArrayList<>();
-        List<PersonalContestRecord> personalContestRecords = personalContestRecordRepository.findAllByStudentIdOrderByTimeDesc(studentId);
-        for (PersonalContestRecord personalContestRecord : personalContestRecords) {
+        List<ContestRecord> personalContestRecords = contestRecordRepository.findAllByStudentIdOrderByTimeDesc(studentId);
+        for (ContestRecord personalContestRecord : personalContestRecords) {
             Contest contest = contestRepository.findById(personalContestRecord.getContestId()).get();
             if(contest.getEndTime().getTime() > System.currentTimeMillis()) continue;
             int solved = 0;
             int penalty = 0;
             PersonalContestLine personalContestLine = new PersonalContestLine();
             personalContestLine.setContestId(personalContestRecord.getContestId());
-            personalContestLine.setTitle(contest.getName());
+            personalContestLine.setTitle(contest.getTitle());
             personalContestLine.setTime(personalContestRecord.getTime());
             personalContestLine.setProNum(contest.getProblemNumber());
-            List<PersonalContestProblemRecord> personalContestProblemRecords = personalContestProblemRecordRepository.findAllByPersonalContestRecordId(personalContestRecord.getId());
-            for(PersonalContestProblemRecord personalContestProblemRecord : personalContestProblemRecords) {
+            List<ContestProblemRecord> personalContestProblemRecords = contestProblemRecordRepository.findAllByContestRecordId(personalContestRecord.getId());
+            for(ContestProblemRecord personalContestProblemRecord : personalContestProblemRecords) {
                 if(personalContestProblemRecord.getStatus().equals("Solved")) {
                     solved++;
-                    penalty += personalContestProblemRecord.getAcTime();
+                    penalty += personalContestProblemRecord.getPenalty();
                 }
             }
-            personalContestLine.setPersonalContestProblemRecords(personalContestProblemRecords);
+            personalContestLine.setContestProblemRecords(personalContestProblemRecords);
             personalContestLine.setSolved(solved);
             personalContestLine.setPenalty(penalty);
             personalContestLines.add(personalContestLine);

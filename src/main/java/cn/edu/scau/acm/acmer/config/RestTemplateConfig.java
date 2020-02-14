@@ -32,7 +32,7 @@ public class RestTemplateConfig {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setReadTimeout(30000);// ms
         factory.setConnectTimeout(30000);// ms
-        factory.setProxy(new java.net.Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8888)));
+//        factory.setProxy(new java.net.Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8888)));
         return factory;
     }
 

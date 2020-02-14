@@ -12,7 +12,7 @@ public class Season {
     private Integer year;
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
@@ -23,7 +23,7 @@ public class Season {
     }
 
     @Basic
-    @Column(name = "Name")
+    @Column(name = "name")
     public String getName() {
         return name;
     }
@@ -33,7 +33,7 @@ public class Season {
     }
 
     @Basic
-    @Column(name = "Type")
+    @Column(name = "type")
     public String getType() {
         return type;
     }
@@ -43,7 +43,7 @@ public class Season {
     }
 
     @Basic
-    @Column(name = "CFProportion")
+    @Column(name = "cf_proportion")
     public Double getCfProportion() {
         return cfProportion;
     }
@@ -53,7 +53,7 @@ public class Season {
     }
 
     @Basic
-    @Column(name = "Year")
+    @Column(name = "year")
     public Integer getYear() {
         return year;
     }

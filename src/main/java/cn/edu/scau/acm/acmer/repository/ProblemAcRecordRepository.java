@@ -19,6 +19,12 @@ public interface ProblemAcRecordRepository extends JpaRepository<ProblemAcRecord
     List<ProblemAcRecord> findAllByOjAccountIdAndTimeBetween(int ojAccountId, Date startTime, Date endTime);
     Optional<ProblemAcRecord> findFirstByOjAccountIdAndTimeBeforeOrderByTimeDesc(int ojAccountId, Date time);
 
+    @Query(value = "select problemAcRecord from ProblemAcRecord as problemAcRecord where problemAcRecord.ojAccountId in :ojAccounts and problemAcRecord.time < :time and problemAcRecord.id not in (select problemAcRecord1.id from problemAcRecord as problemAcRecord1 where problemAcRecord1.ojAccountId in :exOjAccounts) order by problemAcRecord.time desc")
+    List<ProblemAcRecord> findFirstByStudentIdAndTimeBeforeOrderByTimeDescAndStudentIdNotEquals(@Param("ojAccounts") List<Integer> ojAccounts, @Param("time") Date time, @Param("exOjAccounts") List<Integer> exOjAccounts);
+
+    @Query(value = "select new cn.edu.scau.acm.acmer.model.AcProblem(problem, problemAcRecord) from ProblemAcRecord as problemAcRecord left join Problem as problem on problemAcRecord.problemId = problem.id where problemAcRecord.ojAccountId in :ojAccounts and problemAcRecord.time between :startTime and :endTime and problemAcRecord.ojAccountId not in :exOjAccounts")
+    List<AcProblem> findAcProblemByOjAccountsAndTimeBetweenAndExceptByOjAccounts(@Param("ojAccounts") List<Integer> ojAccounts, @Param("startTime") Date startTime, @Param("endTime") Date endTime, @Param("exOjAccounts") List<Integer> exOjAccounts);
+
     @Modifying
     @Transactional
     void deleteAllByOjAccountId(int ojAccountId);

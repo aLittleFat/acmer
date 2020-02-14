@@ -12,7 +12,7 @@ public class Tag {
     private String parent;
 
     @Id
-    @Column(name = "Name")
+    @Column(name = "name")
     public String getName() {
         return name;
     }
@@ -22,7 +22,7 @@ public class Tag {
     }
 
     @Basic
-    @Column(name = "Parent")
+    @Column(name = "parent")
     public String getParent() {
         return parent;
     }

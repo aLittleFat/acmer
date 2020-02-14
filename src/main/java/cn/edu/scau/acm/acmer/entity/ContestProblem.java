@@ -4,18 +4,17 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "ContestProblem", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"ContestID", "IDinContest"})
+@Table(name = "contest_problem", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"index", "contest_id"})
 })
 public class ContestProblem {
     private int id;
-    private String iDinContest;
+    private String index;
     private Integer contestId;
     private Integer problemId;
 
     @Id
-    @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     public int getId() {
         return id;
     }
@@ -25,17 +24,17 @@ public class ContestProblem {
     }
 
     @Basic
-    @Column(name = "IDinContest")
-    public String getIDinContest() {
-        return iDinContest;
+    @Column(name = "index")
+    public String getIndex() {
+        return index;
     }
 
-    public void setIDinContest(String iDinContest) {
-        this.iDinContest = iDinContest;
+    public void setIndex(String index) {
+        this.index = index;
     }
 
     @Basic
-    @Column(name = "ContestID")
+    @Column(name = "contest_id")
     public Integer getContestId() {
         return contestId;
     }
@@ -45,7 +44,7 @@ public class ContestProblem {
     }
 
     @Basic
-    @Column(name = "ProblemID")
+    @Column(name = "problem_id")
     public Integer getProblemId() {
         return problemId;
     }
@@ -60,13 +59,13 @@ public class ContestProblem {
         if (o == null || getClass() != o.getClass()) return false;
         ContestProblem that = (ContestProblem) o;
         return id == that.id &&
-                Objects.equals(iDinContest, that.iDinContest) &&
+                Objects.equals(index, that.index) &&
                 Objects.equals(contestId, that.contestId) &&
                 Objects.equals(problemId, that.problemId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, iDinContest, contestId, problemId);
+        return Objects.hash(id, index, contestId, problemId);
     }
 }

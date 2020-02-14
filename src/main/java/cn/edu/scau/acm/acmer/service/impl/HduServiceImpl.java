@@ -148,8 +148,8 @@ public class HduServiceImpl implements HduService {
         Elements table = Jsoup.parse(html).selectFirst("tbody").select("tr");
         Contest contest = new Contest();
         contest.setOjName("HDU");
-        contest.setCId(cId);
-        contest.setName(element.selectFirst("h1").text());
+        contest.setCid(cId);
+        contest.setTitle(element.selectFirst("h1").text());
         String time = element.selectFirst("div:contains(Start Time)").child(1).text();
         String startTime = time.substring(time.indexOf(':') + 2,time.indexOf('E')-1);
         time = time.substring(time.indexOf("End Time"));
@@ -158,12 +158,12 @@ public class HduServiceImpl implements HduService {
         contest.setEndTime(Timestamp.valueOf(endTime));
         contest.setProblemNumber(table.size()-1);
         contestRepository.save(contest);
-        contest = contestRepository.findByOjNameAndCId("HDU", cId).get();
+        contest = contestRepository.findByOjNameAndCid("HDU", cId).get();
         for (int i = 1; i < table.size(); ++i) {
             Element line = table.get(i);
             ContestProblem contestProblem = new ContestProblem();
             contestProblem.setContestId(contest.getId());
-            contestProblem.setIDinContest(line.select("td").get(1).text());
+            contestProblem.setIndex(line.select("td").get(1).text());
             contestProblemRepository.save(contestProblem);
         }
     }

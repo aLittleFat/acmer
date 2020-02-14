@@ -6,21 +6,21 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "Contest", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"OjName", "CID"})
+        @UniqueConstraint(name = "uni", columnNames = {"oj_name", "cid"})
 })
 public class Contest {
     private int id;
     private Timestamp startTime;
     private Timestamp endTime;
-    private String cId;
-    private String name;
-    private String username;
+    private String cid;
+    private String title;
     private String password;
     private String ojName;
-    private int problemNumber;
+    private String username;
+    private Integer problemNumber;
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
@@ -31,7 +31,7 @@ public class Contest {
     }
 
     @Basic
-    @Column(name = "StartTime")
+    @Column(name = "start_time")
     public Timestamp getStartTime() {
         return startTime;
     }
@@ -41,7 +41,7 @@ public class Contest {
     }
 
     @Basic
-    @Column(name = "EndTime")
+    @Column(name = "end_time")
     public Timestamp getEndTime() {
         return endTime;
     }
@@ -51,33 +51,27 @@ public class Contest {
     }
 
     @Basic
-    @Column(name = "CID")
-    public String getCId() {
-        return cId;
+    @Column(name = "cid")
+    public String getCid() {
+        return cid;
     }
 
-    public void setCId(String cId) {
-        this.cId = cId;
-    }
-
-    @Basic
-    @Column(name = "Name")
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setCid(String cid) {
+        this.cid = cid;
     }
 
     @Basic
-    @Column(name = "Username")
-    public String getUsername() { return username; }
+    @Column(name = "title")
+    public String getTitle() {
+        return title;
+    }
 
-    public void setUsername(String username) { this.username = username; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     @Basic
-    @Column(name = "Password")
+    @Column(name = "password")
     public String getPassword() {
         return password;
     }
@@ -87,7 +81,7 @@ public class Contest {
     }
 
     @Basic
-    @Column(name = "OJName")
+    @Column(name = "oj_name")
     public String getOjName() {
         return ojName;
     }
@@ -97,12 +91,22 @@ public class Contest {
     }
 
     @Basic
-    @Column(name = "ProblemNumber")
-    public int getProblemNumber() {
+    @Column(name = "username")
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @Basic
+    @Column(name = "problem_number")
+    public Integer getProblemNumber() {
         return problemNumber;
     }
 
-    public void setProblemNumber(int problemNumber) {
+    public void setProblemNumber(Integer problemNumber) {
         this.problemNumber = problemNumber;
     }
 
@@ -114,16 +118,16 @@ public class Contest {
         return id == contest.id &&
                 Objects.equals(startTime, contest.startTime) &&
                 Objects.equals(endTime, contest.endTime) &&
-                Objects.equals(cId, contest.cId) &&
-                Objects.equals(name, contest.name) &&
-                Objects.equals(username, contest.username) &&
+                Objects.equals(cid, contest.cid) &&
+                Objects.equals(title, contest.title) &&
                 Objects.equals(password, contest.password) &&
                 Objects.equals(ojName, contest.ojName) &&
-                problemNumber == contest.problemNumber;
+                Objects.equals(username, contest.username) &&
+                Objects.equals(problemNumber, contest.problemNumber);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startTime, endTime, cId, name, username, password, ojName, problemNumber);
+        return Objects.hash(id, startTime, endTime, cid, title, password, ojName, username, problemNumber);
     }
 }

@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserInfo(String userName) {
         UserDto user = new UserDto();
         Optional<User> u = userRepository.findByEmail(userName);
-        if(!u.isPresent()) return null;
+        if(u.isEmpty()) return null;
         user.setUserId(u.get().getId());
         user.setUsername(u.get().getEmail());
         user.setEncryptPwd(u.get().getPassword());

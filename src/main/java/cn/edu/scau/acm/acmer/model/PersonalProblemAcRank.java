@@ -1,7 +1,7 @@
 package cn.edu.scau.acm.acmer.model;
 
 import cn.edu.scau.acm.acmer.entity.Student;
-import cn.edu.scau.acm.acmer.entity.TeamAward;
+import cn.edu.scau.acm.acmer.entity.Award;
 import cn.edu.scau.acm.acmer.entity.User;
 
 import java.util.ArrayList;
@@ -11,10 +11,10 @@ public class PersonalProblemAcRank implements Comparable<PersonalProblemAcRank> 
     private User user;
     private Student student;
     private int acNum;
-    private List<TeamAward> teamAwards;
+    private List<Award> awards;
 
     public PersonalProblemAcRank() {
-        teamAwards = new ArrayList<>();
+        awards = new ArrayList<>();
     }
 
     public Student getStudent() {
@@ -25,8 +25,8 @@ public class PersonalProblemAcRank implements Comparable<PersonalProblemAcRank> 
         return acNum;
     }
 
-    public List<TeamAward> getTeamAwards() {
-        return teamAwards;
+    public List<Award> getAwards() {
+        return awards;
     }
 
     public void setStudent(Student student) {
@@ -37,8 +37,8 @@ public class PersonalProblemAcRank implements Comparable<PersonalProblemAcRank> 
         this.acNum = acNum;
     }
 
-    public void setTeamAwards(List<TeamAward> teamAwards) {
-        this.teamAwards = teamAwards;
+    public void setAwards(List<Award> awards) {
+        this.awards = awards;
     }
 
     public User getUser() {

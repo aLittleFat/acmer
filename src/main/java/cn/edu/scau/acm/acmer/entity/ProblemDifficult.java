@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 @Entity
-@Table(name = "ProblemDifficult", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"StudentID", "ProblemID"})
+@Table(name = "problem_difficult", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"student_id", "problem_id"})
 })
 public class ProblemDifficult {
     private int id;
@@ -15,7 +15,7 @@ public class ProblemDifficult {
     private Integer problemId;
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
@@ -26,7 +26,7 @@ public class ProblemDifficult {
     }
 
     @Basic
-    @Column(name = "Difficult")
+    @Column(name = "difficult")
     public BigDecimal getDifficult() {
         return difficult;
     }
@@ -36,7 +36,7 @@ public class ProblemDifficult {
     }
 
     @Basic
-    @Column(name = "StudentID")
+    @Column(name = "student_id")
     public String getStudentId() {
         return studentId;
     }
@@ -46,7 +46,7 @@ public class ProblemDifficult {
     }
 
     @Basic
-    @Column(name = "ProblemID")
+    @Column(name = "problem_id")
     public Integer getProblemId() {
         return problemId;
     }

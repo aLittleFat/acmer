@@ -4,8 +4,8 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Student", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"UserID"})
+@Table(name = "student", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"user_id"})
 })
 public class Student {
     private String id;
@@ -15,7 +15,7 @@ public class Student {
     private Integer userId;
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     public String getId() {
         return id;
     }
@@ -25,7 +25,7 @@ public class Student {
     }
 
     @Basic
-    @Column(name = "Grade")
+    @Column(name = "grade")
     public Integer getGrade() {
         return grade;
     }
@@ -35,7 +35,7 @@ public class Student {
     }
 
     @Basic
-    @Column(name = "ICPC_Email")
+    @Column(name = "icpc_email")
     public String getIcpcEmail() {
         return icpcEmail;
     }
@@ -45,7 +45,7 @@ public class Student {
     }
 
     @Basic
-    @Column(name = "Status")
+    @Column(name = "status")
     public String getStatus() {
         return status;
     }
@@ -55,7 +55,7 @@ public class Student {
     }
 
     @Basic
-    @Column(name = "UserID")
+    @Column(name = "user_id")
     public Integer getUserId() {
         return userId;
     }

@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface ContestRepository extends JpaRepository<Contest, Integer> {
-    Optional<Contest> findByOjNameAndCId(String ojName, String cId);
+    Optional<Contest> findByOjNameAndCid(String ojName, String cId);
 
     List<Contest> findAllByOjName(String ojName);
 }

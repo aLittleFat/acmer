@@ -1,6 +1,6 @@
 package cn.edu.scau.acm.acmer.model;
 
-import cn.edu.scau.acm.acmer.entity.PersonalContestProblemRecord;
+import cn.edu.scau.acm.acmer.entity.ContestProblemRecord;
 
 import java.util.Date;
 import java.util.List;
@@ -12,7 +12,7 @@ public class PersonalContestLine implements Comparable<PersonalContestLine> {
     private int solved;
     private int penalty;
     private Date time;
-    private List<PersonalContestProblemRecord> personalContestProblemRecords;
+    private List<ContestProblemRecord> contestProblemRecords;
 
     public int getContestId() {
         return contestId;
@@ -38,12 +38,12 @@ public class PersonalContestLine implements Comparable<PersonalContestLine> {
         this.title = title;
     }
 
-    public List<PersonalContestProblemRecord> getPersonalContestProblemRecords() {
-        return personalContestProblemRecords;
+    public List<ContestProblemRecord> getContestProblemRecords() {
+        return contestProblemRecords;
     }
 
-    public void setPersonalContestProblemRecords(List<PersonalContestProblemRecord> personalContestProblemRecords) {
-        this.personalContestProblemRecords = personalContestProblemRecords;
+    public void setContestProblemRecords(List<ContestProblemRecord> contestProblemRecords) {
+        this.contestProblemRecords = contestProblemRecords;
     }
 
     public int getSolved() {

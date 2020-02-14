@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
+@Table(name = "training_plan", schema = "scauacm", catalog = "")
 public class TrainingPlan {
     private int id;
     private Timestamp time;
@@ -12,7 +13,7 @@ public class TrainingPlan {
     private Integer contestId;
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
@@ -23,7 +24,7 @@ public class TrainingPlan {
     }
 
     @Basic
-    @Column(name = "Time")
+    @Column(name = "time")
     public Timestamp getTime() {
         return time;
     }
@@ -33,7 +34,7 @@ public class TrainingPlan {
     }
 
     @Basic
-    @Column(name = "EndTime")
+    @Column(name = "end_time")
     public Timestamp getEndTime() {
         return endTime;
     }
@@ -43,7 +44,7 @@ public class TrainingPlan {
     }
 
     @Basic
-    @Column(name = "ContestID")
+    @Column(name = "contest_id")
     public Integer getContestId() {
         return contestId;
     }

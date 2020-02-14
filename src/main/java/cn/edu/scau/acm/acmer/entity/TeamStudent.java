@@ -4,14 +4,14 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Team_Student", schema = "scauacm", catalog = "")
+@Table(name = "team_student", schema = "scauacm", catalog = "")
 @IdClass(TeamStudentPK.class)
 public class TeamStudent {
     private int teamId;
     private String studentId;
 
     @Id
-    @Column(name = "TeamID")
+    @Column(name = "team_id")
     public int getTeamId() {
         return teamId;
     }
@@ -21,7 +21,7 @@ public class TeamStudent {
     }
 
     @Id
-    @Column(name = "StudentID")
+    @Column(name = "student_id")
     public String getStudentId() {
         return studentId;
     }

@@ -12,7 +12,9 @@ public interface ProblemService {
     void addProblem(String ojName, String problemId);
     boolean addProblemAcRecord(Problem problem, OjAccount ojAccount, Long time);
     Problem findProblem(String ojName, String problemId);
-    AcProblemInDay getProblemAcRecordInDay(List<OjAccount> ojAccounts, List<OjAccount> exOjAccounts, Date startTime, Date endTime);
+
+    AcProblemInDay getProblemAcRecordInDay(List<Integer> ojAccounts, List<Integer> exOjAccounts, Date startTime, Date endTime);
+
     List<AcProblemInDay> getProblemAcRecordSeveralDays(String studentId, Date time, int days, String exStudentId);
     List<PersonalProblemAcRank> getPersonalProblemAcRank(int grade, boolean includeRetired);
 }

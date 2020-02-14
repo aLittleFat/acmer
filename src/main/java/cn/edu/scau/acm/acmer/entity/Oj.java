@@ -1,6 +1,9 @@
 package cn.edu.scau.acm.acmer.entity;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
@@ -8,7 +11,7 @@ public class Oj {
     private String name;
 
     @Id
-    @Column(name = "Name")
+    @Column(name = "name")
     public String getName() {
         return name;
     }

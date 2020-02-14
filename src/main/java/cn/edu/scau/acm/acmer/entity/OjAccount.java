@@ -4,8 +4,8 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "OjAccount", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"StudentID", "OJName"})
+@Table(name = "oj_account", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"student_id", "oj_name"})
 })
 public class OjAccount {
     private int id;
@@ -14,7 +14,7 @@ public class OjAccount {
     private String ojName;
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
@@ -25,7 +25,7 @@ public class OjAccount {
     }
 
     @Basic
-    @Column(name = "Account")
+    @Column(name = "account")
     public String getAccount() {
         return account;
     }
@@ -35,7 +35,7 @@ public class OjAccount {
     }
 
     @Basic
-    @Column(name = "StudentID")
+    @Column(name = "student_id")
     public String getStudentId() {
         return studentId;
     }
@@ -45,7 +45,7 @@ public class OjAccount {
     }
 
     @Basic
-    @Column(name = "OJName")
+    @Column(name = "oj_name")
     public String getOjName() {
         return ojName;
     }

@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "User", uniqueConstraints = {
+@Table(name = "user", uniqueConstraints = {
         @UniqueConstraint(name = "uni", columnNames = {"email"})
 })
 public class User {
@@ -14,10 +14,10 @@ public class User {
     private String name;
     private String password;
     private Byte isAdmin;
-    private Byte verify;
+    private Byte verified;
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
@@ -28,7 +28,7 @@ public class User {
     }
 
     @Basic
-    @Column(name = "Email")
+    @Column(name = "email")
     public String getEmail() {
         return email;
     }
@@ -38,7 +38,7 @@ public class User {
     }
 
     @Basic
-    @Column(name = "Phone")
+    @Column(name = "phone")
     public String getPhone() {
         return phone;
     }
@@ -48,7 +48,7 @@ public class User {
     }
 
     @Basic
-    @Column(name = "Name")
+    @Column(name = "name")
     public String getName() {
         return name;
     }
@@ -58,7 +58,7 @@ public class User {
     }
 
     @Basic
-    @Column(name = "Password")
+    @Column(name = "password")
     public String getPassword() {
         return password;
     }
@@ -68,7 +68,7 @@ public class User {
     }
 
     @Basic
-    @Column(name = "IsAdmin")
+    @Column(name = "is_admin")
     public Byte getIsAdmin() {
         return isAdmin;
     }
@@ -78,13 +78,13 @@ public class User {
     }
 
     @Basic
-    @Column(name = "Verify")
-    public Byte getVerify() {
-        return verify;
+    @Column(name = "verified")
+    public Byte getVerified() {
+        return verified;
     }
 
-    public void setVerify(Byte verify) {
-        this.verify = verify;
+    public void setVerified(Byte verified) {
+        this.verified = verified;
     }
 
     @Override
@@ -98,11 +98,11 @@ public class User {
                 Objects.equals(name, user.name) &&
                 Objects.equals(password, user.password) &&
                 Objects.equals(isAdmin, user.isAdmin) &&
-                Objects.equals(verify, user.verify);
+                Objects.equals(verified, user.verified);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, phone, name, password, isAdmin, verify);
+        return Objects.hash(id, email, phone, name, password, isAdmin, verified);
     }
 }

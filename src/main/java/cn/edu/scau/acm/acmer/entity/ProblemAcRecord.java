@@ -5,8 +5,8 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-@Table(name = "ProblemAcRecord", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"OJAccountID", "ProblemID"})
+@Table(name = "problem_ac_record", uniqueConstraints = {
+    @UniqueConstraint(name = "uni", columnNames = {"problem_id", "oj_account_id"})
 })
 public class ProblemAcRecord {
     private int id;
@@ -15,7 +15,7 @@ public class ProblemAcRecord {
     private Integer problemId;
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
@@ -26,7 +26,7 @@ public class ProblemAcRecord {
     }
 
     @Basic
-    @Column(name = "Time")
+    @Column(name = "time")
     public Timestamp getTime() {
         return time;
     }
@@ -36,7 +36,7 @@ public class ProblemAcRecord {
     }
 
     @Basic
-    @Column(name = "OJAccountID")
+    @Column(name = "oj_account_id")
     public Integer getOjAccountId() {
         return ojAccountId;
     }
@@ -46,7 +46,7 @@ public class ProblemAcRecord {
     }
 
     @Basic
-    @Column(name = "ProblemID")
+    @Column(name = "problem_id")
     public Integer getProblemId() {
         return problemId;
     }

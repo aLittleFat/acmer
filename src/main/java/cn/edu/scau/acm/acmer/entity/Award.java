@@ -5,17 +5,18 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-public class TeamAward {
+@Table(name = "award")
+public class Award {
     private int id;
-    private String award;
+    private String level;
     private String regional;
     private Timestamp time;
     private String contestType;
-    private Byte verify;
+    private Byte verified;
     private Integer teamId;
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
@@ -26,17 +27,17 @@ public class TeamAward {
     }
 
     @Basic
-    @Column(name = "Award")
-    public String getAward() {
-        return award;
+    @Column(name = "level")
+    public String getLevel() {
+        return level;
     }
 
-    public void setAward(String award) {
-        this.award = award;
+    public void setLevel(String level) {
+        this.level = level;
     }
 
     @Basic
-    @Column(name = "Regional")
+    @Column(name = "regional")
     public String getRegional() {
         return regional;
     }
@@ -46,7 +47,7 @@ public class TeamAward {
     }
 
     @Basic
-    @Column(name = "Time")
+    @Column(name = "time")
     public Timestamp getTime() {
         return time;
     }
@@ -56,7 +57,7 @@ public class TeamAward {
     }
 
     @Basic
-    @Column(name = "ContestType")
+    @Column(name = "contest_type")
     public String getContestType() {
         return contestType;
     }
@@ -66,17 +67,17 @@ public class TeamAward {
     }
 
     @Basic
-    @Column(name = "Verify")
-    public Byte getVerify() {
-        return verify;
+    @Column(name = "verified")
+    public Byte getVerified() {
+        return verified;
     }
 
-    public void setVerify(Byte verify) {
-        this.verify = verify;
+    public void setVerified(Byte verified) {
+        this.verified = verified;
     }
 
     @Basic
-    @Column(name = "TeamID")
+    @Column(name = "team_id")
     public Integer getTeamId() {
         return teamId;
     }
@@ -89,18 +90,18 @@ public class TeamAward {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TeamAward teamAward = (TeamAward) o;
-        return id == teamAward.id &&
-                Objects.equals(award, teamAward.award) &&
-                Objects.equals(regional, teamAward.regional) &&
-                Objects.equals(time, teamAward.time) &&
-                Objects.equals(contestType, teamAward.contestType) &&
-                Objects.equals(verify, teamAward.verify) &&
-                Objects.equals(teamId, teamAward.teamId);
+        Award award = (Award) o;
+        return id == award.id &&
+                Objects.equals(level, award.level) &&
+                Objects.equals(regional, award.regional) &&
+                Objects.equals(time, award.time) &&
+                Objects.equals(contestType, award.contestType) &&
+                Objects.equals(verified, award.verified) &&
+                Objects.equals(teamId, award.teamId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, award, regional, time, contestType, verify, teamId);
+        return Objects.hash(id, level, regional, time, contestType, verified, teamId);
     }
 }

@@ -29,7 +29,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -66,10 +65,10 @@ public class VjServiceImpl implements VjService {
     private ContestProblemRepository contestProblemRepository;
 
     @Autowired
-    private PersonalContestRecordRepository personalContestRecordRepository;
+    private ContestRecordRepository contestRecordRepository;
 
     @Autowired
-    private PersonalContestProblemRecordRepository personalContestProblemRecordRepository;
+    private ContestProblemRecordRepository contestProblemRecordRepository;
 
     @Override
     public boolean checkVjLoginStatus() {
@@ -200,15 +199,15 @@ public class VjServiceImpl implements VjService {
             document = Jsoup.parse(html);
             jsonObject = (JSONObject) JSON.parse(document.body().selectFirst("[name=dataJson]").text());
             Contest contest = new Contest();
-            contest.setName(jsonObject.getString("title"));
+            contest.setTitle(jsonObject.getString("title"));
             contest.setOjName("VJ");
-            contest.setCId(cId);
+            contest.setCid(cId);
             Timestamp startTime = new Timestamp(jsonObject.getLong("begin") + 8*60*60*1000);
             Timestamp endTime = new Timestamp(jsonObject.getLong("end") + 8*60*60*1000);
             contest.setStartTime(startTime);
             contest.setEndTime(endTime);
             contestRepository.save(contest);
-            contest = contestRepository.findByOjNameAndCId("VJ", cId).get();
+            contest = contestRepository.findByOjNameAndCid("VJ", cId).get();
             if (System.currentTimeMillis() > endTime.getTime()) {
                 updateContestProblem(httpClient, contest);
             }
@@ -224,7 +223,7 @@ public class VjServiceImpl implements VjService {
             httpClient = new BaseHttpClient();
             login(httpClient);
         }
-        String url = "https://vjudge.net/contest/" + contest.getCId();
+        String url = "https://vjudge.net/contest/" + contest.getCid();
         String html = httpClient.get(url);
         Document document = Jsoup.parse(html);
         JSONObject jsonObject = (JSONObject) JSON.parse(document.body().selectFirst("[name=dataJson]").text());
@@ -235,11 +234,11 @@ public class VjServiceImpl implements VjService {
             log.info(jsonProblem.toJSONString());
             problemService.addProblem(jsonProblem.getString("oj"), jsonProblem.getString("probNum"));
             Problem problem = problemService.findProblem(jsonProblem.getString("oj"), jsonProblem.getString("probNum"));
-            Optional<ContestProblem> contestProblem = contestProblemRepository.findByContestIdAndIDinContest(contest.getId(), jsonProblem.getString("num"));
+            Optional<ContestProblem> contestProblem = contestProblemRepository.findByContestIdAndIndex(contest.getId(), jsonProblem.getString("num"));
             if(contestProblem.isPresent()) continue;
             ContestProblem contestProblem1 = new ContestProblem();
             contestProblem1.setContestId(contest.getId());
-            contestProblem1.setIDinContest(jsonProblem.getString("num"));
+            contestProblem1.setIndex(jsonProblem.getString("num"));
             contestProblem1.setProblemId(problem.getId());
             contestProblemRepository.save(contestProblem1);
         }
@@ -276,52 +275,52 @@ public class VjServiceImpl implements VjService {
         }
         Contest contest = contestRepository.findById(contestId).get();
 
-        PersonalContestRecord personalContestRecord = new PersonalContestRecord();
-        personalContestRecord.setStudentId(studentId);
-        personalContestRecord.setContestId(contestId);
-        personalContestRecord.setAccount(account);
-        personalContestRecord.setTime(contest.getStartTime());
-        personalContestRecordRepository.save(personalContestRecord);
+        ContestRecord contestRecord = new ContestRecord();
+        contestRecord.setStudentId(studentId);
+        contestRecord.setContestId(contestId);
+        contestRecord.setAccount(account);
+        contestRecord.setTime(contest.getStartTime());
+        contestRecordRepository.save(contestRecord);
 
 
-        personalContestRecord = personalContestRecordRepository.findByContestIdAndStudentId(contestId, studentId).get();
+        contestRecord = contestRecordRepository.findByContestIdAndStudentId(contestId, studentId).get();
 
         log.info(contest.getEndTime().getTime() + " " + System.currentTimeMillis());
 
         if(contest.getEndTime().getTime() < System.currentTimeMillis()) {
-            updatePersonalContestProblemRecord(httpClient, personalContestRecord);
+            updatePersonalContestProblemRecord(httpClient, contestRecord);
         }
     }
 
     @Override
     @Async
-    public void updatePersonalContestProblemRecord(BaseHttpClient httpClient, PersonalContestRecord personalContestRecord) throws Exception {
+    public void updatePersonalContestProblemRecord(BaseHttpClient httpClient, ContestRecord contestRecord) throws Exception {
         if(httpClient == null) {
             httpClient = new BaseHttpClient();
             login(httpClient);
         }
 
-        Contest contest = contestRepository.findById(personalContestRecord.getContestId()).get();
-        String url = "https://vjudge.net/contest/rank/single/" + contest.getCId();
+        Contest contest = contestRepository.findById(contestRecord.getContestId()).get();
+        String url = "https://vjudge.net/contest/rank/single/" + contest.getCid();
         JSONObject jsonObject = JSON.parseObject(httpClient.get(url));
         int participantId = 0;
         JSONObject participants = jsonObject.getJSONObject("participants");
         for(String key : participants.keySet()) {
-            if(participants.getJSONArray(key).get(0).toString().equals(personalContestRecord.getAccount())) {
+            if(participants.getJSONArray(key).get(0).toString().equals(contestRecord.getAccount())) {
                 participantId = Integer.parseInt(key);
                 break;
             }
         }
 
-        List<ContestProblem> contestProblems = contestProblemRepository.findAllByContestIdOrderByIDinContest(contest.getId());
-        List<PersonalContestProblemRecord> personalContestProblemRecords = new ArrayList<>();
+        List<ContestProblem> contestProblems = contestProblemRepository.findAllByContestIdOrderByIndexAsc(contest.getId());
+        List<ContestProblemRecord> contestProblemRecords = new ArrayList<>();
         for (ContestProblem contestProblem : contestProblems) {
-            PersonalContestProblemRecord personalContestProblemRecord = personalContestProblemRecordRepository.findByPersonalContestRecordIdAndContestProblemId(personalContestRecord.getId(), contestProblem.getId()).orElse(new PersonalContestProblemRecord());
-            personalContestProblemRecord.setStatus("UnSolved");
-            personalContestProblemRecord.setContestProblemId(contestProblem.getId());
-            personalContestProblemRecord.setTries(0);
-            personalContestProblemRecord.setPersonalContestRecordId(personalContestRecord.getId());
-            personalContestProblemRecords.add(personalContestProblemRecord);
+            ContestProblemRecord contestProblemRecord = contestProblemRecordRepository.findByContestRecordIdAndContestProblemId(contestRecord.getId(), contestProblem.getId()).orElse(new ContestProblemRecord());
+            contestProblemRecord.setStatus("UnSolved");
+            contestProblemRecord.setContestProblemId(contestProblem.getId());
+            contestProblemRecord.setTries(0);
+            contestProblemRecord.setContestRecordId(contestRecord.getId());
+            contestProblemRecords.add(contestProblemRecord);
         }
 
         int contestLength = (int) ((contest.getEndTime().getTime() - contest.getStartTime().getTime()) / (1000 * 60));
@@ -334,19 +333,19 @@ public class VjServiceImpl implements VjService {
                 int proNum = jsonSubmission.getInteger(1);
                 int isAc = jsonSubmission.getInteger(2);
                 int time = jsonSubmission.getInteger(3) / 60;
-                if(!personalContestProblemRecords.get(proNum).getStatus().equals("UnSolved")) continue;
-                personalContestProblemRecords.get(proNum).setTries(personalContestProblemRecords.get(proNum).getTries() + 1);
+                if(!contestProblemRecords.get(proNum).getStatus().equals("UnSolved")) continue;
+                contestProblemRecords.get(proNum).setTries(contestProblemRecords.get(proNum).getTries() + 1);
                 if (isAc != 0) {
                     if (time > contestLength) {
-                        personalContestProblemRecords.get(proNum).setStatus("UpSolved");
+                        contestProblemRecords.get(proNum).setStatus("UpSolved");
                     } else {
-                        personalContestProblemRecords.get(proNum).setStatus("Solved");
+                        contestProblemRecords.get(proNum).setStatus("Solved");
                     }
-                    personalContestProblemRecords.get(proNum).setAcTime(time);
+                    contestProblemRecords.get(proNum).setPenalty(time);
                 }
             }
         }
-        personalContestProblemRecordRepository.saveAll(personalContestProblemRecords);
+        contestProblemRecordRepository.saveAll(contestProblemRecords);
     }
 
     @Override
@@ -358,9 +357,9 @@ public class VjServiceImpl implements VjService {
         }
         if(contest.getEndTime().getTime() > System.currentTimeMillis()) return;
         updateContestProblem(httpClient, contest);
-        List<PersonalContestRecord> personalContestRecords = personalContestRecordRepository.findAllByContestId(contest.getId());
-        for (PersonalContestRecord personalContestRecord : personalContestRecords) {
-            updatePersonalContestProblemRecord(httpClient, personalContestRecord);
+        List<ContestRecord> contestRecords = contestRecordRepository.findAllByContestId(contest.getId());
+        for (ContestRecord contestRecord : contestRecords) {
+            updatePersonalContestProblemRecord(httpClient, contestRecord);
         }
     }
 
