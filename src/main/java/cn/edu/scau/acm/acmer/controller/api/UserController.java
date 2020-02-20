@@ -1,8 +1,9 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
+import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.UserDto;
-import cn.edu.scau.acm.acmer.model.User_Student;
+import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.AccountService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
@@ -17,12 +18,15 @@ public class UserController {
     @Autowired
     AccountService accountService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @ApiOperation("获取目前登录用户的信息")
     @RequiresAuthentication()
     @GetMapping("info")
-    MyResponseEntity<User_Student> getMyInfo() {
+    MyResponseEntity<User> getMyInfo() {
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
-        return new MyResponseEntity<>(accountService.getUserStudentById(id));
+        return new MyResponseEntity<>(userRepository.findById(id).get());
     }
 
     @ApiOperation("修改当前登录用户的个人信息，包括手机号码和icpc邮箱")

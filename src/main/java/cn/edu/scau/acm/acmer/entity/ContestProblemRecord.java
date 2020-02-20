@@ -5,15 +5,15 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "contest_problem_record", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"contest_problem_id", "contest_record_id"})
+        @UniqueConstraint(name = "uni", columnNames = {"problem_index", "contest_record_id"})
 })
 public class ContestProblemRecord {
     private int id;
-    private Integer contestProblemId;
     private String status;
-    private Integer penalty;
-    private Integer tries;
-    private Integer contestRecordId;
+    private int penalty;
+    private int tries;
+    private int contestRecordId;
+    private String problemIndex;
 
     @Id
     @Column(name = "id")
@@ -24,16 +24,6 @@ public class ContestProblemRecord {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    @Basic
-    @Column(name = "contest_problem_id")
-    public Integer getContestProblemId() {
-        return contestProblemId;
-    }
-
-    public void setContestProblemId(Integer contestProblemId) {
-        this.contestProblemId = contestProblemId;
     }
 
     @Basic
@@ -48,32 +38,42 @@ public class ContestProblemRecord {
 
     @Basic
     @Column(name = "penalty")
-    public Integer getPenalty() {
+    public int getPenalty() {
         return penalty;
     }
 
-    public void setPenalty(Integer penalty) {
+    public void setPenalty(int penalty) {
         this.penalty = penalty;
     }
 
     @Basic
     @Column(name = "tries")
-    public Integer getTries() {
+    public int getTries() {
         return tries;
     }
 
-    public void setTries(Integer tries) {
+    public void setTries(int tries) {
         this.tries = tries;
     }
 
     @Basic
     @Column(name = "contest_record_id")
-    public Integer getContestRecordId() {
+    public int getContestRecordId() {
         return contestRecordId;
     }
 
-    public void setContestRecordId(Integer contestRecordId) {
+    public void setContestRecordId(int contestRecordId) {
         this.contestRecordId = contestRecordId;
+    }
+
+    @Basic
+    @Column(name = "problem_index")
+    public String getProblemIndex() {
+        return problemIndex;
+    }
+
+    public void setProblemIndex(String problemIndex) {
+        this.problemIndex = problemIndex;
     }
 
     @Override
@@ -82,15 +82,15 @@ public class ContestProblemRecord {
         if (o == null || getClass() != o.getClass()) return false;
         ContestProblemRecord that = (ContestProblemRecord) o;
         return id == that.id &&
-                Objects.equals(contestProblemId, that.contestProblemId) &&
+                penalty == that.penalty &&
+                tries == that.tries &&
+                contestRecordId == that.contestRecordId &&
                 Objects.equals(status, that.status) &&
-                Objects.equals(penalty, that.penalty) &&
-                Objects.equals(tries, that.tries) &&
-                Objects.equals(contestRecordId, that.contestRecordId);
+                Objects.equals(problemIndex, that.problemIndex);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, contestProblemId, status, penalty, tries, contestRecordId);
+        return Objects.hash(id, status, penalty, tries, contestRecordId, problemIndex);
     }
 }

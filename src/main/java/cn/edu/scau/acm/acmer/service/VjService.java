@@ -16,7 +16,7 @@ public interface VjService {
     void updateContestProblem(BaseHttpClient httpClient, Contest contest) throws Exception;
     void loginContest(BaseHttpClient baseHttpClient, String cId, String password) throws Exception;
     void addPersonalContestRecord(BaseHttpClient httpClient, int contestId, String studentId, String account) throws Exception;
-    void updatePersonalContestProblemRecord(BaseHttpClient httpClient, ContestRecord contestRecord) throws Exception;
+    void updateContestProblemRecord(BaseHttpClient httpClient, ContestRecord contestRecord) throws Exception;
     void updateContest(BaseHttpClient httpClient, Contest contest) throws Exception;
     void updateAllContest(BaseHttpClient httpClient) throws Exception;
 }

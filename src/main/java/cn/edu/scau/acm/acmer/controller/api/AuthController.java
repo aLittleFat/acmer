@@ -53,12 +53,11 @@ public class AuthController {
 
     @ApiOperation("注册")
     @PostMapping("/register")
-    public MyResponseEntity<Void> register(String email, String password, String phone, String name, String verifyCode, String grade, String studentId, String type) throws Exception {
+    public MyResponseEntity<Void> register(String email, String password, String phone, String name, String verifyCode, String grade, String studentId, String qq, String type) throws Exception {
         if (type.equals("教师")) {
-            accountService.registerUser(email, password, phone, name, verifyCode);
-        } else {
-            accountService.registerStudent(email, password, phone, name, verifyCode, Integer.parseInt(grade), studentId);
+            studentId = null;
         }
+        accountService.register(email, password, phone, name, verifyCode, Integer.parseInt(grade), studentId, qq);
         return new MyResponseEntity<>();
     }
 

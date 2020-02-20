@@ -11,12 +11,12 @@ public class Team {
     private int id;
     private String nameCn;
     private String nameEn;
-    private Integer rank;
-    private Integer seasonId;
+    private int rank;
+    private int seasonId;
+    private String vjAccount;
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
     }
@@ -47,22 +47,32 @@ public class Team {
 
     @Basic
     @Column(name = "rank")
-    public Integer getRank() {
+    public int getRank() {
         return rank;
     }
 
-    public void setRank(Integer rank) {
+    public void setRank(int rank) {
         this.rank = rank;
     }
 
     @Basic
     @Column(name = "season_id")
-    public Integer getSeasonId() {
+    public int getSeasonId() {
         return seasonId;
     }
 
-    public void setSeasonId(Integer seasonId) {
+    public void setSeasonId(int seasonId) {
         this.seasonId = seasonId;
+    }
+
+    @Basic
+    @Column(name = "vj_account")
+    public String getVjAccount() {
+        return vjAccount;
+    }
+
+    public void setVjAccount(String vjAccount) {
+        this.vjAccount = vjAccount;
     }
 
     @Override
@@ -71,14 +81,15 @@ public class Team {
         if (o == null || getClass() != o.getClass()) return false;
         Team team = (Team) o;
         return id == team.id &&
+                rank == team.rank &&
+                seasonId == team.seasonId &&
                 Objects.equals(nameCn, team.nameCn) &&
                 Objects.equals(nameEn, team.nameEn) &&
-                Objects.equals(rank, team.rank) &&
-                Objects.equals(seasonId, team.seasonId);
+                Objects.equals(vjAccount, team.vjAccount);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nameCn, nameEn, rank, seasonId);
+        return Objects.hash(id, nameCn, nameEn, rank, seasonId, vjAccount);
     }
 }

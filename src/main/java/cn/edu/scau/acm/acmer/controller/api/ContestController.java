@@ -2,7 +2,7 @@ package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.UserDto;
-import cn.edu.scau.acm.acmer.repository.StudentRepository;
+import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.ContestService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.shiro.SecurityUtils;
@@ -22,31 +22,18 @@ public class ContestController {
     private ContestService contestService;
 
     @Autowired
-    private StudentRepository studentRepository;
+    private UserRepository userRepository;
 
-//    @GetMapping("personalContest")
-//    @RequiresRoles({"student"})
-//    MyResponseEntity<List<PersonalContestLine>> getMyContest(){
-//        int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
-//        String studentId = studentRepository.findByUserId(id).get().getId();
-//        return new MyResponseEntity<>(contestService.getPersonalContestByStudentId(studentId));
-//    }
     @GetMapping("personalContest")
     @RequiresRoles({"student"})
     MyResponseEntity<List<JSONObject>> getMyContest(){
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
-        String studentId = studentRepository.findByUserId(id).get().getId();
-        return new MyResponseEntity<>(contestService.getPersonalContestByStudentId(studentId));
+        String studentId = userRepository.findById(id).get().getStudentId();
+        return new MyResponseEntity<>(contestService.getContestByStudentId(studentId));
     }
-
-
-//    @GetMapping("personalContest/{studentId}")
-//    MyResponseEntity<List<PersonalContestLine>> getPersonalContestByStudentId(@PathVariable String studentId){
-//        return new MyResponseEntity<>(contestService.getPersonalContestByStudentId(studentId));
-//    }
 
     @GetMapping("personalContest/{studentId}")
     MyResponseEntity<List<JSONObject>> getPersonalContestByStudentId(@PathVariable String studentId){
-        return new MyResponseEntity<>(contestService.getPersonalContestByStudentId(studentId));
+        return new MyResponseEntity<>(contestService.getContestByStudentId(studentId));
     }
 }

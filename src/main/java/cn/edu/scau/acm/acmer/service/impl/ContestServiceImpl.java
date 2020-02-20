@@ -6,8 +6,8 @@ import cn.edu.scau.acm.acmer.entity.ContestRecord;
 import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
 import cn.edu.scau.acm.acmer.repository.ContestProblemRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestProblemRepository;
-import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
+import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.service.ContestService;
 import cn.edu.scau.acm.acmer.service.HduService;
 import cn.edu.scau.acm.acmer.service.VjService;
@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,8 +45,8 @@ public class ContestServiceImpl implements ContestService {
     public void addPersonalContestRecord(String ojName, String cId, String password, String studentId, String account) throws Exception {
         BaseHttpClient httpClient = null;
         int contestId = addContest(httpClient, ojName, cId, account, password);
-        Optional<ContestRecord> personalContestRecord = contestRecordRepository.findByContestIdAndStudentId(contestId, studentId);
-        if(personalContestRecord.isPresent()) {
+        Optional<ContestRecord> contestRecord = contestRecordRepository.findByContestIdAndStudentId(contestId, studentId);
+        if(contestRecord.isPresent()) {
             throw new Exception("已经添加该竞赛");
         }
         switch (ojName) {
@@ -76,19 +75,19 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
-    public List<JSONObject> getPersonalContestByStudentId(String studentId) {
-        List<JSONObject> personalContestLines = new ArrayList<>();
+    public List<JSONObject> getContestByStudentId(String studentId) {
+        List<JSONObject> contestLines = new ArrayList<>();
         List<ContestRecord> personalContestRecords = contestRecordRepository.findAllByStudentIdOrderByTimeDesc(studentId);
         for (ContestRecord personalContestRecord : personalContestRecords) {
             Contest contest = contestRepository.findById(personalContestRecord.getContestId()).get();
             if(contest.getEndTime().getTime() > System.currentTimeMillis()) continue;
             int solved = 0;
             int penalty = 0;
-            JSONObject personalContestLine = new JSONObject();
-            personalContestLine.put("contestId" ,personalContestRecord.getContestId());
-            personalContestLine.put("title" ,contest.getTitle());
-            personalContestLine.put("time" ,personalContestRecord.getTime());
-            personalContestLine.put("proNum" ,contest.getProblemNumber());
+            JSONObject contestLine = new JSONObject();
+            contestLine.put("contestId" ,personalContestRecord.getContestId());
+            contestLine.put("title" ,contest.getTitle());
+            contestLine.put("time" ,personalContestRecord.getTime());
+            contestLine.put("proNum" ,contest.getProblemNumber());
             JSONObject cellClassName = new JSONObject();
             List<ContestProblemRecord> contestProblemRecords = contestProblemRecordRepository.findAllByContestRecordId(personalContestRecord.getId());
             char ch = 'A';
@@ -100,29 +99,29 @@ public class ContestServiceImpl implements ContestService {
                     case "Solved":
                         solved++;
                         penalty += contestProblemRecord.getPenalty();
-                        personalContestLine.put(problemIndex, contestProblemRecord.getPenalty() + "(" +contestProblemRecord.getTries()  + ")");
+                        contestLine.put(problemIndex, contestProblemRecord.getPenalty() + "(" +contestProblemRecord.getTries()  + ")");
                         cellClassName.put(problemIndex, "table-ac-cell");
                         break;
                     case "UpSolved":
-                        personalContestLine.put(problemIndex, contestProblemRecord.getPenalty() + "(" +contestProblemRecord.getTries()  + ")");
+                        contestLine.put(problemIndex, contestProblemRecord.getPenalty() + "(" +contestProblemRecord.getTries()  + ")");
                         cellClassName.put(problemIndex, "table-up-cell");
                         break;
                     case "UnSolved":
                         if(contestProblemRecord.getTries() > 0) {
-                            personalContestLine.put(problemIndex, "(" +contestProblemRecord.getTries()  + ")");
+                            contestLine.put(problemIndex, "(" +contestProblemRecord.getTries()  + ")");
                             cellClassName.put(problemIndex, "table-wa-cell");
                         }
                         else {
-                            personalContestLine.put(problemIndex, "");
+                            contestLine.put(problemIndex, "");
                         }
                         break;
                 }
             }
-            personalContestLine.put("cellClassName", cellClassName);
-            personalContestLine.put("solved" ,solved);
-            personalContestLine.put("penalty" ,penalty);
-            personalContestLines.add(personalContestLine);
+            contestLine.put("cellClassName", cellClassName);
+            contestLine.put("solved" ,solved);
+            contestLine.put("penalty" ,penalty);
+            contestLines.add(contestLine);
         }
-        return personalContestLines;
+        return contestLines;
     }
 }

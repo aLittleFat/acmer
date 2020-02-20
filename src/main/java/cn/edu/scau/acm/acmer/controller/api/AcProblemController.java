@@ -4,7 +4,7 @@ import cn.edu.scau.acm.acmer.model.AcProblemInDay;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.PersonalProblemAcRank;
 import cn.edu.scau.acm.acmer.model.UserDto;
-import cn.edu.scau.acm.acmer.repository.StudentRepository;
+import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
@@ -26,7 +26,7 @@ public class AcProblemController {
     private ProblemService problemService;
 
     @Autowired
-    private StudentRepository studentRepository;
+    private UserRepository userRepository;
 
     @ApiOperation("获取刷题排行榜")
     @GetMapping("personalProblemAcRank")
@@ -41,7 +41,7 @@ public class AcProblemController {
         if(except) {
             try {
                 int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
-                mystudentId = studentRepository.findByUserId(id).get().getId();
+                mystudentId = userRepository.findById(id).get().getStudentId();
             } catch (Exception ignored) { }
         }
         return new MyResponseEntity<>(problemService.getProblemAcRecordSeveralDays(studentId,new Date(time), days, mystudentId));
@@ -52,7 +52,7 @@ public class AcProblemController {
     @GetMapping("acProblems")
     MyResponseEntity<List<AcProblemInDay>> getMyAcProblems(long time, int days){
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
-        String studentId = studentRepository.findByUserId(id).get().getId();
+        String studentId = userRepository.findById(id).get().getStudentId();
         return new MyResponseEntity<>(problemService.getProblemAcRecordSeveralDays(studentId,new Date(time), days,null));
     }
 }

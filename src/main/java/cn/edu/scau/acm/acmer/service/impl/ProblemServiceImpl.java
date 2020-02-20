@@ -3,7 +3,7 @@ package cn.edu.scau.acm.acmer.service.impl;
 import cn.edu.scau.acm.acmer.entity.OjAccount;
 import cn.edu.scau.acm.acmer.entity.Problem;
 import cn.edu.scau.acm.acmer.entity.ProblemAcRecord;
-import cn.edu.scau.acm.acmer.entity.Student;
+import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.model.AcProblem;
 import cn.edu.scau.acm.acmer.model.AcProblemInDay;
 import cn.edu.scau.acm.acmer.model.PersonalProblemAcRank;
@@ -31,9 +31,6 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Autowired
     private OjAccountRepository ojAccountRepository;
-
-    @Autowired
-    private StudentRepository studentRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -129,18 +126,21 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     public List<PersonalProblemAcRank> getPersonalProblemAcRank(int grade, boolean includeRetired) {
-        List<Student> students;
+        List<User> users;
+        String status = "退役";
+        if(includeRetired) {
+            status = "";
+        }
         if (grade == 0) {
-            students = studentRepository.findAll();
+            users = userRepository.findAllByStudentIdNotNullAndStatusNot(status);
         } else {
-            students = studentRepository.findAllByGrade(grade);
+            users = userRepository.findAllByGradeAndStatusNot(grade, status);
         }
         List<PersonalProblemAcRank> personalProblemAcRanks = new ArrayList<>();
-        for (Student student : students) {
+        for (User user : users) {
             PersonalProblemAcRank personalProblemAcRank = new PersonalProblemAcRank();
-            personalProblemAcRank.setUser(userRepository.findById((int) student.getUserId()).get());
-            personalProblemAcRank.setStudent(student);
-            personalProblemAcRank.setAcNum(problemAcRecordRepository.countAllByStudentId(student.getId()));
+            personalProblemAcRank.setUser(user);
+            personalProblemAcRank.setAcNum(problemAcRecordRepository.countAllByStudentId(user.getStudentId()));
             //todo getaward
 
             personalProblemAcRanks.add(personalProblemAcRank);

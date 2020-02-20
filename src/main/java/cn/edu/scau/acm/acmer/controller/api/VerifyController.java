@@ -1,7 +1,7 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
+import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
-import cn.edu.scau.acm.acmer.model.User_Student;
 import cn.edu.scau.acm.acmer.service.AccountService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -17,8 +17,8 @@ public class VerifyController {
 
     @ApiOperation("获取未通过注册审核的用户信息")
     @GetMapping("user_unVerify")
-    MyResponseEntity<Page<User_Student>> getUserUnverify(Integer page, Integer size){
-        return new MyResponseEntity<>(accountService.getUserUnverify(page, size));
+    MyResponseEntity<Page<User>> getUserUnverify(Integer page, Integer size){
+        return new MyResponseEntity<>(accountService.getUserUnVerified(page, size));
     }
 
     @ApiOperation("通过注册审核")

@@ -1,9 +1,6 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
-import cn.edu.scau.acm.acmer.entity.Student;
 import cn.edu.scau.acm.acmer.entity.User;
-import cn.edu.scau.acm.acmer.model.User_Student;
-import cn.edu.scau.acm.acmer.repository.StudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.AccountService;
 import cn.edu.scau.acm.acmer.service.MailService;
@@ -30,9 +27,6 @@ public class AccountServiceImpl implements AccountService {
     private static final String encryptSalt = "F12839WhsnnEV$#23b";
 
     @Autowired
-    private StudentRepository studentRepository;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -42,49 +36,23 @@ public class AccountServiceImpl implements AccountService {
     private MailService mailService;
 
     @Override
-    public void registerUser(String email, String password, String phone, String name, String verifyCode) throws Exception {
+    public void register(String email, String password, String phone, String name, String verifyCode, Integer grade, String studentId, String qq) throws Exception {
         if(userRepository.findByEmail(email).isPresent()){
             throw new Exception("该邮箱已被注册");
         }
-
-        String verifyStatus = verifyEmail(email, verifyCode);
-
-        if(!verifyStatus.equals("true")){
-            throw new Exception(verifyStatus);
+        if(studentId != null && userRepository.findByStudentId(studentId).isPresent()) {
+            throw new Exception("该学号已被注册");
         }
+
+        verifyEmail(email, verifyCode);
+
         User u = new User();
         u.setEmail(email);
         String enPassword = new Sha256Hash(password, encryptSalt).toHex();
         u.setPassword(enPassword);
         u.setPhone(phone);
         u.setName(name);
-        u.setIsAdmin((byte) 1);
-        if(userRepository.count() == 0){
-            u.setVerified((byte) 1);
-        }
-        else {
-            u.setVerified((byte) 0);
-        }
-        userRepository.save(u);
-    }
-
-    @Override
-    public void registerStudent(String email, String password, String phone, String name, String verifyCode, int grade, String stuId) throws Exception {
-        if(userRepository.findByEmail(email).isPresent()){
-            throw new Exception("该邮箱已被注册");
-        }
-
-        String verifyStatus = verifyEmail(email, verifyCode);
-
-        if(!verifyStatus.equals("true")){
-            throw new Exception(verifyStatus);
-        }
-        User u = new User();
-        u.setEmail(email);
-        String enPassword = new Sha256Hash(password, encryptSalt).toHex();
-        u.setPassword(enPassword);
-        u.setPhone(phone);
-        u.setName(name);
+        u.setQq(qq);
         if(userRepository.count() == 0){
             u.setIsAdmin((byte) 1);
         }
@@ -97,16 +65,13 @@ public class AccountServiceImpl implements AccountService {
         else {
             u.setVerified((byte) 0);
         }
-        if(studentRepository.findById(stuId).isPresent()){
-            throw new Exception("该学号已被注册");
+
+        if(studentId != null) {
+            u.setStudentId(studentId);
+            u.setGrade(grade);
+            u.setStatus("现役");
         }
         userRepository.save(u);
-        Student stu = new Student();
-        stu.setId(stuId);
-        stu.setGrade(grade);
-        stu.setStatus("现役");
-        stu.setUserId(userRepository.findByEmail(email).get().getId());
-        studentRepository.save(stu);
     }
 
     @Override
@@ -127,16 +92,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public String verifyEmail(String email, String verifyCode) {
+    public void verifyEmail(String email, String verifyCode) throws Exception {
         String getCode = stringRedisTemplate.opsForValue().get(email + "_Verify");
         if(getCode == null){
-            return "验证码已过期";
+            throw new Exception("验证码已过期");
         }
-        if(getCode.equals(verifyCode)){
-            return "true";
-        }
-        else{
-            return "验证码错误";
+        if(!getCode.equals(verifyCode)){
+            throw new Exception("验证码错误");
         }
     }
 
@@ -182,7 +144,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean isStudent(int id) {
-        return studentRepository.findByUserId(id).isPresent();
+        return userRepository.findById(id).get().getStudentId() != null;
     }
 
     @Override
@@ -217,37 +179,24 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Page<User_Student> getUserUnverify(Integer page, Integer size) {
+    public Page<User> getUserUnVerified(Integer page, Integer size) {
         Pageable pr = PageRequest.of(page - 1, size, Sort.Direction.ASC, "name");
-        return userRepository.findAllUnVerify(pr);
+        return userRepository.findAllByVerifiedEquals(pr, (byte)0);
     }
 
     @Override
     public void deleteAccount(Integer id) {
         User u = userRepository.findById(id).get();
-        Optional<Student> student = studentRepository.findByUserId(id);
-        student.ifPresent(value -> studentRepository.delete(value));
         userRepository.delete(u);
         mailService.sendTextMail(u.getEmail(), "ACMER账号审核不通过", "你在ACMER网站注册的账号 " + u.getEmail() + " 没有通过审核，账号已删除，请重新注册");
     }
 
     @Override
-    public User_Student getUserStudentById(int id) {
-        return new User_Student(userRepository.findById(id).get(), studentRepository.findByUserId(id).orElse(null));
-    }
-
-    @Override
     public void changePhoneAndIcpcEmail(String phone, String icpcEmail, int id) {
         User u = userRepository.findById(id).get();
-        Student stu = studentRepository.findByUserId(id).get();
-//        if (!phone.equals("")) {
-            u.setPhone(phone);
-            userRepository.save(u);
-//        }
-//        if (!icpcEmail.equals("")) {
-            stu.setIcpcEmail(icpcEmail);
-            studentRepository.save(stu);
-//        }
+        u.setPhone(phone);
+        u.setIcpcEmail(icpcEmail);
+        userRepository.save(u);
     }
 
 }

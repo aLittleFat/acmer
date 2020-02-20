@@ -4,10 +4,10 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "personal_season_student", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"student_id", "season_id"})
+@Table(name = "season_student", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"season_id", "student_id"})
 })
-public class PersonalSeasonStudent {
+public class SeasonStudent {
     private int seasonId;
     private String studentId;
     private int id;
@@ -34,6 +34,7 @@ public class PersonalSeasonStudent {
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
     }
@@ -46,7 +47,7 @@ public class PersonalSeasonStudent {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PersonalSeasonStudent that = (PersonalSeasonStudent) o;
+        SeasonStudent that = (SeasonStudent) o;
         return seasonId == that.seasonId &&
                 id == that.id &&
                 Objects.equals(studentId, that.studentId);
