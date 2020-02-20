@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface ContestRecordRepository extends JpaRepository<ContestRecord, Integer> {
-    Optional<ContestRecord> findByContestIdAndStudentId(Integer contestId, String studentId);
+    Optional<ContestRecord> findByContestIdAndStudentIdAndTeamId(Integer contestId, String studentId, Integer teamId);
     List<ContestRecord> findAllByStudentIdOrderByTimeDesc(String studentId);
     List<ContestRecord> findAllByContestId(int id);
 }

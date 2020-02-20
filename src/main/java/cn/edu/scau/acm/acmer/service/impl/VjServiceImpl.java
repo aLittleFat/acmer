@@ -182,8 +182,10 @@ public class VjServiceImpl implements VjService {
     @Override
     @Transactional
     public void addContest(BaseHttpClient httpClient, String cId, String password) throws Exception {
-        httpClient = new BaseHttpClient();
-        login(httpClient);
+        if(httpClient == null) {
+            httpClient = new BaseHttpClient();
+            login(httpClient);
+        }
         String url = "https://vjudge.net/contest/" + cId;
         try {
             String html = httpClient.get(url);
@@ -277,12 +279,17 @@ public class VjServiceImpl implements VjService {
     }
 
     @Override
-    public void addPersonalContestRecord(BaseHttpClient httpClient, int contestId, String studentId, String account) throws Exception {
-        if(httpClient == null) {
-            httpClient = new BaseHttpClient();
-            login(httpClient);
+    public void addContestRecord(String ojName, String cId, String studentId, Integer teamId, String account, String password) throws Exception {
+
+        BaseHttpClient httpClient = new BaseHttpClient();
+        login(httpClient);
+
+        Optional<Contest> optionalContest = contestRepository.findByOjNameAndCid(ojName, cId);
+        if(optionalContest.isEmpty()) {
+            addContest(httpClient, cId, password);
         }
-        Contest contest = contestRepository.findById(contestId).get();
+        Contest contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
+
         if(contest.getEndTime().getTime() > System.currentTimeMillis()) {
             throw new Exception("比赛还未结束");
         }
@@ -302,14 +309,13 @@ public class VjServiceImpl implements VjService {
         }
         ContestRecord contestRecord = new ContestRecord();
         contestRecord.setStudentId(studentId);
-        contestRecord.setContestId(contestId);
+        contestRecord.setTeamId(teamId);
+        contestRecord.setContestId(contest.getId());
         contestRecord.setAccount(account);
         contestRecord.setTime(contest.getStartTime());
         contestRecordRepository.save(contestRecord);
 
-
-        contestRecord = contestRecordRepository.findByContestIdAndStudentId(contestId, studentId).get();
-
+        contestRecord = contestRecordRepository.findByContestIdAndStudentIdAndTeamId(contest.getId(), studentId, teamId).get();
 
         updateContestProblemRecord(httpClient, contestRecord);
     }
@@ -333,22 +339,21 @@ public class VjServiceImpl implements VjService {
                 break;
             }
         }
-//        if(participantId == 0) {
-//            throw new Exception("没有参与该比赛");
-//        }
 
         List<ContestProblemRecord> contestProblemRecords = new ArrayList<>();
         if(contest.getProblemNumber() == 0) {
             updateContestProblem(httpClient, contest);
         }
+        char index = 'A';
         for (int i = 0; i < contest.getProblemNumber(); ++i) {
-            String index = String.valueOf('A' + i);
-            ContestProblemRecord contestProblemRecord = contestProblemRecordRepository.findByContestRecordIdAndProblemIndex(contestRecord.getId(), index).orElse(new ContestProblemRecord());
+            String problemIndex = String.valueOf(index);
+            ContestProblemRecord contestProblemRecord = contestProblemRecordRepository.findByContestRecordIdAndProblemIndex(contestRecord.getId(), problemIndex).orElse(new ContestProblemRecord());
             contestProblemRecord.setStatus("UnSolved");
-            contestProblemRecord.setProblemIndex(index);
+            contestProblemRecord.setProblemIndex(problemIndex);
             contestProblemRecord.setTries(0);
             contestProblemRecord.setContestRecordId(contestRecord.getId());
             contestProblemRecords.add(contestProblemRecord);
+            index++;
         }
 
         int contestLength = (int) ((contest.getEndTime().getTime() - contest.getStartTime().getTime()) / (1000 * 60));

@@ -43,25 +43,21 @@ public class TestController {
         scheduledService.getAllAcProblemsFromOj();
     }
 
-    @GetMapping("/addContest")
-    MyResponseEntity<Void> addContest(String ojName, String cId, String username, String password) {
-        try {
-            BaseHttpClient httpClient = null;
-            contestService.addContest(httpClient, ojName, cId, username, password);
-            return new MyResponseEntity<>();
-        } catch (Exception e) {
-            return new MyResponseEntity<>(e.getMessage());
-        }
-    }
+//    @GetMapping("/addContest")
+//    MyResponseEntity<Void> addContest(String ojName, String cId, String username, String password) {
+//        try {
+//            BaseHttpClient httpClient = null;
+//            contestService.addContest(httpClient, ojName, cId, username, password);
+//            return new MyResponseEntity<>();
+//        } catch (Exception e) {
+//            return new MyResponseEntity<>(e.getMessage());
+//        }
+//    }
 
     @GetMapping("/addPersonalContestRecord")
-    MyResponseEntity<Void> addPersonalContestRecord(String ojName, String cId, String account, String password, String studentId) {
-        try {
-            contestService.addPersonalContestRecord(ojName, cId, password, studentId, account);
-            return new MyResponseEntity<>();
-        } catch (Exception e) {
-            return new MyResponseEntity<>(e.getMessage());
-        }
+    MyResponseEntity<Void> addPersonalContestRecord(String ojName, String cId, String account, String password, String studentId) throws Exception {
+        contestService.addContestRecord(ojName, cId, studentId, null, account, password);
+        return new MyResponseEntity<>();
     }
 
     @GetMapping("showContest")

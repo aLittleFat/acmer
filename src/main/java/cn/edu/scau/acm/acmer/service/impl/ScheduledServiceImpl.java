@@ -34,7 +34,7 @@ public class ScheduledServiceImpl implements ScheduledService {
 
     @Override
     @Async
-    @Scheduled(cron = "0 52 12 * * ?")
+    @Scheduled(cron = "0 57 18 * * ?")
     public void updateAllContest() throws Exception {
         BaseHttpClient httpClient = null;
         vjService.updateAllContest(httpClient);
