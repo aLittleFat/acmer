@@ -1,8 +1,6 @@
 package cn.edu.scau.acm.acmer.httpclient;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.ProtocolException;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -22,6 +20,9 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BaseHttpClient {
@@ -40,7 +41,8 @@ public class BaseHttpClient {
 			        sslContext, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 			RequestConfig requestConfig = RequestConfig.custom()
 					.setConnectTimeout(2000).setConnectionRequestTimeout(2000)
-					.setSocketTimeout(10000).build();
+					.setSocketTimeout(10000).setProxy(new HttpHost("localhost", 8888))
+					.build();
 			httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).setDefaultRequestConfig(requestConfig).build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -74,16 +76,25 @@ public class BaseHttpClient {
 	}
 
 	public String post(String url, List<NameValuePair> params) throws Exception {
-		return post(url, "utf-8", params);
+		return post(url, "utf-8", params, null);
 	}
 
-	public String post(String url, String charset, List<NameValuePair> params) throws Exception {
+	public String post(String url, List<NameValuePair> params, List<Header> headers) throws Exception {
+		return post(url, "utf-8", params, headers);
+	}
+
+	public String post(String url, String charset, List<NameValuePair> params, List<Header> headers) throws Exception {
 		CloseableHttpClient client = createHttpClient();
 		HttpPost httpPost = new HttpPost(url);
 		int retry = 5;
 		while (retry > 0) {
 			try {
 				httpPost.setEntity(new UrlEncodedFormEntity(params));
+				if(headers != null) {
+					for (Header header : headers) {
+						httpPost.setHeader(header);
+					}
+				}
 				CloseableHttpResponse response = client.execute(httpPost, context);
 				return getResponseContent(url, charset, response);
 			} catch (IOException e) {

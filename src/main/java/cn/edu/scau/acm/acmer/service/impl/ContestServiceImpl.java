@@ -7,10 +7,7 @@ import cn.edu.scau.acm.acmer.repository.ContestProblemRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestProblemRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
-import cn.edu.scau.acm.acmer.service.ContestService;
-import cn.edu.scau.acm.acmer.service.HduService;
-import cn.edu.scau.acm.acmer.service.NowCoderService;
-import cn.edu.scau.acm.acmer.service.VjService;
+import cn.edu.scau.acm.acmer.service.*;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +39,9 @@ public class ContestServiceImpl implements ContestService {
     @Autowired
     private NowCoderService nowCoderService;
 
+    @Autowired
+    private JisuankeService jisuankeService;
+
 
     @Override
     public void addContestRecord(String ojName, String cId, String studentId, Integer teamId, String account, String password) throws Exception {
@@ -50,7 +50,7 @@ public class ContestServiceImpl implements ContestService {
             case "VJ": vjService.addContestRecord(ojName, cId, studentId, teamId, account, password); break;
             case "HDU": hduService.addContestRecord(ojName, cId, studentId, teamId, account, password); break;
             case "CodeForces": break;
-            case "计蒜客": break;
+            case "计蒜客": jisuankeService.addContestRecord(ojName, cId, studentId, teamId, account);break;
             case "牛客": nowCoderService.addContestRecord(ojName, cId, studentId, teamId, account); break;
         }
     }
