@@ -34,4 +34,7 @@ public interface ProblemAcRecordRepository extends JpaRepository<ProblemAcRecord
 
     @Query(value = "select count (distinct problem) from ProblemAcRecord as problemAcRecord left join Problem as problem on problemAcRecord.problemId=problem.id left join OjAccount as ojAccount on ojAccount.id=problemAcRecord.ojAccountId where ojAccount.studentId=:studentId")
     int countAllByStudentId(@Param("studentId") String studentId);
+
+    @Query(value = "select count (problemAcRecord) from ProblemAcRecord as problemAcRecord left join OjAccount as ojAccount on problemAcRecord.ojAccountId=ojAccount.id where problemAcRecord.problemId = :problemId and ojAccount.studentId = :studentId")
+    int isAc(@Param("problemId") Integer problemId, @Param("studentId") String studentId);
 }

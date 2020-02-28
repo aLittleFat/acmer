@@ -57,6 +57,9 @@ public class HduServiceImpl implements HduService {
     @Autowired
     private ContestProblemRecordRepository contestProblemRecordRepository;
 
+    @Autowired
+    private ProblemRepository problemRepository;
+
     @Override
     public void hduLogout() {
         String url = "http://acm.hdu.edu.cn/userloginex.php?action=logout";
@@ -84,23 +87,27 @@ public class HduServiceImpl implements HduService {
 
     @Override
     @Async
+    @Transactional
     public void getAcProblemsByHduAccount(OjAccount hduAccount) {
+        BaseHttpClient httpClient = new BaseHttpClient();
         String url = "http://acm.hdu.edu.cn/status.php?first=&pid=&user=" + hduAccount.getAccount() +"&lang=0&status=5";
-        int retry = 10;
-        while(url != null && retry > 0) {
-            try {
-                log.info(url);
-                Document document = Jsoup.connect(url).get();
+        try {
+            while(url != null) {
+                Document document = Jsoup.parse(httpClient.get(url));
                 Elements table = document.body().selectFirst("div#fixed_table").selectFirst("table").selectFirst("tbody").select("tr");
                 for (int i = 1; i < table.size(); ++i) {
                     Elements line = table.get(i).select("td");
                     if (line.select("font").first().text().equals("Accepted")) {
                         String proId = line.get(3).selectFirst("a").text();
                         Timestamp time = Timestamp.valueOf(line.get(1).text());
-                        problemService.addProblem("HDU", proId);
+
+                        if(problemRepository.findByOjNameAndProblemId("HDU", proId).isEmpty()) {
+                            String title = Jsoup.parse(httpClient.get("http://acm.hdu.edu.cn/showproblem.php?pid=" + proId)).selectFirst("h1").text();
+                            problemService.addProblem("HDU", proId, title);
+                        }
                         Problem problem = problemService.findProblem("HDU", proId);
-                        if(!problemService.addProblemAcRecord(problem , hduAccount, time.getTime())) {
-                            continue;
+                        if (problemService.addProblemAcRecord(problem, hduAccount, time.getTime() + 8*60*60*1000)) {
+                            break;
                         }
                     }
                 }
@@ -111,17 +118,9 @@ public class HduServiceImpl implements HduService {
                         url = "http://acm.hdu.edu.cn/" + link.attr("href");
                     }
                 }
-                retry = 10;
-            } catch (Exception e) {
-                try {
-                    Thread.sleep(1000);
-                    retry--;
-                    log.error("网络错误，准备重试，重试第{}次", 10-retry);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
     }
 

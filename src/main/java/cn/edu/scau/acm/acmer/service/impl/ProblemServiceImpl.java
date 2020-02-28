@@ -1,19 +1,17 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
-import cn.edu.scau.acm.acmer.entity.OjAccount;
-import cn.edu.scau.acm.acmer.entity.Problem;
-import cn.edu.scau.acm.acmer.entity.ProblemAcRecord;
-import cn.edu.scau.acm.acmer.entity.User;
-import cn.edu.scau.acm.acmer.model.AcProblem;
+import cn.edu.scau.acm.acmer.entity.*;
 import cn.edu.scau.acm.acmer.model.AcProblemInDay;
 import cn.edu.scau.acm.acmer.model.PersonalProblemAcRank;
 import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.*;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -38,28 +36,47 @@ public class ProblemServiceImpl implements ProblemService {
     @Autowired
     private OJService ojService;
 
+    @Autowired
+    private ProblemDifficultRepository problemDifficultRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
+
+    @Autowired
+    private ProblemTagRepository problemTagRepository;
+
     @Override
-    public void addProblem(String ojName, String problemId) {
+    public void addProblem(String ojName, String problemId, String title) {
         Optional<Problem> problem = problemRepository.findByOjNameAndProblemId(ojName, problemId);
         if(problem.isEmpty()) {
             ojService.addOj(ojName);
             Problem newProblem = new Problem();
             newProblem.setOjName(ojName);
             newProblem.setProblemId(problemId);
+            newProblem.setTitle(title);
             problemRepository.save(newProblem);
         }
     }
 
     @Override
     public boolean addProblemAcRecord(Problem problem, OjAccount ojAccount, Long time) {
-        Optional<ProblemAcRecord> problemACRecord = problemAcRecordRepository.findProblemACRecordByOjAccountIdAndProblemId(ojAccount.getId(), problem.getId());
-        if(problemACRecord.isPresent()) return false;
+        Optional<ProblemAcRecord> optionalProblemAcRecord = problemAcRecordRepository.findProblemACRecordByOjAccountIdAndProblemId(ojAccount.getId(), problem.getId());
+        if(optionalProblemAcRecord.isPresent()){
+            ProblemAcRecord problemAcRecord = optionalProblemAcRecord.get();
+            if (problemAcRecord.getTime().getTime() == time) {
+                return true;
+            } else {
+                problemAcRecord.setTime(new Timestamp(time));
+                problemAcRecordRepository.save(problemAcRecord);
+                return false;
+            }
+        }
         ProblemAcRecord newProblemACRecord = new ProblemAcRecord();
         newProblemACRecord.setProblemId(problem.getId());
         newProblemACRecord.setOjAccountId(ojAccount.getId());
         newProblemACRecord.setTime(new Timestamp(time));
         problemAcRecordRepository.save(newProblemACRecord);
-        return true;
+        return false;
     }
 
     @Override
@@ -147,6 +164,44 @@ public class ProblemServiceImpl implements ProblemService {
         }
         Collections.sort(personalProblemAcRanks);
         return personalProblemAcRanks;
+    }
+
+    @Override
+    public JSONObject getProblemInfo(int id, String studentId) {
+        JSONObject res = new JSONObject();
+        Problem problem = problemRepository.findById(id).get();
+        JSONObject problemJson = new JSONObject();
+        problemJson.put("id", problem.getOjName() + " " + problem.getProblemId());
+        problemJson.put("title", problem.getTitle());
+        problemJson.put("link", "https://vjudge.net/problem/" + problem.getOjName() + "-" + problem.getProblemId());
+        res.put("problem", problemJson);
+        BigDecimal difficult = problemDifficultRepository.avgByProblemId(id);
+        if(difficult == null) difficult = BigDecimal.ZERO;
+        res.put("difficult", difficult);
+        res.put("tags", problemTagRepository.findAllByProblemId(id));
+
+        boolean ac = checkIsAc(id, studentId);
+
+        res.put("ac", ac);
+        if(ac) {
+            Optional<ProblemDifficult> problemDifficult = problemDifficultRepository.findByProblemIdAndStudentId(id, studentId);
+            if(problemDifficult.isEmpty()) {
+                difficult = BigDecimal.ZERO;
+            } else {
+                difficult = problemDifficult.get().getDifficult();
+            }
+            res.put("myDifficult", difficult);
+            res.put("myTags", problemTagRepository.findAllByProblemIdAndStudentId(id, studentId));
+        }
+        return res;
+    }
+
+
+
+    @Override
+    public boolean checkIsAc(int problemId, String studentId) {
+        boolean ac = problemAcRecordRepository.isAc(problemId, studentId) > 0;
+        return ac;
     }
 
 

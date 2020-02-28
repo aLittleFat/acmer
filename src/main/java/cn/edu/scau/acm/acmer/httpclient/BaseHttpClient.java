@@ -41,14 +41,12 @@ public class BaseHttpClient {
 			        sslContext, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 			RequestConfig requestConfig = RequestConfig.custom()
 					.setConnectTimeout(2000).setConnectionRequestTimeout(2000)
-					.setSocketTimeout(10000).setProxy(new HttpHost("localhost", 8888))
+					.setSocketTimeout(20000).setProxy(new HttpHost("localhost", 8888))
 					.build();
 			httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).setDefaultRequestConfig(requestConfig).build();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-
 		return httpclient;
 	}
 	

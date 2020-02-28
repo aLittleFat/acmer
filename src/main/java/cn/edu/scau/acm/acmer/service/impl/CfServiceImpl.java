@@ -38,8 +38,6 @@ public class CfServiceImpl implements CfService {
     @Override
     @Async
     public void getAcProblemsByCfAccount(OjAccount cfAccount) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         int sz = 0;
         int start = 1;
         int retry = 20;
@@ -58,9 +56,9 @@ public class CfServiceImpl implements CfService {
                     if(jsonProblem.getJSONObject("problem").getInteger("contestId") >= 9999) {
                         ojName="Gym";
                     }
-                    problemService.addProblem(ojName,proId);
-                    if(!problemService.addProblemAcRecord(problemService.findProblem(ojName, proId), cfAccount, jsonProblem.getLong("creationTimeSeconds")*1000)){
-                        continue;
+                    problemService.addProblem(ojName, proId, jsonProblem.getJSONObject("problem").getString("name"));
+                    if(problemService.addProblemAcRecord(problemService.findProblem(ojName, proId), cfAccount, (jsonProblem.getLong("creationTimeSeconds") + 8*60*60) * 1000)){
+                        break;
                     }
                 }
                 retry = 20;

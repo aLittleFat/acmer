@@ -71,6 +71,9 @@ public class VjServiceImpl implements VjService {
     @Autowired
     private ContestProblemRecordRepository contestProblemRecordRepository;
 
+    @Autowired
+    private ProblemRepository problemRepository;
+
     @Override
     public boolean checkVjLoginStatus() {
         String url = "https://vjudge.net/user/checkLogInStatus";
@@ -113,50 +116,39 @@ public class VjServiceImpl implements VjService {
 
     @Override
     @Async
-    public void getAcProblemsByVjAccount(OjAccount vjAccount) {
+    @Transactional
+    public void getAcProblemsByVjAccount(OjAccount vjAccount) throws Exception {
+        BaseHttpClient httpClient = new BaseHttpClient();
         String url = "https://vjudge.net/status/data/";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         int sz = 0;
         int start = 0;
-        int retry = 10;
         do {
-            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-            map.add("start", String.valueOf(start));
-            map.add("length", "20");
-            map.add("un", vjAccount.getAccount());
-            map.add("OJId", "All");
-            map.add("res", "1");
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-            String response;
-            try {
-                response = restTemplate.postForObject(url, request, String.class);
-                JSONObject jsonObject = JSONObject.parseObject(response);
-                JSONArray vjProblems = jsonObject.getJSONArray("data");
-                sz = vjProblems.size();
-                for (Object vjProblem : vjProblems) {
-                    JSONObject jsonProblem = (JSONObject) vjProblem;
-                    log.info(jsonProblem.getString("oj") + "   " + jsonProblem.getString("probNum"));
-                    ojService.addOj(jsonProblem.getString("oj"));
-                    problemService.addProblem(jsonProblem.getString("oj"),jsonProblem.getString("probNum"));
-                    if(!problemService.addProblemAcRecord(problemService.findProblem(jsonProblem.getString("oj"),jsonProblem.getString("probNum")), vjAccount, jsonProblem.getLong("time"))){
-                        continue;
-                    }
+            List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("start", String.valueOf(start)));
+            params.add(new BasicNameValuePair("length", "20"));
+            params.add(new BasicNameValuePair("un", vjAccount.getAccount()));
+            params.add(new BasicNameValuePair("OJId", "All"));
+            params.add(new BasicNameValuePair("res", "1"));
+            String response = httpClient.post(url, params);
+            JSONObject jsonObject = JSONObject.parseObject(response);
+            JSONArray vjProblems = jsonObject.getJSONArray("data");
+            sz = vjProblems.size();
+            for (Object vjProblem : vjProblems) {
+                JSONObject jsonProblem = (JSONObject) vjProblem;
+                String ojName = jsonProblem.getString("oj");
+                String problemId = jsonProblem.getString("probNum");
+
+                if(problemRepository.findByOjNameAndProblemId(ojName,problemId).isEmpty()) {
+                    response = httpClient.get("https://vjudge.net/problem/" + ojName + "-" + problemId);
+                    String title = Jsoup.parse(response).selectFirst("h2").text();
+                    problemService.addProblem(ojName, problemId, title);
                 }
-                retry = 10;
-            } catch (Exception e) {
-                try {
-                    Thread.sleep(1000);
-                    retry--;
-                    log.error("网络错误，准备重试，重试第{}次", 10-retry);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
+                if(problemService.addProblemAcRecord(problemService.findProblem(ojName, problemId), vjAccount, jsonProblem.getLong("time")+8*60*60*1000)){
+                    break;
                 }
-                continue;
             }
             start += 20;
-            log.info(String.valueOf(sz));
-        } while (sz >= 20 && retry > 0);
+        } while (sz >= 20);
     }
 
     @Override
@@ -164,7 +156,11 @@ public class VjServiceImpl implements VjService {
     public void getAllAcProblems() {
         List<OjAccount> ojAccounts = ojAccountRepository.findAllByOjName("VJ");
         for(OjAccount ojAccount : ojAccounts) {
-            getAcProblemsByVjAccount(ojAccount);
+            try {
+                getAcProblemsByVjAccount(ojAccount);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
         }
     }
 
@@ -230,29 +226,29 @@ public class VjServiceImpl implements VjService {
 
     @Override
     public void updateContestProblem(BaseHttpClient httpClient, Contest contest) throws Exception {
-        if (httpClient == null) {
-            httpClient = new BaseHttpClient();
-            login(httpClient);
-        }
-        String url = "https://vjudge.net/contest/" + contest.getCid();
-        String html = httpClient.get(url);
-        Document document = Jsoup.parse(html);
-        JSONObject jsonObject = (JSONObject) JSON.parse(document.body().selectFirst("[name=dataJson]").text());
-        JSONArray jsonProblems = jsonObject.getJSONArray("problems");
-        contest.setProblemNumber(jsonProblems.size());
-        for(Object jsonProblemObject : jsonProblems) {
-            JSONObject jsonProblem = (JSONObject) jsonProblemObject;
-            log.info(jsonProblem.toJSONString());
-            problemService.addProblem(jsonProblem.getString("oj"), jsonProblem.getString("probNum"));
-            Problem problem = problemService.findProblem(jsonProblem.getString("oj"), jsonProblem.getString("probNum"));
-            Optional<ContestProblem> contestProblem = contestProblemRepository.findByContestIdAndProblemIndex(contest.getId(), jsonProblem.getString("num"));
-            if(contestProblem.isPresent()) continue;
-            ContestProblem contestProblem1 = new ContestProblem();
-            contestProblem1.setContestId(contest.getId());
-            contestProblem1.setProblemIndex(jsonProblem.getString("num"));
-            contestProblem1.setProblemId(problem.getId());
-            contestProblemRepository.save(contestProblem1);
-        }
+//        if (httpClient == null) {
+//            httpClient = new BaseHttpClient();
+//            login(httpClient);
+//        }
+//        String url = "https://vjudge.net/contest/" + contest.getCid();
+//        String html = httpClient.get(url);
+//        Document document = Jsoup.parse(html);
+//        JSONObject jsonObject = (JSONObject) JSON.parse(document.body().selectFirst("[name=dataJson]").text());
+//        JSONArray jsonProblems = jsonObject.getJSONArray("problems");
+//        contest.setProblemNumber(jsonProblems.size());
+//        for(Object jsonProblemObject : jsonProblems) {
+//            JSONObject jsonProblem = (JSONObject) jsonProblemObject;
+//            log.info(jsonProblem.toJSONString());
+//            problemService.addProblem(jsonProblem.getString("oj"), jsonProblem.getString("probNum"), );
+//            Problem problem = problemService.findProblem(jsonProblem.getString("oj"), jsonProblem.getString("probNum"));
+//            Optional<ContestProblem> contestProblem = contestProblemRepository.findByContestIdAndProblemIndex(contest.getId(), jsonProblem.getString("num"));
+//            if(contestProblem.isPresent()) continue;
+//            ContestProblem contestProblem1 = new ContestProblem();
+//            contestProblem1.setContestId(contest.getId());
+//            contestProblem1.setProblemIndex(jsonProblem.getString("num"));
+//            contestProblem1.setProblemId(problem.getId());
+//            contestProblemRepository.save(contestProblem1);
+//        }
     }
 
     @Override

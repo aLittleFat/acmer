@@ -26,14 +26,14 @@ public class ContestController {
 
     @GetMapping("personalContest")
     @RequiresRoles({"student"})
-    MyResponseEntity<List<JSONObject>> getMyContest(){
+    MyResponseEntity<JSONObject> getMyContest(){
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         String studentId = userRepository.findById(id).get().getStudentId();
         return new MyResponseEntity<>(contestService.getContestByStudentId(studentId));
     }
 
     @GetMapping("personalContest/{studentId}")
-    MyResponseEntity<List<JSONObject>> getPersonalContestByStudentId(@PathVariable String studentId){
+    MyResponseEntity<JSONObject> getPersonalContestByStudentId(@PathVariable String studentId){
         return new MyResponseEntity<>(contestService.getContestByStudentId(studentId));
     }
 }

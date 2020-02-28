@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -42,6 +43,9 @@ public class ContestServiceImpl implements ContestService {
     @Autowired
     private JisuankeService jisuankeService;
 
+    @Autowired
+    private OpenTrainsService openTrainsService;
+
 
     @Override
     public void addContestRecord(String ojName, String cId, String studentId, Integer teamId, String account, String password) throws Exception {
@@ -49,9 +53,10 @@ public class ContestServiceImpl implements ContestService {
         switch (ojName) {
             case "VJ": vjService.addContestRecord(ojName, cId, studentId, teamId, account, password); break;
             case "HDU": hduService.addContestRecord(ojName, cId, studentId, teamId, account, password); break;
-            case "CodeForces": break;
+//            case "CodeForces": break;
             case "计蒜客": jisuankeService.addContestRecord(ojName, cId, studentId, teamId, account);break;
             case "牛客": nowCoderService.addContestRecord(ojName, cId, studentId, teamId, account); break;
+//            case "OpenTrains": openTrainsService.addContestRecord(ojName, cId, studentId, teamId, account); break;
         }
     }
 
@@ -72,23 +77,26 @@ public class ContestServiceImpl implements ContestService {
 //    }
 
     @Override
-    public List<JSONObject> getContestByStudentId(String studentId) {
+    public JSONObject getContestByStudentId(String studentId) {
+        JSONObject jsonObject = new JSONObject();
+        HashSet<String> set = new HashSet<>();
         List<JSONObject> contestLines = new ArrayList<>();
-        List<ContestRecord> personalContestRecords = contestRecordRepository.findAllByStudentIdOrderByTimeDesc(studentId);
-        for (ContestRecord personalContestRecord : personalContestRecords) {
-            Contest contest = contestRepository.findById(personalContestRecord.getContestId()).get();
+        List<ContestRecord> contestRecords = contestRecordRepository.findAllByStudentIdOrderByTimeDesc(studentId);
+        for (ContestRecord contestRecord : contestRecords) {
+            Contest contest = contestRepository.findById(contestRecord.getContestId()).get();
             if(contest.getEndTime().getTime() > System.currentTimeMillis()) continue;
             int solved = 0;
             int penalty = 0;
             JSONObject contestLine = new JSONObject();
-            contestLine.put("contestId" ,personalContestRecord.getContestId());
+            contestLine.put("contestId" ,contestRecord.getContestId());
             contestLine.put("title" ,contest.getTitle());
-            contestLine.put("time" ,personalContestRecord.getTime());
+            contestLine.put("time" ,contestRecord.getTime());
             contestLine.put("proNum" ,contest.getProblemNumber());
             JSONObject cellClassName = new JSONObject();
-            List<ContestProblemRecord> contestProblemRecords = contestProblemRecordRepository.findAllByContestRecordId(personalContestRecord.getId());
+            List<ContestProblemRecord> contestProblemRecords = contestProblemRecordRepository.findAllByContestRecordId(contestRecord.getId());
             for(ContestProblemRecord contestProblemRecord : contestProblemRecords) {
                 String problemIndex = contestProblemRecord.getProblemIndex();
+                set.add(problemIndex);
                 switch (contestProblemRecord.getStatus()) {
                     case "Solved":
                         solved++;
@@ -116,6 +124,10 @@ public class ContestServiceImpl implements ContestService {
             contestLine.put("penalty" ,penalty);
             contestLines.add(contestLine);
         }
-        return contestLines;
+
+        jsonObject.put("contests", contestLines);
+        jsonObject.put("columns", set);
+
+        return jsonObject;
     }
 }

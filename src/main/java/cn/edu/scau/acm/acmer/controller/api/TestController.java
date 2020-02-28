@@ -53,6 +53,9 @@ public class TestController {
     @Autowired
     ScheduledService scheduledService;
 
+    @Autowired
+    OpenTrainsService openTrainsService;
+
     @GetMapping("/addAc")
     void addAc() {
         scheduledService.getAllAcProblemsFromOj();
@@ -98,6 +101,11 @@ public class TestController {
             log.info(tds.text());
         }
         driver.close();
+    }
+
+    @GetMapping("/OpenTrains")
+    void testOpenTrains(String username) throws Exception {
+        openTrainsService.login(username);
     }
 
 //    @GetMapping("/testJisuanke")

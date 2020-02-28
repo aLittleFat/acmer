@@ -2,7 +2,9 @@ package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.OjAccount;
 import cn.edu.scau.acm.acmer.entity.Problem;
+import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
 import cn.edu.scau.acm.acmer.repository.OjAccountRepository;
+import cn.edu.scau.acm.acmer.repository.ProblemRepository;
 import cn.edu.scau.acm.acmer.service.BzojService;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import org.jsoup.Jsoup;
@@ -18,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -38,6 +41,9 @@ public class BzojServiceImpl implements BzojService {
 
     @Autowired
     private ProblemService problemService;
+
+    @Autowired
+    private ProblemRepository problemRepository;
 
     @Override
     public void bzojLogout() {
@@ -67,22 +73,25 @@ public class BzojServiceImpl implements BzojService {
 
     @Override
     @Async
+    @Transactional
     public void getAcProblemsByBzojAccount(OjAccount bzojAccount) {
+        BaseHttpClient httpClient = new BaseHttpClient();
         String url = "https://www.lydsy.com/JudgeOnline/status.php?problem_id=&user_id=" + bzojAccount.getAccount() + "&language=-1&jresult=4";
-        int retry = 10;
-        while(url != null && retry > 0) {
-            try {
-                log.info(url);
+        try {
+            while(url != null) {
                 Document document = Jsoup.connect(url).get();
                 Elements table = document.body().selectFirst("table[align=center]").selectFirst("tbody").select("tr");
                 for (int i = 1; i < table.size(); ++i) {
                     Elements line = table.get(i).select("td");
                     String proId = line.get(2).selectFirst("a").text();
                     Timestamp time = Timestamp.valueOf(line.get(8).text());
-                    problemService.addProblem("BZOJ", proId);
-                    Problem problem = problemService.findProblem("BZOJ", proId);
-                    if(!problemService.addProblemAcRecord(problem , bzojAccount, time.getTime())) {
-                        continue;
+                    if (problemRepository.findByOjNameAndProblemId("HYSBZ", proId).isEmpty()) {
+                        String title = Jsoup.connect("https://www.lydsy.com/JudgeOnline/problem.php?id=" + proId).get().selectFirst("h2").text().split(" ")[1];
+                        problemService.addProblem("HYSBZ", proId, title);
+                    }
+                    Problem problem = problemService.findProblem("HYSBZ", proId);
+                    if(problemService.addProblemAcRecord(problem, bzojAccount, time.getTime()+8*60*60*1000)) {
+                        break;
                     }
                 }
                 Elements links = document.body().select("a");
@@ -93,17 +102,10 @@ public class BzojServiceImpl implements BzojService {
                         else url = nextPage;
                     }
                 }
-                retry = 10;
-            } catch (Exception e) {
-                try {
-                    Thread.sleep(1000);
-                    retry--;
-                    log.error("网络错误，准备重试，重试第{}次", 10-retry);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-                e.printStackTrace();
+
             }
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
     }
 

@@ -26,10 +26,10 @@ public class ScheduledServiceImpl implements ScheduledService {
     @Async
     @Scheduled(cron = "0 0 2 * * ?")
     public void getAllAcProblemsFromOj() {
-        bzojService.getAllAcProblems();
+//        bzojService.getAllAcProblems();
         cfService.getAllAcProblems();
-        hduService.getAllAcProblems();
-        vjService.getAllAcProblems();
+//        hduService.getAllAcProblems();
+//        vjService.getAllAcProblems();
     }
 
     @Override

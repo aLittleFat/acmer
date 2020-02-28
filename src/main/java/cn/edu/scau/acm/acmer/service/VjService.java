@@ -9,7 +9,7 @@ public interface VjService {
     boolean checkVjLoginStatus();
     void vjLogout();
     boolean checkVjAccount(String username, String password);
-    void getAcProblemsByVjAccount(OjAccount vjAccount);
+    void getAcProblemsByVjAccount(OjAccount vjAccount) throws Exception;
     void getAllAcProblems();
     void login(BaseHttpClient baseHttpClient) throws Exception;
     void addContest(BaseHttpClient httpClient, String cId, String password) throws Exception;

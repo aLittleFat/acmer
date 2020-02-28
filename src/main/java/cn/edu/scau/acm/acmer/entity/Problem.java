@@ -11,6 +11,7 @@ public class Problem {
     private int id;
     private String problemId;
     private String ojName;
+    private String title;
 
     @Id
     @Column(name = "id")
@@ -43,6 +44,14 @@ public class Problem {
         this.ojName = ojName;
     }
 
+    @Basic
+    @Column(name = "title")
+    public String getTitle() { return title; }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -50,11 +59,12 @@ public class Problem {
         Problem problem = (Problem) o;
         return id == problem.id &&
                 Objects.equals(problemId, problem.problemId) &&
-                Objects.equals(ojName, problem.ojName);
+                Objects.equals(ojName, problem.ojName) &&
+                Objects.equals(title, problem.title);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, problemId, ojName);
+        return Objects.hash(id, problemId, ojName, title);
     }
 }
