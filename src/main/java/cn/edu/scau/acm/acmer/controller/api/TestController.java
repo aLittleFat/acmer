@@ -1,15 +1,11 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
-import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
+import cn.edu.scau.acm.acmer.model.OjAcChart;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.ProblemAcRecordRepository;
 import cn.edu.scau.acm.acmer.service.*;
-import org.apache.http.Header;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicNameValuePair;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -25,7 +21,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -55,6 +50,7 @@ public class TestController {
 
     @Autowired
     OpenTrainsService openTrainsService;
+
 
     @GetMapping("/addAc")
     void addAc() {
@@ -106,6 +102,11 @@ public class TestController {
     @GetMapping("/OpenTrains")
     void testOpenTrains(String username) throws Exception {
         openTrainsService.login(username);
+    }
+
+    @GetMapping("/testCharts")
+    MyResponseEntity<List<OjAcChart>> testCharts(String studentId){
+        return new MyResponseEntity<>(problemAcRecordRepository.countAllByStudentIdGroupByOJ(studentId));
     }
 
 //    @GetMapping("/testJisuanke")

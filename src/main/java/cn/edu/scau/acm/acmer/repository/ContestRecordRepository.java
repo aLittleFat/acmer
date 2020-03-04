@@ -11,5 +11,6 @@ import java.util.Optional;
 public interface ContestRecordRepository extends JpaRepository<ContestRecord, Integer> {
     Optional<ContestRecord> findByContestIdAndStudentIdAndTeamId(Integer contestId, String studentId, Integer teamId);
     List<ContestRecord> findAllByStudentIdOrderByTimeDesc(String studentId);
+    List<ContestRecord> findAllByTeamIdOrderByTimeDesc(Integer teamId);
     List<ContestRecord> findAllByContestId(int id);
 }

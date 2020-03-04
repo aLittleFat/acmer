@@ -2,9 +2,11 @@ package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
+import cn.edu.scau.acm.acmer.model.StudentInfo;
 import cn.edu.scau.acm.acmer.model.UserDto;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.AccountService;
+import cn.edu.scau.acm.acmer.service.StudentService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
@@ -21,6 +23,9 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private StudentService studentService;
+
     @ApiOperation("获取目前登录用户的信息")
     @RequiresAuthentication()
     @GetMapping("info")
@@ -36,5 +41,14 @@ public class UserController {
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         accountService.changePhoneAndIcpcEmail(phone, icpcEmail, id);
         return new MyResponseEntity<>();
+    }
+
+    @GetMapping("studentInfo")
+    MyResponseEntity<StudentInfo> getStudentInfo(String studentId) {
+        if(studentId == null || studentId.equals("")) {
+            int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
+            studentId = userRepository.findById(id).get().getStudentId();
+        }
+        return new MyResponseEntity<>(studentService.getStudentInfo(studentId));
     }
 }

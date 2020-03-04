@@ -11,10 +11,9 @@ import cn.edu.scau.acm.acmer.service.*;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ContestServiceImpl implements ContestService {
@@ -44,44 +43,61 @@ public class ContestServiceImpl implements ContestService {
     private JisuankeService jisuankeService;
 
     @Autowired
+    private CfService cfService;
+
+    @Autowired
+    private OJService ojService;
+
+    @Autowired
     private OpenTrainsService openTrainsService;
 
 
     @Override
+    @Transactional
     public void addContestRecord(String ojName, String cId, String studentId, Integer teamId, String account, String password) throws Exception {
 
+        ojService.addOj(ojName);
+        addContest(ojName, cId, account, password);
         switch (ojName) {
             case "VJ": vjService.addContestRecord(ojName, cId, studentId, teamId, account, password); break;
             case "HDU": hduService.addContestRecord(ojName, cId, studentId, teamId, account, password); break;
-//            case "CodeForces": break;
+            case "CodeForces": cfService.addContestRecord(ojName, cId, studentId, teamId, account);  break;
             case "计蒜客": jisuankeService.addContestRecord(ojName, cId, studentId, teamId, account);break;
             case "牛客": nowCoderService.addContestRecord(ojName, cId, studentId, teamId, account); break;
-//            case "OpenTrains": openTrainsService.addContestRecord(ojName, cId, studentId, teamId, account); break;
         }
     }
 
-//    @Override
-//    public int addContest(BaseHttpClient httpClient, String ojName, String cId, String username, String password) throws Exception {
-//        Optional<Contest> contest = contestRepository.findByOjNameAndCid(ojName, cId);
-//
-//        if(contest.isPresent()) return contest.get().getId();
-//        switch (ojName) {
-//            case "VJ": vjService.addContest(httpClient, cId, password); break;
-//            case "HDU": hduService.addContest(httpClient, cId, username, password); break;
-//            case "CodeForces": break;
-//            case "计蒜客": break;
-//            case "牛客": break;
-//            default: throw new Exception("不存在的OJ名");
-//        }
-//        return contestRepository.findByOjNameAndCid(ojName, cId).get().getId();
-//    }
+    @Override
+    public void addContest(String ojName, String cId, String username, String password) throws Exception {
+        Optional<Contest> optionalContest = contestRepository.findByOjNameAndCid(ojName, cId);
+        if(optionalContest.isEmpty()) {
+            switch (ojName) {
+                case "VJ": vjService.addContest(ojName, cId, password); break;
+                case "HDU": hduService.addContest(ojName, cId, username, password); break;
+                case "CodeForces": cfService.addContest(ojName, cId); break;
+                case "计蒜客": jisuankeService.addContest(ojName, cId);break;
+                case "牛客": nowCoderService.addContest(ojName, cId); break;
+                default: throw new Exception("不支持的OJ");
+            }
+        }
+    }
 
     @Override
     public JSONObject getContestByStudentId(String studentId) {
-        JSONObject jsonObject = new JSONObject();
-        HashSet<String> set = new HashSet<>();
-        List<JSONObject> contestLines = new ArrayList<>();
         List<ContestRecord> contestRecords = contestRecordRepository.findAllByStudentIdOrderByTimeDesc(studentId);
+        return getContestRecordTable(contestRecords);
+    }
+
+    @Override
+    public JSONObject getContestByTeamId(Integer teamId) {
+        List<ContestRecord> contestRecords = contestRecordRepository.findAllByTeamIdOrderByTimeDesc(teamId);
+        return getContestRecordTable(contestRecords);
+    }
+
+    private JSONObject getContestRecordTable(List<ContestRecord> contestRecords){
+        JSONObject jsonObject = new JSONObject();
+        Set<String> set = new TreeSet<>();
+        List<JSONObject> contestLines = new ArrayList<>();
         for (ContestRecord contestRecord : contestRecords) {
             Contest contest = contestRepository.findById(contestRecord.getContestId()).get();
             if(contest.getEndTime().getTime() > System.currentTimeMillis()) continue;

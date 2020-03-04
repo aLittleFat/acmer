@@ -12,7 +12,7 @@ public interface VjService {
     void getAcProblemsByVjAccount(OjAccount vjAccount) throws Exception;
     void getAllAcProblems();
     void login(BaseHttpClient baseHttpClient) throws Exception;
-    void addContest(BaseHttpClient httpClient, String cId, String password) throws Exception;
+    void addContest(String ojName, String cId, String password) throws Exception;
     void updateContestProblem(BaseHttpClient httpClient, Contest contest) throws Exception;
     void loginContest(BaseHttpClient baseHttpClient, String cId, String password) throws Exception;
     void addContestRecord(String ojName, String cId, String studentId, Integer teamId, String account, String password) throws Exception;

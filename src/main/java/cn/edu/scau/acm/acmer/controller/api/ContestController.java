@@ -1,17 +1,16 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
+import cn.edu.scau.acm.acmer.entity.TeamStudentPK;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.UserDto;
+import cn.edu.scau.acm.acmer.repository.TeamStudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.ContestService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -24,6 +23,9 @@ public class ContestController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private TeamStudentRepository teamStudentRepository;
+
     @GetMapping("personalContest")
     @RequiresRoles({"student"})
     MyResponseEntity<JSONObject> getMyContest(){
@@ -35,5 +37,34 @@ public class ContestController {
     @GetMapping("personalContest/{studentId}")
     MyResponseEntity<JSONObject> getPersonalContestByStudentId(@PathVariable String studentId){
         return new MyResponseEntity<>(contestService.getContestByStudentId(studentId));
+    }
+
+    @GetMapping("teamContest/{teamId}")
+    MyResponseEntity<JSONObject> getTeamContestByStudentId(@PathVariable Integer teamId){
+        return new MyResponseEntity<>(contestService.getContestByTeamId(teamId));
+    }
+
+    @PutMapping("personalContestRecord")
+    @RequiresRoles("student")
+    MyResponseEntity<Void> addPersonalContestRecord(String ojName, String cId, String account, String password) throws Exception {
+        int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
+        String studentId = userRepository.findById(id).get().getStudentId();
+        contestService.addContestRecord(ojName, cId, studentId, null, account, password);
+        return new MyResponseEntity<>();
+    }
+
+    @PutMapping("teamContestRecord")
+    @RequiresRoles("student")
+    MyResponseEntity<Void> addTeamContestRecord(String ojName, String cId, Integer teamId, String account, String password) throws Exception {
+        int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
+        String studentId = userRepository.findById(id).get().getStudentId();
+        TeamStudentPK teamStudentPK = new TeamStudentPK();
+        teamStudentPK.setStudentId(studentId);
+        teamStudentPK.setTeamId(teamId);
+        if(teamStudentRepository.findById(teamStudentPK).isEmpty()) {
+            throw new Exception("不是自己的队伍");
+        }
+        contestService.addContestRecord(ojName, cId, null, teamId, account, password);
+        return new MyResponseEntity<>();
     }
 }

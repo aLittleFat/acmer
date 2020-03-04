@@ -11,7 +11,7 @@ public interface HduService {
     void getAcProblemsByHduAccount(OjAccount hduAccount);
     void getAllAcProblems();
 
-    void addContest(BaseHttpClient httpClient, String cId, String username, String password) throws Exception;
+    void addContest(String ojName, String cId, String username, String password) throws Exception;
     void updateContestProblem(BaseHttpClient httpClient, Contest contest) throws Exception;
     void loginContest(BaseHttpClient httpClient, String ojId, String username, String password) throws Exception;
 

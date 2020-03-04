@@ -177,11 +177,10 @@ public class VjServiceImpl implements VjService {
 
     @Override
     @Transactional
-    public void addContest(BaseHttpClient httpClient, String cId, String password) throws Exception {
-        if(httpClient == null) {
-            httpClient = new BaseHttpClient();
-            login(httpClient);
-        }
+    public void addContest(String ojName, String cId, String password) throws Exception {
+
+        BaseHttpClient httpClient = new BaseHttpClient();
+        login(httpClient);
         String url = "https://vjudge.net/contest/" + cId;
         try {
             String html = httpClient.get(url);
@@ -207,7 +206,7 @@ public class VjServiceImpl implements VjService {
                 contest.setProblemNumber(0);
             }
             contest.setTitle(jsonObject.getString("title"));
-            contest.setOjName("VJ");
+            contest.setOjName(ojName);
             contest.setCid(cId);
 
             Timestamp startTime = new Timestamp(jsonObject.getLong("begin") + 8*60*60*1000);
@@ -215,10 +214,10 @@ public class VjServiceImpl implements VjService {
             contest.setStartTime(startTime);
             contest.setEndTime(endTime);
             contestRepository.save(contest);
-            contest = contestRepository.findByOjNameAndCid("VJ", cId).get();
-            if (System.currentTimeMillis() > endTime.getTime()) {
-                updateContestProblem(httpClient, contest);
-            }
+//            contest = contestRepository.findByOjNameAndCid("VJ", cId).get();
+//            if (System.currentTimeMillis() > endTime.getTime()) {
+//                updateContestProblem(httpClient, contest);
+//            }
         } catch (ProtocolException e) {
             throw new Exception("比赛不存在");
         }
@@ -280,10 +279,6 @@ public class VjServiceImpl implements VjService {
         BaseHttpClient httpClient = new BaseHttpClient();
         login(httpClient);
 
-        Optional<Contest> optionalContest = contestRepository.findByOjNameAndCid(ojName, cId);
-        if(optionalContest.isEmpty()) {
-            addContest(httpClient, cId, password);
-        }
         Contest contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
 
         if(contest.getEndTime().getTime() > System.currentTimeMillis()) {

@@ -51,7 +51,6 @@ public class JisuankeServiceImpl implements JisuankeService {
 
     @Override
     public void addContest(String ojName, String cId) throws Exception {
-        ojService.addOj(ojName);
         WebDriver webDriver = new ChromeDriver();
         webDriver.get("https://passport.jisuanke.com/?n=https://www.jisuanke.com/contest/" + cId);
         login(webDriver);
@@ -86,15 +85,8 @@ public class JisuankeServiceImpl implements JisuankeService {
     @Override
     @Transactional
     public void addContestRecord(String ojName, String cId, String studentId, Integer teamId, String account) throws Exception {
-        Optional<Contest> optionalContest = contestRepository.findByOjNameAndCid(ojName, cId);
-        Contest contest;
-        if(optionalContest.isEmpty()) {
-            addContest(ojName, cId);
-            contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
-        }
-        else{
-            contest = optionalContest.get();
-        }
+        Contest contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
+
         if(System.currentTimeMillis() < contest.getEndTime().getTime()) {
             throw new Exception("比赛还没结束");
         }

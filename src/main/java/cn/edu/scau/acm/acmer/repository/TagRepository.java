@@ -10,4 +10,6 @@ import java.util.List;
 
 @Repository
 public interface TagRepository extends JpaRepository<Tag, String> {
+    @Query(value = "select tag.name from Tag as tag where tag.name like :key")
+    List<String> findAllLike(@Param("key")String key);
 }

@@ -4,6 +4,7 @@ import cn.edu.scau.acm.acmer.entity.*;
 import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
 import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.HduService;
+import cn.edu.scau.acm.acmer.service.OJService;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -59,6 +60,9 @@ public class HduServiceImpl implements HduService {
 
     @Autowired
     private ProblemRepository problemRepository;
+
+    @Autowired
+    private OJService ojService;
 
     @Override
     public void hduLogout() {
@@ -134,16 +138,14 @@ public class HduServiceImpl implements HduService {
     }
 
     @Override
-    public void addContest(BaseHttpClient httpClient, String cId, String username, String password) throws Exception {
-        if (httpClient == null) {
-            httpClient = new BaseHttpClient();
-        }
+    public void addContest(String ojName, String cId, String username, String password) throws Exception {
+        BaseHttpClient httpClient = new BaseHttpClient();
         String url = "http://acm.hdu.edu.cn/contests/contest_show.php?cid=" + cId;
         log.info(url);
         String html = httpClient.get(url);
         String title = Jsoup.parse(html).title();
         Contest contest = new Contest();
-        contest.setOjName("HDU");
+        contest.setOjName(ojName);
         contest.setCid(cId);
         if(title.equals("User Login")) {
             if(username == null || username.equals("") || password == null || password.equals("")) {
@@ -169,8 +171,6 @@ public class HduServiceImpl implements HduService {
             contest.setProblemNumber(0);
         }
         contestRepository.save(contest);
-//        contest = contestRepository.findByOjNameAndCid("HDU", cId).get();
-
     }
 
     @Override
@@ -206,11 +206,6 @@ public class HduServiceImpl implements HduService {
     @Transactional
     public void addContestRecord(String ojName, String cId, String studentId, Integer teamId, String account, String password) throws Exception {
         BaseHttpClient httpClient = new BaseHttpClient();
-
-        Optional<Contest> optionalContest = contestRepository.findByOjNameAndCid(ojName, cId);
-        if(optionalContest.isEmpty()) {
-            addContest(httpClient, cId, account, password);
-        }
         Contest contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
 
         Optional<ContestRecord> optionalContestRecord = contestRecordRepository.findByContestIdAndStudentIdAndTeamId(contest.getId(), studentId, teamId);

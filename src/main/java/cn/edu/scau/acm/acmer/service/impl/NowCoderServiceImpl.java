@@ -48,14 +48,7 @@ public class NowCoderServiceImpl implements NowCoderService {
     @Override
     @Transactional
     public void addContestRecord(String ojName, String cId, String studentId, Integer teamId, String account) throws Exception {
-        Optional<Contest> optionalContest = contestRepository.findByOjNameAndCid(ojName, cId);
-        Contest contest;
-        if(optionalContest.isEmpty()) {
-            addContest(ojName, cId);
-            contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
-        } else {
-            contest = optionalContest.get();
-        }
+        Contest contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
         Optional<ContestRecord> optionalContestRecord = contestRecordRepository.findByContestIdAndStudentIdAndTeamId(contest.getId(), studentId, teamId);
         if(optionalContestRecord.isPresent()) {
             throw new Exception("已添加该竞赛记录");
@@ -93,7 +86,6 @@ public class NowCoderServiceImpl implements NowCoderService {
 
     @Override
     public void addContest(String ojName, String cId) throws Exception {
-        ojService.addOj(ojName);
         String url = "https://ac.nowcoder.com/acm/contest/rank/submit-list?currentContestId=" + cId + "&contestList=" + cId;
         JSONObject res = restTemplate.getForObject(url, JSONObject.class);
         assert res != null;

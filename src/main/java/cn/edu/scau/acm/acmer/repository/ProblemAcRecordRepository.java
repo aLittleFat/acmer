@@ -2,6 +2,8 @@ package cn.edu.scau.acm.acmer.repository;
 
 import cn.edu.scau.acm.acmer.entity.ProblemAcRecord;
 import cn.edu.scau.acm.acmer.model.AcProblem;
+import cn.edu.scau.acm.acmer.model.OjAcChart;
+import cn.edu.scau.acm.acmer.model.TagAcChart;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -29,12 +31,15 @@ public interface ProblemAcRecordRepository extends JpaRepository<ProblemAcRecord
     @Transactional
     void deleteAllByOjAccountId(int ojAccountId);
 
-    @Query(value = "select new cn.edu.scau.acm.acmer.model.AcProblem(problem, problemAcRecord) from ProblemAcRecord as problemAcRecord left join Problem as problem on problemAcRecord.problemId = problem.id where problemAcRecord.ojAccountId = :ojAccountId and problemAcRecord.time between :startTime and :endTime")
-    List<AcProblem> findAcProblemByOjAccountIdAndTimeBetween(@Param("ojAccountId") int ojAccountId, @Param("startTime") Date startTime, @Param("endTime") Date endTime);
-
     @Query(value = "select count (distinct problem) from ProblemAcRecord as problemAcRecord left join Problem as problem on problemAcRecord.problemId=problem.id left join OjAccount as ojAccount on ojAccount.id=problemAcRecord.ojAccountId where ojAccount.studentId=:studentId")
     int countAllByStudentId(@Param("studentId") String studentId);
 
     @Query(value = "select count (problemAcRecord) from ProblemAcRecord as problemAcRecord left join OjAccount as ojAccount on problemAcRecord.ojAccountId=ojAccount.id where problemAcRecord.problemId = :problemId and ojAccount.studentId = :studentId")
     int isAc(@Param("problemId") Integer problemId, @Param("studentId") String studentId);
+
+    @Query(value = "select new cn.edu.scau.acm.acmer.model.OjAcChart(problem.ojName, count(distinct problemAcRecord.problemId)) from ProblemAcRecord as problemAcRecord left join OjAccount as ojAccount on problemAcRecord.ojAccountId=ojAccount.id left join Problem as problem on problemAcRecord.problemId = problem.id where ojAccount.studentId = :studentId group by problem.ojName order by count(distinct problemAcRecord.problemId)")
+    List<OjAcChart> countAllByStudentIdGroupByOJ(String studentId);
+
+    @Query(value = "select new cn.edu.scau.acm.acmer.model.TagAcChart(problemTag.tagName, count(distinct problemAcRecord.problemId)) from ProblemAcRecord as problemAcRecord left join OjAccount as ojAccount on problemAcRecord.ojAccountId=ojAccount.id left join Problem as problem on problemAcRecord.problemId = problem.id left join ProblemTag as problemTag on problem.id = problemTag.problemId where ojAccount.studentId = :studentId group by problemTag.tagName order by count(distinct problemAcRecord.problemId)")
+    List<TagAcChart> countAllByStudentIdGroupByTag(String studentId);
 }
