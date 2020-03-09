@@ -4,6 +4,7 @@ import cn.edu.scau.acm.acmer.entity.Team;
 import cn.edu.scau.acm.acmer.entity.TeamStudent;
 import cn.edu.scau.acm.acmer.entity.TeamStudentPK;
 import cn.edu.scau.acm.acmer.entity.User;
+import cn.edu.scau.acm.acmer.model.MyTeamMenu;
 import cn.edu.scau.acm.acmer.model.TeamWithUsers;
 import cn.edu.scau.acm.acmer.repository.TeamRepository;
 import cn.edu.scau.acm.acmer.repository.TeamStudentRepository;
@@ -96,5 +97,10 @@ public class TeamServiceImpl implements TeamService {
             throw new Exception("不存在该队伍");
         }
         teamRepository.delete(team.get());
+    }
+
+    @Override
+    public List<MyTeamMenu> getTeamByStudentId(String studentId) {
+        return teamRepository.findAllTeamMenuByStudentId(studentId);
     }
 }

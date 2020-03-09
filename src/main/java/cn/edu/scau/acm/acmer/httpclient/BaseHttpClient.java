@@ -41,7 +41,7 @@ public class BaseHttpClient {
 			        sslContext, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 			RequestConfig requestConfig = RequestConfig.custom()
 					.setConnectTimeout(2000).setConnectionRequestTimeout(2000)
-					.setSocketTimeout(20000).setProxy(new HttpHost("localhost", 8888))
+					.setSocketTimeout(10000).setProxy(new HttpHost("localhost", 8888))
 					.build();
 			httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).setDefaultRequestConfig(requestConfig).build();
 		} catch (Exception e) {
@@ -57,7 +57,7 @@ public class BaseHttpClient {
 	public String get(String url, String charset) throws Exception {
 		CloseableHttpClient client = createHttpClient();
 		HttpGet httpGet = new HttpGet(url);
-		int retry = 5;
+		int retry = 3;
 		while (retry > 0) {
 			try {
 				CloseableHttpResponse response = client.execute(httpGet, context);
@@ -84,7 +84,7 @@ public class BaseHttpClient {
 	public String post(String url, String charset, List<NameValuePair> params, List<Header> headers) throws Exception {
 		CloseableHttpClient client = createHttpClient();
 		HttpPost httpPost = new HttpPost(url);
-		int retry = 5;
+		int retry = 3;
 		while (retry > 0) {
 			try {
 				httpPost.setEntity(new UrlEncodedFormEntity(params));

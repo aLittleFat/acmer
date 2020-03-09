@@ -1,5 +1,7 @@
 package cn.edu.scau.acm.acmer.service;
 
+import cn.edu.scau.acm.acmer.entity.Team;
+import cn.edu.scau.acm.acmer.model.MyTeamMenu;
 import cn.edu.scau.acm.acmer.model.TeamWithUsers;
 
 import java.util.List;
@@ -14,4 +16,6 @@ public interface TeamService {
     void deleteStudent(int teamId, String studentId) throws Exception;
 
     void deleteTeam(Integer teamId) throws Exception;
+
+    List<MyTeamMenu> getTeamByStudentId(String studentId);
 }

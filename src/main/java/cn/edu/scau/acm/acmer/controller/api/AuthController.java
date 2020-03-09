@@ -1,8 +1,12 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
+import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
+import cn.edu.scau.acm.acmer.model.UserDto;
+import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.AccountService;
 import cn.edu.scau.acm.acmer.service.UserService;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -18,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
-@RequestMapping(value = "/auth"  ,produces = "application/json; charset=utf-8")
+@RequestMapping(value = "/api/auth"  ,produces = "application/json; charset=utf-8")
 public class AuthController {
 
     @Autowired
@@ -28,6 +32,9 @@ public class AuthController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    UserRepository userRepository;
 
     @ApiOperation("登录")
     @PostMapping("/login")
@@ -49,6 +56,29 @@ public class AuthController {
         } catch (Exception e) {
             return new MyResponseEntity<>("网络错误");
         }
+    }
+
+    @GetMapping("roles")
+    public MyResponseEntity<JSONObject> roles() {
+        JSONObject roles = new JSONObject();
+        try {
+            int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
+            User user = userRepository.findById(id).get();
+            if(user.getStudentId() != null) {
+                roles.put("is_student", true);
+            } else {
+                roles.put("is_student", false);
+            }
+            if(user.getIsAdmin() == (byte)1) {
+                roles.put("is_admin", true);
+            } else {
+                roles.put("is_admin", false);
+            }
+        } catch (Exception e) {
+            roles.put("is_student", false);
+            roles.put("is_admin", false);
+        }
+        return new MyResponseEntity<>(roles);
     }
 
     @ApiOperation("注册")
