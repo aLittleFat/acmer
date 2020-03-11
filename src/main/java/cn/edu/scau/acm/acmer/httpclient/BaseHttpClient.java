@@ -40,10 +40,14 @@ public class BaseHttpClient {
 			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
 			        sslContext, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectTimeout(2000).setConnectionRequestTimeout(2000)
-					.setSocketTimeout(10000).setProxy(new HttpHost("localhost", 8888))
+					.setConnectTimeout(5000)
+					.setConnectionRequestTimeout(5000)
+					.setSocketTimeout(20000)
+//					.setProxy(new HttpHost("localhost", 8888))
 					.build();
-			httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).setDefaultRequestConfig(requestConfig).build();
+			httpclient = HttpClients.custom()
+					.setSSLSocketFactory(sslsf)
+					.setDefaultRequestConfig(requestConfig).build();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -57,7 +61,7 @@ public class BaseHttpClient {
 	public String get(String url, String charset) throws Exception {
 		CloseableHttpClient client = createHttpClient();
 		HttpGet httpGet = new HttpGet(url);
-		int retry = 3;
+		int retry = 5;
 		while (retry > 0) {
 			try {
 				CloseableHttpResponse response = client.execute(httpGet, context);
@@ -106,7 +110,7 @@ public class BaseHttpClient {
 	private String getResponseContent(String url, String charset, CloseableHttpResponse response) throws IOException, ProtocolException {
 		try {
             int status = response.getStatusLine().getStatusCode();
-            if (status >= 200 && status < 300 || status == 302) {
+            if (status >= 200 && status < 400) {
                 HttpEntity entity = response.getEntity();
                 return entity != null ? EntityUtils.toString(entity, charset) : null;
             } else {

@@ -18,6 +18,7 @@ public class Contest {
     private String ojName;
     private String username;
     private Integer problemNumber;
+    private String problemList;
 
     @Id
     @Column(name = "id")
@@ -106,6 +107,10 @@ public class Contest {
         return problemNumber;
     }
 
+    public void setProblemNumber(int problemNumber) {
+        this.problemNumber = problemNumber;
+    }
+
     public void setProblemNumber(Integer problemNumber) {
         this.problemNumber = problemNumber;
     }
@@ -123,11 +128,22 @@ public class Contest {
                 Objects.equals(password, contest.password) &&
                 Objects.equals(ojName, contest.ojName) &&
                 Objects.equals(username, contest.username) &&
-                Objects.equals(problemNumber, contest.problemNumber);
+                Objects.equals(problemNumber, contest.problemNumber) &&
+                Objects.equals(problemList, contest.problemList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startTime, endTime, cid, title, password, ojName, username, problemNumber);
+        return Objects.hash(id, startTime, endTime, cid, title, password, ojName, username, problemNumber, problemList);
+    }
+
+    @Basic
+    @Column(name = "problem_list")
+    public String getProblemList() {
+        return problemList;
+    }
+
+    public void setProblemList(String problemList) {
+        this.problemList = problemList;
     }
 }

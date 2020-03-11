@@ -1,10 +1,8 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
-import cn.edu.scau.acm.acmer.entity.ContestProblemRecord;
 import cn.edu.scau.acm.acmer.entity.ContestRecord;
 import cn.edu.scau.acm.acmer.entity.OjAccount;
-import cn.edu.scau.acm.acmer.repository.ContestProblemRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.OjAccountRepository;
@@ -16,8 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,8 +45,6 @@ public class CfServiceImpl implements CfService {
     @Autowired
     private ContestRecordRepository contestRecordRepository;
 
-    @Autowired
-    private ContestProblemRecordRepository contestProblemRecordRepository;
 
     @Override
     @Async
@@ -171,30 +165,32 @@ public class CfServiceImpl implements CfService {
 
         }
 
-        ContestRecord contestRecord = new ContestRecord();
-        contestRecord.setTime(new Timestamp((standingRow.getJSONObject("party").getLong("startTimeSeconds") + 8*60*60)*1000));
-        contestRecord.setContestId(contest.getId());
-        contestRecord.setStudentId(studentId);
-        contestRecord.setTeamId(teamId);
-        contestRecord.setAccount(account);
-        contestRecordRepository.save(contestRecord);
-        contestRecord = contestRecordRepository.findByContestIdAndStudentIdAndTeamId(contest.getId(), studentId, teamId).get();
-        JSONArray standings = standingRow.getJSONArray("problemResults");
-        for (int i = 0; i < problems.size(); i++) {
-            ContestProblemRecord contestProblemRecord = new ContestProblemRecord();
-            contestProblemRecord.setProblemIndex(problems.getJSONObject(i).getString("index"));
-            Integer timeSeconds = standings.getJSONObject(i).getInteger("bestSubmissionTimeSeconds");
-            if(timeSeconds == null) {
-                contestProblemRecord.setTries(standings.getJSONObject(i).getInteger("rejectedAttemptCount"));
-                contestProblemRecord.setStatus("UnSolved");
-            } else {
-                contestProblemRecord.setTries(standings.getJSONObject(i).getInteger("rejectedAttemptCount")+1);
-                contestProblemRecord.setPenalty(timeSeconds / 60);
-                contestProblemRecord.setStatus("Solved");
-            }
-            contestProblemRecord.setContestRecordId(contestRecord.getId());
-            contestProblemRecordRepository.save(contestProblemRecord);
-        }
+        // todo
+
+//        ContestRecord contestRecord = new ContestRecord();
+//        contestRecord.setTime(new Timestamp((standingRow.getJSONObject("party").getLong("startTimeSeconds") + 8*60*60)*1000));
+//        contestRecord.setContestId(contest.getId());
+//        contestRecord.setStudentId(studentId);
+//        contestRecord.setTeamId(teamId);
+//        contestRecord.setAccount(account);
+//        contestRecordRepository.save(contestRecord);
+//        contestRecord = contestRecordRepository.findByContestIdAndStudentIdAndTeamId(contest.getId(), studentId, teamId).get();
+//        JSONArray standings = standingRow.getJSONArray("problemResults");
+//        for (int i = 0; i < problems.size(); i++) {
+//            ContestProblemRecord contestProblemRecord = new ContestProblemRecord();
+//            contestProblemRecord.setProblemIndex(problems.getJSONObject(i).getString("index"));
+//            Integer timeSeconds = standings.getJSONObject(i).getInteger("bestSubmissionTimeSeconds");
+//            if(timeSeconds == null) {
+//                contestProblemRecord.setTries(standings.getJSONObject(i).getInteger("rejectedAttemptCount"));
+//                contestProblemRecord.setStatus("UnSolved");
+//            } else {
+//                contestProblemRecord.setTries(standings.getJSONObject(i).getInteger("rejectedAttemptCount")+1);
+//                contestProblemRecord.setPenalty(timeSeconds / 60);
+//                contestProblemRecord.setStatus("Solved");
+//            }
+//            contestProblemRecord.setContestRecordId(contestRecord.getId());
+//            contestProblemRecordRepository.save(contestProblemRecord);
+//        }
     }
 
     @Override

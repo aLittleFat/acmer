@@ -9,6 +9,8 @@ import cn.edu.scau.acm.acmer.service.ContestService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,9 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "api", produces = "application/json; charset=utf-8")
 public class ContestController {
+
+    Logger log = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private ContestService contestService;
 
@@ -31,12 +36,22 @@ public class ContestController {
     MyResponseEntity<JSONObject> getMyContest(){
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         String studentId = userRepository.findById(id).get().getStudentId();
-        return new MyResponseEntity<>(contestService.getContestByStudentId(studentId));
+
+        long a = System.currentTimeMillis();
+        JSONObject res = contestService.getContestByStudentId(studentId);
+        log.info(System.currentTimeMillis()-a+"ms");
+
+        return new MyResponseEntity<>(res);
     }
 
     @GetMapping("personalContest/{studentId}")
     MyResponseEntity<JSONObject> getPersonalContestByStudentId(@PathVariable String studentId){
-        return new MyResponseEntity<>(contestService.getContestByStudentId(studentId));
+
+        long a = System.currentTimeMillis();
+        JSONObject res = contestService.getContestByStudentId(studentId);
+        log.info(System.currentTimeMillis()-a+"ms");
+
+        return new MyResponseEntity<>(res);
     }
 
     @GetMapping("teamContest/{teamId}")

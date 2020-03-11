@@ -56,9 +56,6 @@ public class HduServiceImpl implements HduService {
     private ContestRecordRepository contestRecordRepository;
 
     @Autowired
-    private ContestProblemRecordRepository contestProblemRecordRepository;
-
-    @Autowired
     private ProblemRepository problemRepository;
 
     @Autowired
@@ -333,13 +330,16 @@ public class HduServiceImpl implements HduService {
                             tries = Integer.parseInt(statusStrings[1].substring(2, statusStrings[1].length()-1))+1;
                             status = "Solved";
                         }
-                        ContestProblemRecord contestProblemRecord = contestProblemRecordRepository.findByContestRecordIdAndProblemIndex(contestRecord.getId(), String.valueOf(index)).orElse(new ContestProblemRecord());
-                        contestProblemRecord.setProblemIndex(String.valueOf(index));
-                        contestProblemRecord.setPenalty(penalty);
-                        contestProblemRecord.setTries(tries);
-                        contestProblemRecord.setContestRecordId(contestRecord.getId());
-                        contestProblemRecord.setStatus(status);
-                        contestProblemRecordRepository.save(contestProblemRecord);
+//                        ContestProblemRecord contestProblemRecord = contestProblemRecordRepository.findByContestRecordIdAndProblemIndex(contestRecord.getId(), String.valueOf(index)).orElse(new ContestProblemRecord());
+//                        contestProblemRecord.setProblemIndex(String.valueOf(index));
+//                        contestProblemRecord.setPenalty(penalty);
+//                        contestProblemRecord.setTries(tries);
+//                        contestProblemRecord.setContestRecordId(contestRecord.getId());
+//                        contestProblemRecord.setStatus(status);
+//                        contestProblemRecordRepository.save(contestProblemRecord);
+
+                        // todo
+
                         ++index;
                         log.info(tds.get(j).text());
                     }

@@ -1,9 +1,7 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
-import cn.edu.scau.acm.acmer.entity.ContestProblemRecord;
 import cn.edu.scau.acm.acmer.entity.ContestRecord;
-import cn.edu.scau.acm.acmer.repository.ContestProblemRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.service.JisuankeService;
@@ -45,9 +43,6 @@ public class JisuankeServiceImpl implements JisuankeService {
 
     @Autowired
     private ContestRecordRepository contestRecordRepository;
-
-    @Autowired
-    private ContestProblemRecordRepository contestProblemRecordRepository;
 
     @Override
     public void addContest(String ojName, String cId) throws Exception {
@@ -155,13 +150,15 @@ public class JisuankeServiceImpl implements JisuankeService {
                         status = "Solved";
                     }
 
-                    ContestProblemRecord contestProblemRecord = contestProblemRecordRepository.findByContestRecordIdAndProblemIndex(contestRecord.getId(), problemIndex).orElse(new ContestProblemRecord());
-                    contestProblemRecord.setProblemIndex(problemIndex);
-                    contestProblemRecord.setContestRecordId(contestRecord.getId());
-                    contestProblemRecord.setStatus(status);
-                    contestProblemRecord.setPenalty(penalty);
-                    contestProblemRecord.setTries(tries);
-                    contestProblemRecordRepository.save(contestProblemRecord);
+//                    ContestProblemRecord contestProblemRecord = contestProblemRecordRepository.findByContestRecordIdAndProblemIndex(contestRecord.getId(), problemIndex).orElse(new ContestProblemRecord());
+//                    contestProblemRecord.setProblemIndex(problemIndex);
+//                    contestProblemRecord.setContestRecordId(contestRecord.getId());
+//                    contestProblemRecord.setStatus(status);
+//                    contestProblemRecord.setPenalty(penalty);
+//                    contestProblemRecord.setTries(tries);
+//                    contestProblemRecordRepository.save(contestProblemRecord);
+
+                    // todo
 
                     ++index;
                 }

@@ -1,14 +1,11 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
-import cn.edu.scau.acm.acmer.entity.ContestProblemRecord;
 import cn.edu.scau.acm.acmer.entity.ContestRecord;
-import cn.edu.scau.acm.acmer.repository.ContestProblemRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.service.NowCoderService;
 import cn.edu.scau.acm.acmer.service.OJService;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -20,9 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -42,8 +37,6 @@ public class NowCoderServiceImpl implements NowCoderService {
     @Autowired
     private OJService ojService;
 
-    @Autowired
-    private ContestProblemRecordRepository contestProblemRecordRepository;
 
     @Override
     @Transactional
@@ -126,7 +119,7 @@ public class NowCoderServiceImpl implements NowCoderService {
             }
         }
 
-        List<ContestProblemRecord> contestProblemRecords = new ArrayList<>();
+//        List<ContestProblemRecord> contestProblemRecords = new ArrayList<>();
         if(contest.getProblemNumber() == 0) {
             updateContestProblem(contest);
         }
@@ -142,43 +135,45 @@ public class NowCoderServiceImpl implements NowCoderService {
 
         char index = 'A';
 
-        for (int i = 0; i < contest.getProblemNumber(); ++i) {
-            String problemIndex = String.valueOf(index);
-            charToInt.put(problemIndex, i);
-            ContestProblemRecord contestProblemRecord = contestProblemRecordRepository.findByContestRecordIdAndProblemIndex(contestRecord.getId(), problemIndex).orElse(new ContestProblemRecord());
-            contestProblemRecord.setStatus("UnSolved");
-            contestProblemRecord.setProblemIndex(problemIndex);
-            contestProblemRecord.setTries(0);
-            contestProblemRecord.setContestRecordId(contestRecord.getId());
-            contestProblemRecords.add(contestProblemRecord);
-            index++;
-        }
+//        for (int i = 0; i < contest.getProblemNumber(); ++i) {
+//            String problemIndex = String.valueOf(index);
+//            charToInt.put(problemIndex, i);
+//            ContestProblemRecord contestProblemRecord = contestProblemRecordRepository.findByContestRecordIdAndProblemIndex(contestRecord.getId(), problemIndex).orElse(new ContestProblemRecord());
+//            contestProblemRecord.setStatus("UnSolved");
+//            contestProblemRecord.setProblemIndex(problemIndex);
+//            contestProblemRecord.setTries(0);
+//            contestProblemRecord.setContestRecordId(contestRecord.getId());
+//            contestProblemRecords.add(contestProblemRecord);
+//            index++;
+//        }
 
         int contestLength = (int) ((contest.getEndTime().getTime() - contest.getStartTime().getTime()) / (1000 * 60));
         log.info(String.valueOf(contestLength));
 
         JSONArray submissions = res.getJSONObject("data").getJSONArray("submitDataList").getJSONObject(0).getJSONArray("submissions");
 
-        for (int i = 0; i < submissions.size(); ++i) {
-            JSONObject submission = submissions.getJSONObject(i);
-            if(submission.getInteger("uid") == uid) {
-                int proNum = charToInt.get(map.get(submission.getInteger("problemId")));
-                int isAc = submission.getInteger("status");
-                log.info(submission.getLong("submitTime") + " " + (submission.getLong("submitTime") + 8*60*60*1000) + " " + contest.getStartTime().getTime());
-                int time = (int) ((submission.getLong("submitTime") + 8*60*60*1000 - contest.getStartTime().getTime()) / (60 * 1000));
-                if(!contestProblemRecords.get(proNum).getStatus().equals("UnSolved")) continue;
-                contestProblemRecords.get(proNum).setTries(contestProblemRecords.get(proNum).getTries() + 1);
-                if (isAc == 5) {
-                    if (time > contestLength) {
-                        contestProblemRecords.get(proNum).setStatus("UpSolved");
-                    } else {
-                        contestProblemRecords.get(proNum).setStatus("Solved");
-                    }
-                    contestProblemRecords.get(proNum).setPenalty(time);
-                }
-            }
-        }
-        contestProblemRecordRepository.saveAll(contestProblemRecords);
+        // todo
+
+//        for (int i = 0; i < submissions.size(); ++i) {
+//            JSONObject submission = submissions.getJSONObject(i);
+//            if(submission.getInteger("uid") == uid) {
+//                int proNum = charToInt.get(map.get(submission.getInteger("problemId")));
+//                int isAc = submission.getInteger("status");
+//                log.info(submission.getLong("submitTime") + " " + (submission.getLong("submitTime") + 8*60*60*1000) + " " + contest.getStartTime().getTime());
+//                int time = (int) ((submission.getLong("submitTime") + 8*60*60*1000 - contest.getStartTime().getTime()) / (60 * 1000));
+//                if(!contestProblemRecords.get(proNum).getStatus().equals("UnSolved")) continue;
+//                contestProblemRecords.get(proNum).setTries(contestProblemRecords.get(proNum).getTries() + 1);
+//                if (isAc == 5) {
+//                    if (time > contestLength) {
+//                        contestProblemRecords.get(proNum).setStatus("UpSolved");
+//                    } else {
+//                        contestProblemRecords.get(proNum).setStatus("Solved");
+//                    }
+//                    contestProblemRecords.get(proNum).setPenalty(time);
+//                }
+//            }
+//        }
+//        contestProblemRecordRepository.saveAll(contestProblemRecords);
     }
 
     @Override

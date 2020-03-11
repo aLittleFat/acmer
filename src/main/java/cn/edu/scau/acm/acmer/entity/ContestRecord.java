@@ -6,16 +6,19 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "contest_record", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"contest_id", "student_id", "team_id"})
+        @UniqueConstraint(name = "uni", columnNames = {"student_id", "team_id", "contest_id"})
 })
 public class ContestRecord {
     private int id;
-    private Integer contestId;
+    private int contestId;
     private String studentId;
     private Integer teamId;
     private String account;
     private Timestamp time;
     private String solution;
+    private String solved;
+    private String upSolved;
+    private int penalty;
 
     @Id
     @Column(name = "id")
@@ -30,11 +33,11 @@ public class ContestRecord {
 
     @Basic
     @Column(name = "contest_id")
-    public Integer getContestId() {
+    public int getContestId() {
         return contestId;
     }
 
-    public void setContestId(Integer contestId) {
+    public void setContestId(int contestId) {
         this.contestId = contestId;
     }
 
@@ -88,22 +91,55 @@ public class ContestRecord {
         this.solution = solution;
     }
 
+    @Basic
+    @Column(name = "solved")
+    public String getSolved() {
+        return solved;
+    }
+
+    public void setSolved(String solved) {
+        this.solved = solved;
+    }
+
+    @Basic
+    @Column(name = "up_solved")
+    public String getUpSolved() {
+        return upSolved;
+    }
+
+    public void setUpSolved(String upSolved) {
+        this.upSolved = upSolved;
+    }
+
+    @Basic
+    @Column(name = "penalty")
+    public int getPenalty() {
+        return penalty;
+    }
+
+    public void setPenalty(int penalty) {
+        this.penalty = penalty;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ContestRecord that = (ContestRecord) o;
         return id == that.id &&
-                Objects.equals(contestId, that.contestId) &&
+                contestId == that.contestId &&
+                penalty == that.penalty &&
                 Objects.equals(studentId, that.studentId) &&
                 Objects.equals(teamId, that.teamId) &&
                 Objects.equals(account, that.account) &&
                 Objects.equals(time, that.time) &&
-                Objects.equals(solution, that.solution);
+                Objects.equals(solution, that.solution) &&
+                Objects.equals(solved, that.solved) &&
+                Objects.equals(upSolved, that.upSolved);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, contestId, studentId, teamId, account, time, solution);
+        return Objects.hash(id, contestId, studentId, teamId, account, time, solution, solved, upSolved, penalty);
     }
 }

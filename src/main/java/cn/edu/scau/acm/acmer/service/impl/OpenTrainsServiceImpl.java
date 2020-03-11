@@ -3,7 +3,6 @@ package cn.edu.scau.acm.acmer.service.impl;
 import cn.edu.scau.acm.acmer.entity.Contest;
 import cn.edu.scau.acm.acmer.entity.ContestRecord;
 import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
-import cn.edu.scau.acm.acmer.repository.ContestProblemRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.service.OJService;
@@ -36,9 +35,6 @@ public class OpenTrainsServiceImpl implements OpenTrainsService {
 
     @Autowired
     private ContestRecordRepository contestRecordRepository;
-
-    @Autowired
-    private ContestProblemRecordRepository contestProblemRecordRepository;
 
     @Autowired
     private OJService ojService;
