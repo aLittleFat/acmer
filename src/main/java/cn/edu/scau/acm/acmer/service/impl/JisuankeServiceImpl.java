@@ -5,8 +5,7 @@ import cn.edu.scau.acm.acmer.entity.ContestRecord;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.service.JisuankeService;
-import cn.edu.scau.acm.acmer.service.OJService;
-import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -25,15 +24,13 @@ import org.springframework.web.client.RestTemplate;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Service
 public class JisuankeServiceImpl implements JisuankeService {
 
     Logger log = LoggerFactory.getLogger(this.getClass());
-
-    @Autowired
-    private OJService ojService;
 
     @Autowired
     private ContestRepository contestRepository;
@@ -74,6 +71,11 @@ public class JisuankeServiceImpl implements JisuankeService {
         contest.setStartTime(new Timestamp(Timestamp.valueOf(startTime).getTime() + 8*60*60*1000));
         contest.setEndTime(new Timestamp(contest.getStartTime().getTime() + len));
         contest.setProblemNumber(problemNumber);
+        List<String> problemList = new ArrayList<>();
+        for (char i = 'A', j = 0; j < contest.getProblemNumber(); j++, i++) {
+            problemList.add(String.valueOf(i));
+        }
+        contest.setProblemList(StringUtils.join(problemList, " "));
         contestRepository.save(contest);
     }
 
@@ -95,76 +97,35 @@ public class JisuankeServiceImpl implements JisuankeService {
         for (Element element : table) {
             Elements tds = element.select("td");
             if (tds.get(2).selectFirst("a").text().equals(account)) {
+
+                ContestRecord contestRecord = new ContestRecord();
+                contestRecord.setTime(contest.getStartTime());
+                contestRecord.setAccount(account);
+                contestRecord.setTeamId(teamId);
+                contestRecord.setStudentId(studentId);
+                contestRecord.setContestId(contest.getId());
+                contestRecord.setPenalty(Integer.parseInt(tds.get(5).text())*60);
+
+                Set<String> solved = new TreeSet<>();
+
+                char index = 'A';
+                for (int i = 0; i < contest.getProblemNumber(); i++) {
+                    String problemIndex = String.valueOf(index);
+                    String statusString = tds.get(i+6).text();
+                    if (!statusString.contains("--")) {
+                        solved.add(problemIndex);
+                    }
+                    ++index;
+                }
+                contestRecord.setSolved(StringUtils.join(solved, " "));
+                contestRecord.setUpSolved("");
+                contestRecordRepository.save(contestRecord);
                 hasTakePartIn = true;
                 break;
             }
         }
         if(!hasTakePartIn) {
             throw new Exception("未参加该竞赛");
-        }
-        ContestRecord contestRecord = new ContestRecord();
-        contestRecord.setTime(contest.getStartTime());
-        contestRecord.setAccount(account);
-        contestRecord.setTeamId(teamId);
-        contestRecord.setStudentId(studentId);
-        contestRecord.setContestId(contest.getId());
-        contestRecordRepository.save(contestRecord);
-        contestRecord = contestRecordRepository.findByContestIdAndStudentIdAndTeamId(contest.getId(), studentId, teamId).get();
-        updateContestProblemRecord(contestRecord);
-    }
-
-    @Override
-    @Transactional
-    public void updateContestProblemRecord(ContestRecord contestRecord) throws Exception {
-        Contest contest = contestRepository.findById(contestRecord.getContestId()).get();
-        if(System.currentTimeMillis() < contest.getEndTime().getTime()) {
-            return;
-        }
-        String cId = contest.getCid();
-        WebDriver webDriver = new ChromeDriver();
-        webDriver.get("https://passport.jisuanke.com/?n=https://www.jisuanke.com/contest/" + cId + "?view=rank&page=1&school=%E5%8D%8E%E5%8D%97%E5%86%9C%E4%B8%9A%E5%A4%A7%E5%AD%A6#/");
-        login(webDriver);
-        Document document = Jsoup.parse(webDriver.getPageSource());
-        webDriver.close();
-
-
-
-        Elements table = document.selectFirst("tbody").select("tr");
-        for (Element element : table) {
-            Elements tds = element.select("td");
-            if (tds.get(2).selectFirst("a").text().equals(contestRecord.getAccount())) {
-
-                char index = 'A';
-                for (int i = 0; i < contest.getProblemNumber(); i++) {
-                    String problemIndex = String.valueOf(index);
-
-                    String statusString = tds.get(i+6).text();
-                    int penalty = 0;
-                    String status;
-
-                    int tries = Integer.parseInt(statusString.substring(statusString.indexOf("(")+1, statusString.indexOf(")")));
-                    if (statusString.contains("--")) {
-                        status = "UnSolved";
-                    } else {
-                        penalty = Integer.parseInt(statusString.substring(0, statusString.indexOf("(")));
-                        status = "Solved";
-                    }
-
-//                    ContestProblemRecord contestProblemRecord = contestProblemRecordRepository.findByContestRecordIdAndProblemIndex(contestRecord.getId(), problemIndex).orElse(new ContestProblemRecord());
-//                    contestProblemRecord.setProblemIndex(problemIndex);
-//                    contestProblemRecord.setContestRecordId(contestRecord.getId());
-//                    contestProblemRecord.setStatus(status);
-//                    contestProblemRecord.setPenalty(penalty);
-//                    contestProblemRecord.setTries(tries);
-//                    contestProblemRecordRepository.save(contestProblemRecord);
-
-                    // todo
-
-                    ++index;
-                }
-
-                break;
-            }
         }
     }
 

@@ -10,7 +10,5 @@ public interface JisuankeService {
 
     void addContestRecord(String ojName, String cId, String studentId, Integer teamId, String account) throws Exception;
 
-    void updateContestProblemRecord(ContestRecord contestRecord) throws Exception;
-
     void login(WebDriver webDriver) throws InterruptedException;
 }
