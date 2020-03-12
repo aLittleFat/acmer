@@ -1,8 +1,10 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
+import cn.edu.scau.acm.acmer.entity.ContestProblem;
 import cn.edu.scau.acm.acmer.entity.ContestRecord;
 import cn.edu.scau.acm.acmer.entity.OjAccount;
+import cn.edu.scau.acm.acmer.repository.ContestProblemRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.OjAccountRepository;
@@ -10,6 +12,8 @@ import cn.edu.scau.acm.acmer.service.CfService;
 import cn.edu.scau.acm.acmer.service.ProblemService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sun.source.tree.Tree;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +25,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Service
 public class CfServiceImpl implements CfService {
@@ -44,6 +50,9 @@ public class CfServiceImpl implements CfService {
 
     @Autowired
     private ContestRecordRepository contestRecordRepository;
+
+    @Autowired
+    private ContestProblemRepository contestProblemRepository;
 
 
     @Override
@@ -85,7 +94,6 @@ public class CfServiceImpl implements CfService {
                 continue;
             }
             start += 20;
-            log.info(url + " " + String.valueOf(sz));
         } while (sz >= 20 && retry > 0);
     }
 
@@ -156,44 +164,41 @@ public class CfServiceImpl implements CfService {
                         break;
                     }
                 }
-//                log.info(rows.size() + " " + String.valueOf(standingRow!=null));
             } while(rows.size() == sz && standingRow == null);
             if(standingRow == null) {
                 throw new Exception("未参加该竞赛");
             }
-
-
         }
 
-        // todo
+        ContestRecord contestRecord = new ContestRecord();
+        contestRecord.setTime(new Timestamp((standingRow.getJSONObject("party").getLong("startTimeSeconds") + 8*60*60)*1000));
+        contestRecord.setContestId(contest.getId());
+        contestRecord.setStudentId(studentId);
+        contestRecord.setTeamId(teamId);
+        contestRecord.setAccount(account);
 
-//        ContestRecord contestRecord = new ContestRecord();
-//        contestRecord.setTime(new Timestamp((standingRow.getJSONObject("party").getLong("startTimeSeconds") + 8*60*60)*1000));
-//        contestRecord.setContestId(contest.getId());
-//        contestRecord.setStudentId(studentId);
-//        contestRecord.setTeamId(teamId);
-//        contestRecord.setAccount(account);
-//        contestRecordRepository.save(contestRecord);
-//        contestRecord = contestRecordRepository.findByContestIdAndStudentIdAndTeamId(contest.getId(), studentId, teamId).get();
-//        JSONArray standings = standingRow.getJSONArray("problemResults");
-//        for (int i = 0; i < problems.size(); i++) {
-//            ContestProblemRecord contestProblemRecord = new ContestProblemRecord();
-//            contestProblemRecord.setProblemIndex(problems.getJSONObject(i).getString("index"));
-//            Integer timeSeconds = standings.getJSONObject(i).getInteger("bestSubmissionTimeSeconds");
-//            if(timeSeconds == null) {
-//                contestProblemRecord.setTries(standings.getJSONObject(i).getInteger("rejectedAttemptCount"));
-//                contestProblemRecord.setStatus("UnSolved");
-//            } else {
-//                contestProblemRecord.setTries(standings.getJSONObject(i).getInteger("rejectedAttemptCount")+1);
-//                contestProblemRecord.setPenalty(timeSeconds / 60);
-//                contestProblemRecord.setStatus("Solved");
-//            }
-//            contestProblemRecord.setContestRecordId(contestRecord.getId());
-//            contestProblemRecordRepository.save(contestProblemRecord);
-//        }
+        JSONArray standings = standingRow.getJSONArray("problemResults");
+
+        int penalty = 0;
+        Set<String> solved = new TreeSet<>();
+
+        for (int i = 0; i < problems.size(); i++) {
+            String index = problems.getJSONObject(i).getString("index");
+
+            Integer timeSeconds = standings.getJSONObject(i).getInteger("bestSubmissionTimeSeconds");
+            if(timeSeconds != null) {
+                penalty += 1200*standings.getJSONObject(i).getInteger("rejectedAttemptCount") + timeSeconds;
+                solved.add(index);
+            }
+        }
+        contestRecord.setPenalty(penalty);
+        contestRecord.setSolved(StringUtils.join(solved ," "));
+        contestRecord.setUpSolved("");
+        contestRecordRepository.save(contestRecord);
     }
 
     @Override
+    @Transactional
     public void addContest(String ojName, String cId) throws Exception {
         JSONObject res = restTemplate.getForObject("https://codeforces.com/api/contest.standings?from=1&count=1&contestId=" + cId, JSONObject.class);
         if(!res.getString("status").equals("OK")) {
@@ -202,6 +207,8 @@ public class CfServiceImpl implements CfService {
 
         Contest contest = new Contest();
 
+        Set<String> problemList = new TreeSet<>();
+
         res = res.getJSONObject("result");
 
         JSONObject contestInfo = res.getJSONObject("contest");
@@ -209,16 +216,27 @@ public class CfServiceImpl implements CfService {
         Long startTimeSeconds = contestInfo.getLong("startTimeSeconds");
         log.info(String.valueOf(startTimeSeconds));
         log.info(String.valueOf(new Timestamp((startTimeSeconds+8*60*60)*1000)));
-        if(startTimeSeconds != null) {
-            contest.setStartTime(new Timestamp((startTimeSeconds+8*60*60)*1000));
-        } else {
-            contest.setStartTime(new Timestamp(0));
-        }
+        contest.setStartTime(new Timestamp((startTimeSeconds+8*60*60)*1000));
         contest.setEndTime(new Timestamp(contest.getStartTime().getTime() + contestInfo.getInteger("durationSeconds")*1000));
         contest.setTitle(contestInfo.getString("name"));
         contest.setOjName(ojName);
         contest.setCid(cId);
-        contest.setProblemNumber(res.getJSONArray("problems").size());
+        JSONArray problems = res.getJSONArray("problems");
+
+        for (int i = 0; i < problems.size(); i++) {
+            problemList.add(problems.getJSONObject(i).getString("index"));
+        }
+        contest.setProblemList(StringUtils.join(problemList, " "));
+        contest.setProblemNumber(problems.size());
         contestRepository.save(contest);
+        contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
+        for (int i = 0; i < problems.size(); i++) {
+            problemService.addProblem(ojName, cId + problems.getJSONObject(i).getString("index"),  problems.getJSONObject(i).getString("name"));
+            ContestProblem contestProblem = new ContestProblem();
+            contestProblem.setProblemIndex(problems.getJSONObject(i).getString("index"));
+            contestProblem.setContestId(contest.getId());
+            contestProblem.setProblemId(problemService.findProblem(ojName, cId + problems.getJSONObject(i).getString("index")).getId());
+            contestProblemRepository.save(contestProblem);
+        }
     }
 }
