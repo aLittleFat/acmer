@@ -216,10 +216,10 @@ public class VjServiceImpl implements VjService {
             contest.setStartTime(startTime);
             contest.setEndTime(endTime);
             contestRepository.save(contest);
-//            contest = contestRepository.findByOjNameAndCid("VJ", cId).get();
-//            if (System.currentTimeMillis() > endTime.getTime()) {
-//                updateContestProblem(httpClient, contest);
-//            }
+            contest = contestRepository.findByOjNameAndCid("VJ", cId).get();
+            if (contest.getProblemNumber() != 0) {
+                updateContestProblem(httpClient, contest);
+            }
         } catch (ProtocolException e) {
             throw new Exception("比赛不存在");
         }
@@ -227,29 +227,34 @@ public class VjServiceImpl implements VjService {
 
     @Override
     public void updateContestProblem(BaseHttpClient httpClient, Contest contest) throws Exception {
-//        if (httpClient == null) {
-//            httpClient = new BaseHttpClient();
-//            login(httpClient);
-//        }
-//        String url = "https://vjudge.net/contest/" + contest.getCid();
-//        String html = httpClient.get(url);
-//        Document document = Jsoup.parse(html);
-//        JSONObject jsonObject = (JSONObject) JSON.parse(document.body().selectFirst("[name=dataJson]").text());
-//        JSONArray jsonProblems = jsonObject.getJSONArray("problems");
-//        contest.setProblemNumber(jsonProblems.size());
-//        for(Object jsonProblemObject : jsonProblems) {
-//            JSONObject jsonProblem = (JSONObject) jsonProblemObject;
-//            log.info(jsonProblem.toJSONString());
-//            problemService.addProblem(jsonProblem.getString("oj"), jsonProblem.getString("probNum"), );
-//            Problem problem = problemService.findProblem(jsonProblem.getString("oj"), jsonProblem.getString("probNum"));
-//            Optional<ContestProblem> contestProblem = contestProblemRepository.findByContestIdAndProblemIndex(contest.getId(), jsonProblem.getString("num"));
-//            if(contestProblem.isPresent()) continue;
-//            ContestProblem contestProblem1 = new ContestProblem();
-//            contestProblem1.setContestId(contest.getId());
-//            contestProblem1.setProblemIndex(jsonProblem.getString("num"));
-//            contestProblem1.setProblemId(problem.getId());
-//            contestProblemRepository.save(contestProblem1);
-//        }
+        if (httpClient == null) {
+            httpClient = new BaseHttpClient();
+            login(httpClient);
+        }
+        String url = "https://vjudge.net/contest/" + contest.getCid();
+        String html = httpClient.get(url);
+        Document document = Jsoup.parse(html);
+        JSONObject jsonObject = (JSONObject) JSON.parse(document.body().selectFirst("[name=dataJson]").text());
+        JSONArray jsonProblems = jsonObject.getJSONArray("problems");
+        contest.setProblemNumber(jsonProblems.size());
+        contestRepository.save(contest);
+        for(Object jsonProblemObject : jsonProblems) {
+            JSONObject jsonProblem = (JSONObject) jsonProblemObject;
+
+            String ojName = jsonProblem.getString("oj");
+            String problemId = jsonProblem.getString("probNum");
+            if(problemRepository.findByOjNameAndProblemId(ojName, problemId).isEmpty()) {
+                problemService.addProblem(ojName, problemId, Jsoup.parse(httpClient.get("https://vjudge.net/problem/" + ojName + "-" + problemId)).selectFirst("h2").text());
+            }
+            Problem problem = problemService.findProblem(ojName, problemId);
+            Optional<ContestProblem> optionalContestProblem = contestProblemRepository.findByContestIdAndProblemIndex(contest.getId(), jsonProblem.getString("num"));
+            if(optionalContestProblem.isPresent()) continue;
+            ContestProblem contestProblem = new ContestProblem();
+            contestProblem.setContestId(contest.getId());
+            contestProblem.setProblemIndex(jsonProblem.getString("num"));
+            contestProblem.setProblemId(problem.getId());
+            contestProblemRepository.save(contestProblem);
+        }
     }
 
     @Override
@@ -301,7 +306,6 @@ public class VjServiceImpl implements VjService {
             throw new Exception("没有参与该比赛");
         }
 
-//        log.info(String.valueOf(jsonObject));
         ContestRecord contestRecord = new ContestRecord();
         contestRecord.setStudentId(studentId);
         contestRecord.setTeamId(teamId);

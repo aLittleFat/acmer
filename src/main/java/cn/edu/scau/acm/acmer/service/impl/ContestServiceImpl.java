@@ -47,9 +47,6 @@ public class ContestServiceImpl implements ContestService {
     @Autowired
     private OJService ojService;
 
-    @Autowired
-    private OpenTrainsService openTrainsService;
-
 
     @Override
     @Transactional
@@ -102,58 +99,39 @@ public class ContestServiceImpl implements ContestService {
         Set<String> set = new TreeSet<>();
         List<JSONObject> contestLines = new ArrayList<>();
 
-    //todo
+        for (ContestRecord contestRecord : contestRecords) {
 
-//        for (ContestRecord contestRecord : contestRecords) {
-//
-//            Contest contest = contestRepository.findById(contestRecord.getContestId()).get();
-//            if(contest.getEndTime().getTime() > System.currentTimeMillis()) continue;
-//            int solved = 0;
-//            int penalty = 0;
-//            JSONObject contestLine = new JSONObject();
-//            contestLine.put("contestId" ,contestRecord.getContestId());
-//            contestLine.put("title" ,contest.getTitle());
-//            contestLine.put("time" ,contestRecord.getTime());
-//            contestLine.put("proNum" ,contest.getProblemNumber());
-//            JSONObject cellClassName = new JSONObject();
-//
-//
-//            List<ContestProblemRecord> contestProblemRecords = contestProblemRecordRepository.findAllByContestRecordId(contestRecord.getId());
-//
-//            for(ContestProblemRecord contestProblemRecord : contestProblemRecords) {
-//                String problemIndex = contestProblemRecord.getProblemIndex();
-//                set.add(problemIndex);
-//                switch (contestProblemRecord.getStatus()) {
-//                    case "Solved":
-//                        solved++;
-//                        penalty += contestProblemRecord.getPenalty() + (contestProblemRecord.getTries() - 1)*20;
-//                        contestLine.put(problemIndex, contestProblemRecord.getPenalty() + "(" +contestProblemRecord.getTries()  + ")");
-//                        cellClassName.put(problemIndex, "table-ac-cell");
-//                        break;
-//                    case "UpSolved":
-//                        contestLine.put(problemIndex, contestProblemRecord.getPenalty() + "(" +contestProblemRecord.getTries()  + ")");
-//                        cellClassName.put(problemIndex, "table-up-cell");
-//                        break;
-//                    case "UnSolved":
-//                        if(contestProblemRecord.getTries() > 0) {
-//                            contestLine.put(problemIndex, "(" +contestProblemRecord.getTries()  + ")");
-//                            cellClassName.put(problemIndex, "table-wa-cell");
-//                        }
-//                        else {
-//                            contestLine.put(problemIndex, "");
-//                        }
-//                        break;
-//                }
-//            }
-//            contestLine.put("cellClassName", cellClassName);
-//            contestLine.put("solved" ,solved);
-//            contestLine.put("penalty" ,penalty);
-//            contestLines.add(contestLine);
-//
-//        }
-//
-//        jsonObject.put("contests", contestLines);
-//        jsonObject.put("columns", set);
+            Contest contest = contestRepository.findById(contestRecord.getContestId()).get();
+            if(contest.getEndTime().getTime() > System.currentTimeMillis()) continue;
+
+            set.addAll(Arrays.asList(contest.getProblemList().split(" ")));
+
+            JSONObject contestLine = new JSONObject();
+            contestLine.put("contestId" ,contestRecord.getContestId());
+            contestLine.put("title" ,contest.getTitle());
+            contestLine.put("time" ,contestRecord.getTime());
+            contestLine.put("proNum" ,contest.getProblemNumber());
+            JSONObject cellClassName = new JSONObject();
+
+            for (String problemIndex : contestRecord.getSolved().split(" ")) {
+                cellClassName.put(problemIndex, "table-ac-cell");
+                contestLine.put(problemIndex, "");
+            }
+
+            for (String problemIndex : contestRecord.getUpSolved().split(" ")) {
+                cellClassName.put(problemIndex, "table-up-cell");
+                contestLine.put(problemIndex, "");
+            }
+
+            contestLine.put("cellClassName", cellClassName);
+            contestLine.put("solved", contestRecord.getSolved().split(" ").length);
+            contestLine.put("penalty", contestRecord.getPenalty() / 60);
+            contestLines.add(contestLine);
+
+        }
+
+        jsonObject.put("contests", contestLines);
+        jsonObject.put("columns", set);
 
         return jsonObject;
     }

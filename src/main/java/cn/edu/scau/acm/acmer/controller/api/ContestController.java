@@ -36,11 +36,7 @@ public class ContestController {
     MyResponseEntity<JSONObject> getMyContest(){
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         String studentId = userRepository.findById(id).get().getStudentId();
-
-        long a = System.currentTimeMillis();
         JSONObject res = contestService.getContestByStudentId(studentId);
-        log.info(System.currentTimeMillis()-a+"ms");
-
         return new MyResponseEntity<>(res);
     }
 

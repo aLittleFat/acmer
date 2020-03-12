@@ -17,5 +17,4 @@ public interface HduService {
 
     void addContestRecord(String ojName, String cId, String studentId, Integer teamId, String account, String password) throws Exception;
 
-    void updateContestProblemRecord(BaseHttpClient httpClient, ContestRecord contestRecord) throws Exception;
 }
