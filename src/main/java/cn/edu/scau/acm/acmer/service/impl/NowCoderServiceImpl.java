@@ -5,20 +5,18 @@ import cn.edu.scau.acm.acmer.entity.ContestRecord;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.service.NowCoderService;
-import cn.edu.scau.acm.acmer.service.OJService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class NowCoderServiceImpl implements NowCoderService {
@@ -34,9 +32,6 @@ public class NowCoderServiceImpl implements NowCoderService {
     @Autowired
     private ContestRepository contestRepository;
 
-    @Autowired
-    private OJService ojService;
-
 
     @Override
     @Transactional
@@ -50,18 +45,18 @@ public class NowCoderServiceImpl implements NowCoderService {
         String url = "https://ac.nowcoder.com/acm/contest/rank/submit-list?currentContestId=" + cId + "&contestList=" + cId;
         JSONObject res = restTemplate.getForObject(url, JSONObject.class);
 
-        int uid = 0;
+        boolean hasTakePartIn = false;
 
         JSONArray signUpUsers = res.getJSONObject("data").getJSONArray("submitDataList").getJSONObject(0).getJSONArray("signUpUsers");
         for (int i = 0; i < signUpUsers.size(); ++i) {
             JSONObject signUpUser = signUpUsers.getJSONObject(i);
-            if(signUpUser.getString("name").equals(account)) {
-                uid = signUpUser.getInteger("uid");
+            if(String.valueOf(signUpUser.getInteger("uid")).equals(account)) {
+                hasTakePartIn = true;
                 break;
             }
         }
 
-        if(uid == 0) {
+        if(!hasTakePartIn) {
             throw new Exception("没有参加该竞赛");
         }
 
@@ -71,10 +66,56 @@ public class NowCoderServiceImpl implements NowCoderService {
         contestRecord.setTeamId(teamId);
         contestRecord.setAccount(account);
         contestRecord.setTime(contest.getStartTime());
-        contestRecordRepository.save(contestRecord);
 
-        contestRecord = contestRecordRepository.findByContestIdAndStudentIdAndTeamId(contest.getId(), studentId, teamId).get();
-        updateContestProblemRecord(contestRecord);
+        int contestLength = (int) ((contest.getEndTime().getTime() - contest.getStartTime().getTime()) / 1000);
+        int penalty = 0;
+
+        JSONArray submissions = res.getJSONObject("data").getJSONArray("submitDataList").getJSONObject(0).getJSONArray("submissions");
+
+        HashMap<Integer, String> map = new HashMap<>();
+        HashMap<String, Integer> penaltyMap = new HashMap<>();
+
+        JSONArray problemData = res.getJSONObject("data").getJSONArray("problemData");
+        for(int i = 0; i < problemData.size(); ++i) {
+            JSONObject problem = problemData.getJSONObject(i);
+            map.put(problem.getInteger("problemId"), problem.getString("index"));
+            penaltyMap.put(problem.getString("index"), 0);
+        }
+
+        Set<String> solved  = new TreeSet<>();
+        Set<String> upSolved = new TreeSet<>();
+
+        for (int i = 0; i < submissions.size(); ++i) {
+            JSONObject submission = submissions.getJSONObject(i);
+            if(String.valueOf(submission.getInteger("uid")).equals(account)) {
+
+
+                String index = map.get(submission.getInteger("problemId"));
+                int isAc = submission.getInteger("status");
+                int time = (int) ((submission.getLong("submitTime") + 8*60*60*1000 - contest.getStartTime().getTime()) / 1000);
+                log.info(index + " " + isAc + " " + time );
+                if (isAc == 5) {
+                    if (time > contestLength) {
+                        if(!solved.contains(index)) {
+                            upSolved.add(index);
+                        }
+                    } else {
+                        if(!solved.contains(index)) {
+                            solved.add(index);
+                            penalty += penaltyMap.get(index) + time;
+                        }
+                    }
+                } else if (isAc != 12) {
+                    penaltyMap.put(index, penaltyMap.get(index) + 1200);
+                }
+            }
+        }
+
+        contestRecord.setSolved(StringUtils.join(solved, " "));
+        contestRecord.setUpSolved(StringUtils.join(upSolved, " "));
+        contestRecord.setPenalty(penalty);
+
+        contestRecordRepository.save(contestRecord);
     }
 
     @Override
@@ -95,86 +136,19 @@ public class NowCoderServiceImpl implements NowCoderService {
         if(System.currentTimeMillis() < contest.getEndTime().getTime()) {
             contest.setProblemNumber(0);
         } else {
-            contest.setProblemNumber(res.getJSONObject("data").getJSONArray("problemData").size());
+            JSONArray problemData = res.getJSONObject("data").getJSONArray("problemData");
+            contest.setProblemNumber(problemData.size());
+            List<String> indexList = new ArrayList<>();
+            for (int i = 0; i < problemData.size(); i++) {
+                JSONObject problem = problemData.getJSONObject(i);
+                String index = problem.getString("index");
+                indexList.add(index);
+            }
+            contest.setProblemList(StringUtils.join(indexList, " "));
         }
         contestRepository.save(contest);
     }
 
-    @Override
-    @Async
-    public void updateContestProblemRecord(ContestRecord contestRecord) throws Exception {
-        Contest contest = contestRepository.findById(contestRecord.getContestId()).get();
-        String cId = contest.getCid();
-        String url = "https://ac.nowcoder.com/acm/contest/rank/submit-list?currentContestId=" + cId + "&contestList=" + cId;
-        JSONObject res = restTemplate.getForObject(url, JSONObject.class);
-
-        int uid = 0;
-
-        JSONArray signUpUsers = res.getJSONObject("data").getJSONArray("submitDataList").getJSONObject(0).getJSONArray("signUpUsers");
-        for (int i = 0; i < signUpUsers.size(); ++i) {
-            JSONObject signUpUser = signUpUsers.getJSONObject(i);
-            if(signUpUser.getString("name").equals(contestRecord.getAccount())) {
-                uid = signUpUser.getInteger("uid");
-                break;
-            }
-        }
-
-//        List<ContestProblemRecord> contestProblemRecords = new ArrayList<>();
-        if(contest.getProblemNumber() == 0) {
-            updateContestProblem(contest);
-        }
-
-        HashMap<Integer, String> map = new HashMap<>();
-        HashMap<String, Integer> charToInt = new HashMap<>();
-
-        JSONArray problemData = res.getJSONObject("data").getJSONArray("problemData");
-        for(int i = 0; i < problemData.size(); ++i) {
-            JSONObject problem = problemData.getJSONObject(i);
-            map.put(problem.getInteger("problemId"), problem.getString("index"));
-        }
-
-        char index = 'A';
-
-//        for (int i = 0; i < contest.getProblemNumber(); ++i) {
-//            String problemIndex = String.valueOf(index);
-//            charToInt.put(problemIndex, i);
-//            ContestProblemRecord contestProblemRecord = contestProblemRecordRepository.findByContestRecordIdAndProblemIndex(contestRecord.getId(), problemIndex).orElse(new ContestProblemRecord());
-//            contestProblemRecord.setStatus("UnSolved");
-//            contestProblemRecord.setProblemIndex(problemIndex);
-//            contestProblemRecord.setTries(0);
-//            contestProblemRecord.setContestRecordId(contestRecord.getId());
-//            contestProblemRecords.add(contestProblemRecord);
-//            index++;
-//        }
-
-        int contestLength = (int) ((contest.getEndTime().getTime() - contest.getStartTime().getTime()) / (1000 * 60));
-        log.info(String.valueOf(contestLength));
-
-        JSONArray submissions = res.getJSONObject("data").getJSONArray("submitDataList").getJSONObject(0).getJSONArray("submissions");
-
-        // todo
-
-//        for (int i = 0; i < submissions.size(); ++i) {
-//            JSONObject submission = submissions.getJSONObject(i);
-//            if(submission.getInteger("uid") == uid) {
-//                int proNum = charToInt.get(map.get(submission.getInteger("problemId")));
-//                int isAc = submission.getInteger("status");
-//                log.info(submission.getLong("submitTime") + " " + (submission.getLong("submitTime") + 8*60*60*1000) + " " + contest.getStartTime().getTime());
-//                int time = (int) ((submission.getLong("submitTime") + 8*60*60*1000 - contest.getStartTime().getTime()) / (60 * 1000));
-//                if(!contestProblemRecords.get(proNum).getStatus().equals("UnSolved")) continue;
-//                contestProblemRecords.get(proNum).setTries(contestProblemRecords.get(proNum).getTries() + 1);
-//                if (isAc == 5) {
-//                    if (time > contestLength) {
-//                        contestProblemRecords.get(proNum).setStatus("UpSolved");
-//                    } else {
-//                        contestProblemRecords.get(proNum).setStatus("Solved");
-//                    }
-//                    contestProblemRecords.get(proNum).setPenalty(time);
-//                }
-//            }
-//        }
-//        contestProblemRecordRepository.saveAll(contestProblemRecords);
-    }
 
     @Override
     public void updateContestProblem(Contest contest) {
