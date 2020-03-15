@@ -34,12 +34,12 @@ public class UserController {
         return new MyResponseEntity<>(userRepository.findById(id).get());
     }
 
-    @ApiOperation("修改当前登录用户的个人信息，包括手机号码和icpc邮箱")
+    @ApiOperation("修改当前登录用户的个人信息，包括手机号码、icpc邮箱和QQ")
     @RequiresRoles({"student"})
     @PutMapping("info")
-    MyResponseEntity<Void> changeMyInfo(String phone, String icpcEmail) {
+    MyResponseEntity<Void> changeMyInfo(String phone, String icpcEmail, String qq) {
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
-        accountService.changePhoneAndIcpcEmail(phone, icpcEmail, id);
+        accountService.changeInfo(id, phone, icpcEmail, qq);
         return new MyResponseEntity<>();
     }
 
@@ -51,4 +51,14 @@ public class UserController {
         }
         return new MyResponseEntity<>(studentService.getStudentInfo(studentId));
     }
+
+    @ApiOperation("队员申请退役")
+    @PutMapping("retire/{studentId}")
+    @RequiresRoles("student")
+    MyResponseEntity<Void> retire(@PathVariable String studentId) throws Exception {
+        accountService.retire(studentId);
+        return new MyResponseEntity<>();
+    }
+
+
 }

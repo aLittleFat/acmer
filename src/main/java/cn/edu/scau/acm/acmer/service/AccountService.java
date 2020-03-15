@@ -17,5 +17,11 @@ public interface AccountService {
     void forgetPassword(String email, String password, String verifyCode) throws Exception;
     Page<User> getUserUnVerified(Integer page, Integer size);
     void deleteAccount(Integer id);
-    void changePhoneAndIcpcEmail(String phone, String icpcEmail, int id);
+    void changeInfo(int id, String phone, String icpcEmail, String qq);
+
+    void retire(String studentId) throws Exception;
+
+    Page<User> getRequestRetireUser(Integer page, Integer size);
+
+    void changeUserStatus(Integer id, String status);
 }

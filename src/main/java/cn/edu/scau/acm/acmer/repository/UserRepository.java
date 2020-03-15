@@ -35,4 +35,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query(value = "select user from User as user left join TeamStudent as teamStudent on user.studentId = teamStudent.studentId where teamStudent.teamId = :teamId")
     List<User> findAllByTeamId(@Param("teamId") Integer teamId);
+
+    Page<User> findAllByStatus(Pageable pageable, String status);
 }

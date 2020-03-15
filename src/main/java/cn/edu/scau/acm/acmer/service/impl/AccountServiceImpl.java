@@ -192,10 +192,34 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void changePhoneAndIcpcEmail(String phone, String icpcEmail, int id) {
+    public void changeInfo(int id, String phone, String icpcEmail, String qq) {
         User u = userRepository.findById(id).get();
         u.setPhone(phone);
         u.setIcpcEmail(icpcEmail);
+        u.setQq(qq);
+        userRepository.save(u);
+    }
+
+    @Override
+    public void retire(String studentId) throws Exception {
+        User u = userRepository.findByStudentId(studentId).get();
+        if(!u.getStatus().equals("现役")) {
+            throw new Exception("不是现役，不能申请退役");
+        }
+        u.setStatus("申请退役");
+        userRepository.save(u);
+    }
+
+    @Override
+    public Page<User> getRequestRetireUser(Integer page, Integer size) {
+        Pageable pr = PageRequest.of(page - 1, size, Sort.Direction.ASC, "name");
+        return userRepository.findAllByStatus(pr, "申请退役");
+    }
+
+    @Override
+    public void changeUserStatus(Integer id, String status) {
+        User u = userRepository.findById(id).get();
+        u.setStatus(status);
         userRepository.save(u);
     }
 

@@ -21,6 +21,13 @@ public class VerifyController {
         return new MyResponseEntity<>(accountService.getUserUnVerified(page, size));
     }
 
+    @ApiOperation("获取申请退役的队员列表")
+    @RequiresRoles("admin")
+    @GetMapping("requestRetireUser")
+    MyResponseEntity<Page<User>> getRequestRetireUser(Integer page, Integer size){
+        return new MyResponseEntity<>(accountService.getRequestRetireUser(page, size));
+    }
+
     @ApiOperation("通过注册审核")
     @PutMapping("registerVerify")
     @RequiresRoles({"admin"})
@@ -34,6 +41,14 @@ public class VerifyController {
     @RequiresRoles({"admin"})
     MyResponseEntity<Void> deleteAccount(Integer id) {
         accountService.deleteAccount(id);
+        return new MyResponseEntity<>();
+    }
+
+    @ApiOperation("修改队员状态")
+    @PutMapping("user/{id}/status")
+    @RequiresRoles("admin")
+    MyResponseEntity<Void> changeUserStatus(@PathVariable Integer id, String status) {
+        accountService.changeUserStatus(id, status);
         return new MyResponseEntity<>();
     }
 
