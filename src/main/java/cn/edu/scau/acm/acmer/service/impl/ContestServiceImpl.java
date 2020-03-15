@@ -2,6 +2,7 @@ package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
 import cn.edu.scau.acm.acmer.entity.ContestRecord;
+import cn.edu.scau.acm.acmer.model.ContestRecordLine;
 import cn.edu.scau.acm.acmer.repository.ContestProblemRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
@@ -80,59 +81,24 @@ public class ContestServiceImpl implements ContestService {
 
     @Override
     public JSONObject getContestByStudentId(String studentId) {
-        List<ContestRecord> contestRecords = contestRecordRepository.findAllByStudentIdOrderByTimeDesc(studentId);
-        long a = System.currentTimeMillis();
-        JSONObject res = getContestRecordTable(contestRecords);
-        log.info(System.currentTimeMillis()-a + "ms");
-
-        return res;
+        List<ContestRecordLine> contestRecordLines = contestRecordRepository.findAllContestRecordLineByStudentId(studentId);
+        return getContestRecordTable(contestRecordLines);
     }
 
     @Override
     public JSONObject getContestByTeamId(Integer teamId) {
-        List<ContestRecord> contestRecords = contestRecordRepository.findAllByTeamIdOrderByTimeDesc(teamId);
-        return getContestRecordTable(contestRecords);
+        List<ContestRecordLine> contestRecordLines = contestRecordRepository.findAllContestRecordLineByTeamId(teamId);
+        return getContestRecordTable(contestRecordLines);
     }
 
-    private JSONObject getContestRecordTable(List<ContestRecord> contestRecords){
-        JSONObject jsonObject = new JSONObject();
-        Set<String> set = new TreeSet<>();
-        List<JSONObject> contestLines = new ArrayList<>();
-
-        for (ContestRecord contestRecord : contestRecords) {
-
-            Contest contest = contestRepository.findById(contestRecord.getContestId()).get();
-            if(contest.getEndTime().getTime() > System.currentTimeMillis()) continue;
-
-            set.addAll(Arrays.asList(contest.getProblemList().split(" ")));
-
-            JSONObject contestLine = new JSONObject();
-            contestLine.put("contestId" ,contestRecord.getContestId());
-            contestLine.put("title" ,contest.getTitle());
-            contestLine.put("time" ,contestRecord.getTime());
-            contestLine.put("proNum" ,contest.getProblemNumber());
-            JSONObject cellClassName = new JSONObject();
-
-            for (String problemIndex : contestRecord.getSolved().split(" ")) {
-                cellClassName.put(problemIndex, "table-ac-cell");
-                contestLine.put(problemIndex, "");
-            }
-
-            for (String problemIndex : contestRecord.getUpSolved().split(" ")) {
-                cellClassName.put(problemIndex, "table-up-cell");
-                contestLine.put(problemIndex, "");
-            }
-
-            contestLine.put("cellClassName", cellClassName);
-            contestLine.put("solved", contestRecord.getSolved().split(" ").length);
-            contestLine.put("penalty", contestRecord.getPenalty() / 60);
-            contestLines.add(contestLine);
-
+    private JSONObject getContestRecordTable(List<ContestRecordLine> contestRecordLines){
+        JSONObject res = new JSONObject();
+        Set<String> problemList = new TreeSet<>();
+        for(ContestRecordLine contestRecordLine : contestRecordLines) {
+            problemList.addAll(contestRecordLine.getProblemList());
         }
-
-        jsonObject.put("contests", contestLines);
-        jsonObject.put("columns", set);
-
-        return jsonObject;
+        res.put("problemList", problemList);
+        res.put("contestRecord", contestRecordLines);
+        return res;
     }
 }

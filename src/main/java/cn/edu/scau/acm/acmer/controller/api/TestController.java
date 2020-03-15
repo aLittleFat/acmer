@@ -1,11 +1,17 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
+import cn.edu.scau.acm.acmer.model.ContestRecordLine;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.OjAcChart;
+import cn.edu.scau.acm.acmer.model.UserDto;
+import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.ProblemAcRecordRepository;
+import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.*;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.shiro.SecurityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -21,7 +27,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 
 @RestController
@@ -50,6 +59,12 @@ public class TestController {
 
     @Autowired
     OpenTrainsService openTrainsService;
+
+    @Autowired
+    ContestRecordRepository contestRecordRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
 
     @GetMapping("/addAc")
@@ -109,28 +124,19 @@ public class TestController {
         return new MyResponseEntity<>(problemAcRecordRepository.countAllByStudentIdGroupByOJ(studentId));
     }
 
-//    @GetMapping("/testJisuanke")
-//    void testJisuanke() throws Exception {
-//        BaseHttpClient httpClient = new BaseHttpClient();
-//        httpClient.get("https://www.jisuanke.com/");
-//        String xsrf = httpClient.getCookie("XSRF-TOKEN");
-//        List<NameValuePair> params = new ArrayList<>();
-//        params.add(new BasicNameValuePair("account", "+8615914764919"));
-//        params.add(new BasicNameValuePair("pwd", "3a54c27831354a122c2b69dce1efe599"));
-//        params.add(new BasicNameValuePair("save", "1"));
-//        List<Header> headers = new ArrayList<>();
-//        headers.add(new BasicHeader("XSRF-TOKEN", xsrf));
-//        headers.add(new BasicHeader("Accept", "application/json, text/javascript, */*; q=0.01"));
-//        headers.add(new BasicHeader("X-Requested-With", "XMLHttpRequest"));
-//        headers.add(new BasicHeader("Host", "passport.jisuanke.com"));
-//        headers.add(new BasicHeader("Origin", "https://passport.jisuanke.com"));
-//        headers.add(new BasicHeader("Referer", "https://passport.jisuanke.com/?n=https://www.jisuanke.com/"));
-//        headers.add(new BasicHeader("Sec-Fetch-Dest", "empty"));
-//        headers.add(new BasicHeader("Sec-Fetch-Mode", "cors"));
-//        headers.add(new BasicHeader("Sec-Fetch-Site", "same-origin"));
-//        headers.add(new BasicHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36"));
-//        httpClient.post("https://passport.jisuanke.com/auth/login", params, headers);
-//        log.info(httpClient.get("https://www.jisuanke.com/"));
-//    }
+    @GetMapping("/testGetContest")
+    MyResponseEntity<JSONObject> find() {
+        int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
+        String studentId = userRepository.findById(id).get().getStudentId();
+        List<ContestRecordLine> contestRecordLines = contestRecordRepository.findAllContestRecordLineByStudentId(studentId);
+        JSONObject res = new JSONObject();
+        Set<String> problemList = new TreeSet<>();
+        for(ContestRecordLine contestRecordLine : contestRecordLines) {
+            problemList.addAll(contestRecordLine.getProblemList());
+        }
+        res.put("problemList", problemList);
+        res.put("contestRecord", contestRecordLines);
+        return new MyResponseEntity(res);
+    }
 
 }
