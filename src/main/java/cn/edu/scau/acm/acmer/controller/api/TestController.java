@@ -1,10 +1,7 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
-import cn.edu.scau.acm.acmer.model.ContestRecordLine;
-import cn.edu.scau.acm.acmer.model.MyResponseEntity;
-import cn.edu.scau.acm.acmer.model.OjAcChart;
-import cn.edu.scau.acm.acmer.model.UserDto;
+import cn.edu.scau.acm.acmer.model.*;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.ProblemAcRecordRepository;
@@ -27,7 +24,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -122,21 +118,6 @@ public class TestController {
     @GetMapping("/testCharts")
     MyResponseEntity<List<OjAcChart>> testCharts(String studentId){
         return new MyResponseEntity<>(problemAcRecordRepository.countAllByStudentIdGroupByOJ(studentId));
-    }
-
-    @GetMapping("/testGetContest")
-    MyResponseEntity<JSONObject> find() {
-        int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
-        String studentId = userRepository.findById(id).get().getStudentId();
-        List<ContestRecordLine> contestRecordLines = contestRecordRepository.findAllContestRecordLineByStudentId(studentId);
-        JSONObject res = new JSONObject();
-        Set<String> problemList = new TreeSet<>();
-        for(ContestRecordLine contestRecordLine : contestRecordLines) {
-            problemList.addAll(contestRecordLine.getProblemList());
-        }
-        res.put("problemList", problemList);
-        res.put("contestRecord", contestRecordLines);
-        return new MyResponseEntity(res);
     }
 
 }

@@ -1,10 +1,12 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
-import cn.edu.scau.acm.acmer.entity.ContestRecord;
 import cn.edu.scau.acm.acmer.model.ContestRecordLine;
+import cn.edu.scau.acm.acmer.model.ContestTable;
+import cn.edu.scau.acm.acmer.model.MultiContestRecordLine;
 import cn.edu.scau.acm.acmer.repository.ContestProblemRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
+import cn.edu.scau.acm.acmer.repository.ContestRecordViewRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.service.*;
 import com.alibaba.fastjson.JSONObject;
@@ -48,6 +50,9 @@ public class ContestServiceImpl implements ContestService {
     @Autowired
     private OJService ojService;
 
+    @Autowired
+    private ContestRecordViewRepository contestRecordViewRepository;
+
 
     @Override
     @Transactional
@@ -80,25 +85,39 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
-    public JSONObject getContestByStudentId(String studentId) {
-        List<ContestRecordLine> contestRecordLines = contestRecordRepository.findAllContestRecordLineByStudentId(studentId);
-        return getContestRecordTable(contestRecordLines);
+    public JSONObject getContestTableByStudentId(String studentId) {
+        List<MultiContestRecordLine> multiContestRecordLines = contestRecordViewRepository.findAllMultiContestRecordLineByStudentId(studentId);
+        return getContestRecordTable(multiContestRecordLines);
     }
 
     @Override
-    public JSONObject getContestByTeamId(Integer teamId) {
-        List<ContestRecordLine> contestRecordLines = contestRecordRepository.findAllContestRecordLineByTeamId(teamId);
-        return getContestRecordTable(contestRecordLines);
+    public JSONObject getContestTableByTeamId(Integer teamId) {
+        List<MultiContestRecordLine> multiContestRecordLines = contestRecordViewRepository.findAllMultiContestRecordLineByTeamId(teamId);
+        return getContestRecordTable(multiContestRecordLines);
     }
 
-    private JSONObject getContestRecordTable(List<ContestRecordLine> contestRecordLines){
+    @Override
+    public ContestTable getContestTableByContestId(Integer contestId) throws Exception {
+        Optional<Contest> optionalContest = contestRepository.findById(contestId);
+        if(optionalContest.isEmpty()) throw new Exception("不存在的竞赛");
+        Contest contest = optionalContest.get();
+        List<ContestRecordLine> contestRecordLines = contestRecordViewRepository.findAllContestRecordLineByContestId(contestId);
+        Collections.sort(contestRecordLines);
+        ContestTable contestTable = new ContestTable();
+        contestTable.setContestRecordLines(contestRecordLines);
+        contestTable.setTitle(contest.getTitle());
+        contestTable.setProblemList(Arrays.asList(contest.getProblemList().split(" ")));
+        return contestTable;
+    }
+
+    private JSONObject getContestRecordTable(List<MultiContestRecordLine> multiContestRecordLines){
         JSONObject res = new JSONObject();
         Set<String> problemList = new TreeSet<>();
-        for(ContestRecordLine contestRecordLine : contestRecordLines) {
-            problemList.addAll(contestRecordLine.getProblemList());
+        for(MultiContestRecordLine multiContestRecordLine : multiContestRecordLines) {
+            problemList.addAll(multiContestRecordLine.getProblemList());
         }
         res.put("problemList", problemList);
-        res.put("contestRecord", contestRecordLines);
+        res.put("contestRecord", multiContestRecordLines);
         return res;
     }
 }

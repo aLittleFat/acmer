@@ -1,6 +1,7 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.entity.TeamStudentPK;
+import cn.edu.scau.acm.acmer.model.ContestTable;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.UserDto;
 import cn.edu.scau.acm.acmer.repository.TeamStudentRepository;
@@ -13,8 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "api", produces = "application/json; charset=utf-8")
@@ -36,7 +35,7 @@ public class ContestController {
     MyResponseEntity<JSONObject> getMyContest(){
         int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
         String studentId = userRepository.findById(id).get().getStudentId();
-        JSONObject res = contestService.getContestByStudentId(studentId);
+        JSONObject res = contestService.getContestTableByStudentId(studentId);
         return new MyResponseEntity<>(res);
     }
 
@@ -44,7 +43,7 @@ public class ContestController {
     MyResponseEntity<JSONObject> getPersonalContestByStudentId(@PathVariable String studentId){
 
         long a = System.currentTimeMillis();
-        JSONObject res = contestService.getContestByStudentId(studentId);
+        JSONObject res = contestService.getContestTableByStudentId(studentId);
         log.info(System.currentTimeMillis()-a+"ms");
 
         return new MyResponseEntity<>(res);
@@ -52,7 +51,7 @@ public class ContestController {
 
     @GetMapping("teamContest/{teamId}")
     MyResponseEntity<JSONObject> getTeamContestByStudentId(@PathVariable Integer teamId){
-        return new MyResponseEntity<>(contestService.getContestByTeamId(teamId));
+        return new MyResponseEntity<>(contestService.getContestTableByTeamId(teamId));
     }
 
     @PutMapping("personalContestRecord")
@@ -77,5 +76,10 @@ public class ContestController {
         }
         contestService.addContestRecord(ojName, cId, null, teamId, account, password);
         return new MyResponseEntity<>();
+    }
+
+    @GetMapping("contestTable")
+    MyResponseEntity<ContestTable> getContestTableByContestId(Integer contestId) throws Exception {
+        return new MyResponseEntity<>(contestService.getContestTableByContestId(contestId));
     }
 }

@@ -1,0 +1,27 @@
+package cn.edu.scau.acm.acmer.repository;
+
+import cn.edu.scau.acm.acmer.entity.ContestRecordView;
+import cn.edu.scau.acm.acmer.model.ContestRecordLine;
+import cn.edu.scau.acm.acmer.model.MultiContestRecordLine;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface ContestRecordViewRepository extends JpaRepository<ContestRecordView, Integer> {
+    List<ContestRecordView> findAllByContestId(Integer contestId);
+    List<ContestRecordView> findAllByTeamId(Integer teamId);
+    List<ContestRecordView> findAllByStudentId(String studentId);
+
+    @Query("select new cn.edu.scau.acm.acmer.model.MultiContestRecordLine(contestRecordView) from ContestRecordView as contestRecordView where contestRecordView.studentId = :studentId order by contestRecordView.time desc")
+    List<MultiContestRecordLine> findAllMultiContestRecordLineByStudentId(@Param("studentId") String studentId);
+
+    @Query("select new cn.edu.scau.acm.acmer.model.MultiContestRecordLine(contestRecordView) from ContestRecordView as contestRecordView where contestRecordView.teamId = :teamId order by contestRecordView.time desc")
+    List<MultiContestRecordLine> findAllMultiContestRecordLineByTeamId(@Param("teamId") Integer teamId);
+
+    @Query("select new cn.edu.scau.acm.acmer.model.ContestRecordLine(contestRecordView) from ContestRecordView as contestRecordView where contestRecordView.contestId = :contestId")
+    List<ContestRecordLine> findAllContestRecordLineByContestId(@Param("contestId") Integer contestId);
+}
