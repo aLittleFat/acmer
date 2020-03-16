@@ -1,8 +1,10 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
+import cn.edu.scau.acm.acmer.entity.AwardView;
 import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.service.AccountService;
+import cn.edu.scau.acm.acmer.service.AwardService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +15,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api", produces = "application/json; charset=utf-8")
 public class VerifyController {
     @Autowired
-    AccountService accountService;
+    private AccountService accountService;
+
+    @Autowired
+    private AwardService awardService;
 
     @ApiOperation("获取未通过注册审核的用户信息")
     @GetMapping("user_unVerify")
@@ -52,5 +57,27 @@ public class VerifyController {
         return new MyResponseEntity<>();
     }
 
+    @ApiOperation("获取待审核的获奖记录")
+    @RequiresRoles("admin")
+    @GetMapping("award/notVerified")
+    MyResponseEntity<Page<AwardView>> getAwardViewNotVerified(Integer page, Integer size) {
+        return new MyResponseEntity<>(awardService.getAwardViewNotVerified(page, size));
+    }
+
+    @ApiOperation("通过审核获奖记录")
+    @RequiresRoles("admin")
+    @PutMapping("award/{awardId}/verified")
+    MyResponseEntity<Void> verifyAward(@PathVariable Integer awardId) throws Exception {
+        awardService.verifyAward(awardId);
+        return new MyResponseEntity<>();
+    }
+
+    @ApiOperation("不通过获奖记录，删除记录并对队伍发送邮件通知")
+    @RequiresRoles("admin")
+    @DeleteMapping("award/{awardId}/verified")
+    MyResponseEntity<Void> deleteAward(@PathVariable Integer awardId) throws Exception {
+        awardService.deleteAward(awardId);
+        return new MyResponseEntity<>();
+    }
 
 }

@@ -7,6 +7,7 @@ import cn.edu.scau.acm.acmer.model.TeamWithUsers;
 import cn.edu.scau.acm.acmer.service.SeasonService;
 import cn.edu.scau.acm.acmer.service.TeamService;
 import com.alibaba.fastjson.JSONArray;
+import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,16 +24,19 @@ public class SeasonController {
     @Autowired
     private TeamService teamService;
 
+    @ApiOperation("获取赛季列表")
     @GetMapping("/season")
     MyResponseEntity<List<Season>> getSeason() {
         return new MyResponseEntity<>(seasonService.getAllSeason());
     }
 
+    @ApiOperation("获取单个赛季")
     @GetMapping("/season/{seasonId}")
     MyResponseEntity<Season> getSeasonById(@PathVariable int seasonId) throws Exception {
         return new MyResponseEntity<>(seasonService.getSeasonById(seasonId));
     }
 
+    @ApiOperation("添加赛季")
     @RequiresRoles({"admin"})
     @PostMapping("/season")
     MyResponseEntity<Void> addSeason(int year, String name, String type, int cfPro) throws Exception {
@@ -40,6 +44,7 @@ public class SeasonController {
         return new MyResponseEntity<>();
     }
 
+    @ApiOperation("删除赛季")
     @RequiresRoles({"admin"})
     @DeleteMapping("/season")
     MyResponseEntity<Void> deleteSeason(int seasonId) throws Exception {
@@ -47,38 +52,45 @@ public class SeasonController {
         return new MyResponseEntity<>();
     }
 
+    @ApiOperation("获取个人赛季的队员列表")
     @GetMapping("/season/{seasonId}/student")
     MyResponseEntity<List<User>> getSeasonStudentBySeasonId(@PathVariable int seasonId) {
         return new MyResponseEntity<>(seasonService.getSeasonStudentBySeasonId(seasonId));
     }
 
+    @ApiOperation("添加个人赛季的参赛队员")
     @PostMapping("/season/{seasonId}/student")
     MyResponseEntity<Void> addSeasonStudentBySeasonId(@PathVariable int seasonId, @RequestParam List<String> studentIds) throws Exception {
         seasonService.addSeasonStudentBySeasonId(seasonId, studentIds);
         return new MyResponseEntity<>();
     }
 
+    @ApiOperation("删除个人赛季的参赛队员")
     @DeleteMapping("/season/{seasonId}/student")
     MyResponseEntity<Void> deleteSeasonStudentBySeasonIdAndStudentId(@PathVariable int seasonId, String studentId) throws Exception {
         seasonService.deleteSeasonStudentBySeasonIdAndStudentId(seasonId, studentId);
         return new MyResponseEntity<>();
     }
 
+    @ApiOperation("获取个人赛季可以添加的队员列表")
     @GetMapping("/season/{seasonId}/studentChoice")
     MyResponseEntity<JSONArray> getSeasonStudentChoiceBySeasonId(@PathVariable int seasonId) {
         return new MyResponseEntity<>(seasonService.getSeasonStudentChoiceBySeasonId(seasonId));
     }
 
+    @ApiOperation("获取组队赛季可以组队的队员列表")
     @GetMapping("/season/{seasonId}/teamStudentChoice")
     MyResponseEntity<JSONArray> getTeamStudentChoiceBySeasonId(@PathVariable int seasonId) {
         return new MyResponseEntity<>(seasonService.getTeamStudentChoiceBySeasonId(seasonId));
     }
 
+    @ApiOperation("获取赛季队伍列表")
     @GetMapping("/season/{seasonId}/team")
     MyResponseEntity<List<TeamWithUsers>> getTeamBySeasonId(@PathVariable int seasonId) {
         return new MyResponseEntity<>(teamService.getTeamBySeasonId(seasonId));
     }
 
+    @ApiOperation("获取赛季队伍")
     @PostMapping("season/{seasonId}/team")
     MyResponseEntity<Void> addTeam(@PathVariable int seasonId, int rank, String vjAccount) {
         teamService.addTeam(seasonId, rank, vjAccount);

@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-@Table(name = "contest_record_view", schema = "scauacm", catalog = "")
+@Table(name = "contest_record_view")
 public class ContestRecordView {
     private int id;
     private int contestId;

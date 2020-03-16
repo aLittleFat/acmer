@@ -43,6 +43,7 @@ public class UserController {
         return new MyResponseEntity<>();
     }
 
+    @ApiOperation("获取学生概览页面的信息")
     @GetMapping("studentInfo")
     MyResponseEntity<StudentInfo> getStudentInfo(String studentId) {
         if(studentId == null || studentId.equals("")) {

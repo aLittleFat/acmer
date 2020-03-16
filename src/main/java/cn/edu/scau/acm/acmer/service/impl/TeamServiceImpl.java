@@ -1,15 +1,15 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
-import cn.edu.scau.acm.acmer.entity.Team;
-import cn.edu.scau.acm.acmer.entity.TeamStudent;
-import cn.edu.scau.acm.acmer.entity.TeamStudentPK;
-import cn.edu.scau.acm.acmer.entity.User;
+import cn.edu.scau.acm.acmer.entity.*;
 import cn.edu.scau.acm.acmer.model.MyTeamMenu;
 import cn.edu.scau.acm.acmer.model.TeamWithUsers;
+import cn.edu.scau.acm.acmer.repository.AwardRepository;
 import cn.edu.scau.acm.acmer.repository.TeamRepository;
 import cn.edu.scau.acm.acmer.repository.TeamStudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
+import cn.edu.scau.acm.acmer.service.MailService;
 import cn.edu.scau.acm.acmer.service.TeamService;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +28,12 @@ public class TeamServiceImpl implements TeamService {
 
     @Autowired
     private TeamStudentRepository teamStudentRepository;
+
+    @Autowired
+    private AwardRepository awardRepository;
+
+    @Autowired
+    private MailService mailService;
 
     @Override
     public List<TeamWithUsers> getTeamBySeasonId(int seasonId) {
@@ -102,5 +108,60 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public List<MyTeamMenu> getTeamByStudentId(String studentId) {
         return teamRepository.findAllTeamMenuByStudentId(studentId);
+    }
+
+    @Override
+    public JSONObject getTeamInfoByTeamIdAndStudentId(Integer teamId, String studentId) throws Exception {
+        Optional<Team> optionalTeam = teamRepository.findById(teamId);
+        if(optionalTeam.isEmpty()) {
+            throw new Exception("不存在的队伍");
+        }
+        JSONObject res = new JSONObject();
+        boolean isMyTeam = checkInTeam(teamId, studentId);
+        res.put("isMyTeam", isMyTeam);
+
+        Team team = optionalTeam.get();
+        List<User> students = userRepository.findAllByTeamId(teamId);
+        List<Award> awards;
+        if(isMyTeam) {
+            awards = awardRepository.findAllByTeamIdOrderByTimeAsc(teamId);
+        } else {
+            awards = awardRepository.findAllByTeamIdAndVerifiedOrderByTimeAsc(teamId, (byte)1);
+        }
+        res.put("team", team);
+        res.put("students", students);
+        res.put("awards", awards);
+        return res;
+    }
+
+    @Override
+    public void changeTeamName(Integer teamId, String nameCn, String nameEn, String studentId) throws Exception {
+        Optional<Team> optionalTeam = teamRepository.findById(teamId);
+        if(optionalTeam.isEmpty()) {
+            throw new Exception("不存在的队伍");
+        }
+        Team team = optionalTeam.get();
+        if(!checkInTeam(teamId, studentId)) {
+            throw new Exception("不是你的队伍");
+        }
+        team.setNameCn(nameCn);
+        team.setNameEn(nameEn);
+        teamRepository.save(team);
+    }
+
+    @Override
+    public boolean checkInTeam(Integer teamId, String studentId) {
+        TeamStudentPK teamStudentPK = new TeamStudentPK();
+        teamStudentPK.setTeamId(teamId);
+        teamStudentPK.setStudentId(studentId);
+        return teamStudentRepository.findById(teamStudentPK).isPresent();
+    }
+
+    @Override
+    public void sendMail(Integer teamId, String title, String msg) {
+        List<User> users = userRepository.findAllByTeamId(teamId);
+        for (User user : users) {
+            mailService.sendTextMail(user.getEmail(), title, msg);
+        }
     }
 }
