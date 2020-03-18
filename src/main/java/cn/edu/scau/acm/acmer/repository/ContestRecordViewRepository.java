@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ContestRecordViewRepository extends JpaRepository<ContestRecordView, Integer> {
@@ -24,4 +25,8 @@ public interface ContestRecordViewRepository extends JpaRepository<ContestRecord
 
     @Query("select new cn.edu.scau.acm.acmer.model.ContestRecordLine(contestRecordView) from ContestRecordView as contestRecordView where contestRecordView.contestId = :contestId")
     List<ContestRecordLine> findAllContestRecordLineByContestId(@Param("contestId") Integer contestId);
+
+    Optional<ContestRecordView> findByContestIdAndStudentIdAndAccount(Integer contestId, String studentId, String account);
+
+    Optional<ContestRecordView> findByContestIdAndTeamIdAndAccount(Integer contestId, Integer teamId, String account);
 }

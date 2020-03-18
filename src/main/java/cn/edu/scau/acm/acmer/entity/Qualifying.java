@@ -7,9 +7,11 @@ import java.util.Objects;
 public class Qualifying {
     private int id;
     private String title;
-    private Double proportion;
-    private Integer seasonId;
-    private Integer contestId;
+    private double proportion;
+    private int seasonId;
+    private int contestId;
+    private Integer seasonAccountId;
+    private byte calculated;
 
     @Id
     @Column(name = "id")
@@ -34,32 +36,52 @@ public class Qualifying {
 
     @Basic
     @Column(name = "proportion")
-    public Double getProportion() {
+    public double getProportion() {
         return proportion;
     }
 
-    public void setProportion(Double proportion) {
+    public void setProportion(double proportion) {
         this.proportion = proportion;
     }
 
     @Basic
     @Column(name = "season_id")
-    public Integer getSeasonId() {
+    public int getSeasonId() {
         return seasonId;
     }
 
-    public void setSeasonId(Integer seasonId) {
+    public void setSeasonId(int seasonId) {
         this.seasonId = seasonId;
     }
 
     @Basic
     @Column(name = "contest_id")
-    public Integer getContestId() {
+    public int getContestId() {
         return contestId;
     }
 
-    public void setContestId(Integer contestId) {
+    public void setContestId(int contestId) {
         this.contestId = contestId;
+    }
+
+    @Basic
+    @Column(name = "season_account_id")
+    public Integer getSeasonAccountId() {
+        return seasonAccountId;
+    }
+
+    public void setSeasonAccountId(Integer seasonAccountId) {
+        this.seasonAccountId = seasonAccountId;
+    }
+
+    @Basic
+    @Column(name = "calculated")
+    public byte getCalculated() {
+        return calculated;
+    }
+
+    public void setCalculated(byte calculated) {
+        this.calculated = calculated;
     }
 
     @Override
@@ -68,14 +90,16 @@ public class Qualifying {
         if (o == null || getClass() != o.getClass()) return false;
         Qualifying that = (Qualifying) o;
         return id == that.id &&
+                Double.compare(that.proportion, proportion) == 0 &&
+                seasonId == that.seasonId &&
+                contestId == that.contestId &&
+                calculated == that.calculated &&
                 Objects.equals(title, that.title) &&
-                Objects.equals(proportion, that.proportion) &&
-                Objects.equals(seasonId, that.seasonId) &&
-                Objects.equals(contestId, that.contestId);
+                Objects.equals(seasonAccountId, that.seasonAccountId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, proportion, seasonId, contestId);
+        return Objects.hash(id, title, proportion, seasonId, contestId, seasonAccountId, calculated);
     }
 }

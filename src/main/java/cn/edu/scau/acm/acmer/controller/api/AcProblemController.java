@@ -30,8 +30,8 @@ public class AcProblemController {
 
     @ApiOperation("获取刷题排行榜")
     @GetMapping("personalProblemAcRank")
-    MyResponseEntity<List<PersonalProblemAcRank>> getPersonalProblemAcRank(int grade, boolean includeRetired) {
-        return new MyResponseEntity<>(problemService.getPersonalProblemAcRank(grade, includeRetired));
+    MyResponseEntity<List<PersonalProblemAcRank>> getPersonalProblemAcRank(int grade) {
+        return new MyResponseEntity<>(problemService.getPersonalProblemAcRank(grade));
     }
 
     @ApiOperation("根据学号获取刷题记录")

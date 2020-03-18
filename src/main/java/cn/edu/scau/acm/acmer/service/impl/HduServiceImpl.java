@@ -309,9 +309,9 @@ public class HduServiceImpl implements HduService {
             }
         }
 
-        if (!hasTakeParkIn) {
-            throw new Exception("没有参加该比赛");
-        }
+//        if (!hasTakeParkIn) {
+//            throw new Exception("没有参加该比赛");
+//        }
 
         ContestRecord contestRecord = new ContestRecord();
         contestRecord.setTeamId(teamId);

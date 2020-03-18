@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ContestRecordLine implements Comparable<ContestRecordLine> {
     private Timestamp time;
-    private Integer solvedNumber;
+    private Long solvedNumber;
     private Integer penalty;
     private List<String> solved;
     private List<String> upSolved;
@@ -23,7 +23,7 @@ public class ContestRecordLine implements Comparable<ContestRecordLine> {
         this.penalty = contestRecordView.getPenalty() / 60;
         this.solved = Arrays.asList(contestRecordView.getSolved().split(" "));
         this.upSolved = Arrays.asList(contestRecordView.getUpSolved().split(" "));
-        this.solvedNumber = this.solved.size();
+        this.solvedNumber = contestRecordView.getSolvedNumber();
         this.participants = contestRecordView.getStudents();
         this.teamId = contestRecordView.getTeamId();
         this.studentId = contestRecordView.getStudentId();
@@ -55,11 +55,11 @@ public class ContestRecordLine implements Comparable<ContestRecordLine> {
         this.penalty = penalty;
     }
 
-    public Integer getSolvedNumber() {
+    public Long getSolvedNumber() {
         return solvedNumber;
     }
 
-    public void setSolvedNumber(Integer solvedNumber) {
+    public void setSolvedNumber(Long solvedNumber) {
         this.solvedNumber = solvedNumber;
     }
 

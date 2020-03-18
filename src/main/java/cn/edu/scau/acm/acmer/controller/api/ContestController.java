@@ -51,7 +51,12 @@ public class ContestController {
 
     @GetMapping("teamContest/{teamId}")
     MyResponseEntity<JSONObject> getTeamContestByStudentId(@PathVariable Integer teamId){
-        return new MyResponseEntity<>(contestService.getContestTableByTeamId(teamId));
+        String studentId = null;
+        try {
+            int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
+            studentId = userRepository.findById(id).get().getStudentId();
+        } catch (Exception ignore) { }
+        return new MyResponseEntity<>(contestService.getContestTableByTeamId(teamId, studentId));
     }
 
     @PutMapping("personalContestRecord")

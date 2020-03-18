@@ -45,6 +45,9 @@ public class ProblemServiceImpl implements ProblemService {
     @Autowired
     private ProblemTagRepository problemTagRepository;
 
+    @Autowired
+    private AwardRepository awardRepository;
+
     @Override
     public void addProblem(String ojName, String problemId, String title) {
         Optional<Problem> problem = problemRepository.findByOjNameAndProblemId(ojName, problemId);
@@ -142,24 +145,19 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     @Override
-    public List<PersonalProblemAcRank> getPersonalProblemAcRank(int grade, boolean includeRetired) {
+    public List<PersonalProblemAcRank> getPersonalProblemAcRank(int grade) {
         List<User> users;
-        String status = "退役";
-        if(includeRetired) {
-            status = "";
-        }
         if (grade == 0) {
-            users = userRepository.findAllByStudentIdNotNullAndStatusNot(status);
+            users = userRepository.findAllByStudentIdNotNull();
         } else {
-            users = userRepository.findAllByGradeAndStatusNot(grade, status);
+            users = userRepository.findAllByGrade(grade);
         }
         List<PersonalProblemAcRank> personalProblemAcRanks = new ArrayList<>();
         for (User user : users) {
             PersonalProblemAcRank personalProblemAcRank = new PersonalProblemAcRank();
             personalProblemAcRank.setUser(user);
             personalProblemAcRank.setAcNum(problemAcRecordRepository.countAllByStudentId(user.getStudentId()));
-            //todo getaward
-
+            personalProblemAcRank.setAwards(awardRepository.findAllByStudentId(user.getStudentId()));
             personalProblemAcRanks.add(personalProblemAcRank);
         }
         Collections.sort(personalProblemAcRanks);

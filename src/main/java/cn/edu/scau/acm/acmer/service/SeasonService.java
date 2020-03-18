@@ -2,6 +2,7 @@ package cn.edu.scau.acm.acmer.service;
 
 import cn.edu.scau.acm.acmer.entity.Season;
 import cn.edu.scau.acm.acmer.entity.User;
+import cn.edu.scau.acm.acmer.model.SeasonParticipant;
 import com.alibaba.fastjson.JSONArray;
 
 import java.util.List;
@@ -24,4 +25,6 @@ public interface SeasonService {
     void deleteSeasonStudentBySeasonIdAndStudentId(int seasonId, String studentId) throws Exception;
 
     JSONArray getTeamStudentChoiceBySeasonId(int seasonId);
+
+    List<SeasonParticipant> getSeasonParticipantBySeasonId(Integer seasonId) throws Exception;
 }

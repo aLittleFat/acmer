@@ -3,6 +3,7 @@ package cn.edu.scau.acm.acmer.service.impl;
 import cn.edu.scau.acm.acmer.entity.SeasonStudent;
 import cn.edu.scau.acm.acmer.entity.Season;
 import cn.edu.scau.acm.acmer.entity.User;
+import cn.edu.scau.acm.acmer.model.SeasonParticipant;
 import cn.edu.scau.acm.acmer.repository.SeasonStudentRepository;
 import cn.edu.scau.acm.acmer.repository.SeasonRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
@@ -83,6 +84,22 @@ public class SeasonServiceImpl implements SeasonService {
     public JSONArray getTeamStudentChoiceBySeasonId(int seasonId) {
         List<User> users = userRepository.findAllNotInTeamBySeasonId(seasonId);
         return getChoiceArray(users);
+    }
+
+    @Override
+    public List<SeasonParticipant> getSeasonParticipantBySeasonId(Integer seasonId) throws Exception {
+        Optional<Season> optionalSeason = seasonRepository.findById(seasonId);
+        if(optionalSeason.isEmpty()) {
+            throw new Exception("不存在的赛季");
+        }
+        Season season = optionalSeason.get();
+        List<SeasonParticipant> seasonParticipants;
+        if(season.getType().equals("个人赛")) {
+            seasonParticipants = seasonRepository.findAllSeasonStudentParticipantBySeasonId(seasonId);
+        } else {
+            seasonParticipants = seasonRepository.findAllSeasonTeamParticipantBySeasonId(seasonId);
+        }
+        return seasonParticipants;
     }
 
     private JSONArray getChoiceArray(List<User> users) {

@@ -1,12 +1,17 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.entity.Season;
+import cn.edu.scau.acm.acmer.entity.SeasonAccount;
 import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
+import cn.edu.scau.acm.acmer.model.SeasonParticipant;
 import cn.edu.scau.acm.acmer.model.TeamWithUsers;
+import cn.edu.scau.acm.acmer.repository.SeasonAccountRepository;
+import cn.edu.scau.acm.acmer.service.SeasonAccountService;
 import cn.edu.scau.acm.acmer.service.SeasonService;
 import cn.edu.scau.acm.acmer.service.TeamService;
 import com.alibaba.fastjson.JSONArray;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +28,12 @@ public class SeasonController {
 
     @Autowired
     private TeamService teamService;
+
+    @Autowired
+    private SeasonAccountRepository seasonAccountRepository;
+
+    @Autowired
+    private SeasonAccountService seasonAccountService;
 
     @ApiOperation("获取赛季列表")
     @GetMapping("/season")
@@ -95,6 +106,32 @@ public class SeasonController {
     MyResponseEntity<Void> addTeam(@PathVariable int seasonId, int rank, String vjAccount) {
         teamService.addTeam(seasonId, rank, vjAccount);
         return new MyResponseEntity<>();
+    }
+
+    @ApiOperation("获取赛季账号集")
+    @GetMapping("season/{seasonId}/seasonAccount")
+    MyResponseEntity<List<SeasonAccount>> getSeasonAccountBySeasonId(@PathVariable Integer seasonId) {
+        return new MyResponseEntity<>(seasonAccountRepository.findAllBySeasonId(seasonId));
+    }
+
+    @ApiOperation("添加账号集")
+    @PostMapping("season/{seasonId}/seasonAccount")
+    MyResponseEntity<Void> addSeasonAccountBySeasonId(@PathVariable Integer seasonId, String title, @RequestParam List<Integer> seasonStudentIds, @RequestParam List<Integer> teamIds, @RequestParam List<String> handles, @RequestParam List<String> accounts, @RequestParam List<String> passwords) throws Exception {
+        seasonAccountService.addSeasonAccount(seasonId, title, seasonStudentIds, teamIds, handles, accounts, passwords);
+        return new MyResponseEntity<>();
+    }
+
+    @ApiOperation("删除账号集")
+    @DeleteMapping("seasonAccount/{seasonAccountId}")
+    MyResponseEntity<Void> deleteSeasonAccount(@PathVariable Integer seasonAccountId) throws Exception {
+        seasonAccountService.deleteSeasonAccount(seasonAccountId);
+        return new MyResponseEntity<>();
+    }
+
+    @ApiOperation("获取本赛季参赛者列表")
+    @GetMapping("season/{seasonId}/participant")
+    MyResponseEntity<List<SeasonParticipant>> getSeasonParticipantBySeasonId(@PathVariable Integer seasonId) throws Exception {
+        return new MyResponseEntity<>(seasonService.getSeasonParticipantBySeasonId(seasonId));
     }
 
 }

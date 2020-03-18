@@ -124,9 +124,9 @@ public class JisuankeServiceImpl implements JisuankeService {
                 break;
             }
         }
-        if(!hasTakePartIn) {
-            throw new Exception("未参加该竞赛");
-        }
+//        if(!hasTakePartIn) {
+//            throw new Exception("未参加该竞赛");
+//        }
     }
 
     @Override

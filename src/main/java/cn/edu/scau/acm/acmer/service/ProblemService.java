@@ -6,7 +6,6 @@ import cn.edu.scau.acm.acmer.model.AcProblemInDay;
 import cn.edu.scau.acm.acmer.model.PersonalProblemAcRank;
 import com.alibaba.fastjson.JSONObject;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -18,7 +17,7 @@ public interface ProblemService {
     AcProblemInDay getProblemAcRecordInDay(List<Integer> ojAccounts, List<Integer> exOjAccounts, Date startTime, Date endTime);
 
     List<AcProblemInDay> getProblemAcRecordSeveralDays(String studentId, Date time, int days, String exStudentId);
-    List<PersonalProblemAcRank> getPersonalProblemAcRank(int grade, boolean includeRetired);
+    List<PersonalProblemAcRank> getPersonalProblemAcRank(int grade);
 
     JSONObject getProblemInfo(int id, String studentId);
 

@@ -1,6 +1,7 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
+import cn.edu.scau.acm.acmer.entity.ContestRecord;
 import cn.edu.scau.acm.acmer.model.ContestRecordLine;
 import cn.edu.scau.acm.acmer.model.ContestTable;
 import cn.edu.scau.acm.acmer.model.MultiContestRecordLine;
@@ -53,6 +54,9 @@ public class ContestServiceImpl implements ContestService {
     @Autowired
     private ContestRecordViewRepository contestRecordViewRepository;
 
+    @Autowired
+    private TeamService teamService;
+
 
     @Override
     @Transactional
@@ -60,6 +64,7 @@ public class ContestServiceImpl implements ContestService {
 
         ojService.addOj(ojName);
         addContest(ojName, cId, account, password);
+
         switch (ojName) {
             case "VJ": vjService.addContestRecord(ojName, cId, studentId, teamId, account, password); break;
             case "HDU": hduService.addContestRecord(ojName, cId, studentId, teamId, account, password); break;
@@ -91,9 +96,11 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
-    public JSONObject getContestTableByTeamId(Integer teamId) {
+    public JSONObject getContestTableByTeamId(Integer teamId, String studentId) {
         List<MultiContestRecordLine> multiContestRecordLines = contestRecordViewRepository.findAllMultiContestRecordLineByTeamId(teamId);
-        return getContestRecordTable(multiContestRecordLines);
+        JSONObject res = getContestRecordTable(multiContestRecordLines);
+        res.put("isMyTeam", teamService.checkInTeam(teamId, studentId));
+        return res;
     }
 
     @Override

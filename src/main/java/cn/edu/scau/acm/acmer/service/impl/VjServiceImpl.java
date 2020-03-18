@@ -226,6 +226,7 @@ public class VjServiceImpl implements VjService {
     }
 
     @Override
+    @Async
     public void updateContestProblem(BaseHttpClient httpClient, Contest contest) throws Exception {
         if (httpClient == null) {
             httpClient = new BaseHttpClient();
@@ -287,6 +288,11 @@ public class VjServiceImpl implements VjService {
         login(httpClient);
 
         Contest contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
+        Optional<ContestRecord> optionalContestRecord = contestRecordRepository.findByContestIdAndStudentIdAndTeamId(contest.getId(), studentId, teamId);
+
+        if (optionalContestRecord.isPresent()) {
+            throw new Exception("已存在该竞赛记录");
+        }
 
         if(contest.getEndTime().getTime() > System.currentTimeMillis()) {
             throw new Exception("比赛还未结束");
@@ -302,9 +308,9 @@ public class VjServiceImpl implements VjService {
                 break;
             }
         }
-        if(participantId == 0) {
-            throw new Exception("没有参与该比赛");
-        }
+//        if(participantId == 0) {
+//            throw new Exception("没有参与该比赛");
+//        }
 
         ContestRecord contestRecord = new ContestRecord();
         contestRecord.setStudentId(studentId);

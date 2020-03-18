@@ -5,10 +5,7 @@ import cn.edu.scau.acm.acmer.entity.Team;
 import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.model.StudentInfo;
 import cn.edu.scau.acm.acmer.model.TagAcChart;
-import cn.edu.scau.acm.acmer.repository.ProblemAcRecordRepository;
-import cn.edu.scau.acm.acmer.repository.SeasonRepository;
-import cn.edu.scau.acm.acmer.repository.TeamRepository;
-import cn.edu.scau.acm.acmer.repository.UserRepository;
+import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.StudentService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +29,16 @@ public class StudentServiceImpl implements StudentService {
     @Autowired
     private SeasonRepository seasonRepository;
 
+    @Autowired
+    private AwardRepository awardRepository;
+
     @Override
     public StudentInfo getStudentInfo(String studentId) {
         StudentInfo studentInfo = new StudentInfo();
         User user = userRepository.findByStudentId(studentId).get();
         studentInfo.setName(user.getName());
         studentInfo.setGrade(user.getGrade());
-        //todo studentInfo.setAwardList();
+        studentInfo.setAwardList(awardRepository.findAllByStudentId(studentId));
         //todo studentInfo.setCfRating();
         List<Team> teams = teamRepository.findAllByStudentId(studentId);
         List<JSONObject> jsonTeams = new ArrayList<>();

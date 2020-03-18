@@ -5,14 +5,14 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "qualifying_score", uniqueConstraints = {
-    @UniqueConstraint(name = "uni", columnNames = {"qualifying_id", "team_id", "personal_season_student_id"})
+    @UniqueConstraint(name = "uni", columnNames = {"qualifying_id", "team_id", "season_student_id"})
 })
 public class QualifyingScore {
     private int id;
-    private Double score;
-    private Integer qualifyingId;
+    private double score;
+    private int qualifyingId;
     private Integer teamId;
-    private Integer personalSeasonStudentId;
+    private Integer seasonStudentId;
 
     @Id
     @Column(name = "id")
@@ -27,21 +27,21 @@ public class QualifyingScore {
 
     @Basic
     @Column(name = "score")
-    public Double getScore() {
+    public double getScore() {
         return score;
     }
 
-    public void setScore(Double score) {
+    public void setScore(double score) {
         this.score = score;
     }
 
     @Basic
     @Column(name = "qualifying_id")
-    public Integer getQualifyingId() {
+    public int getQualifyingId() {
         return qualifyingId;
     }
 
-    public void setQualifyingId(Integer qualifyingId) {
+    public void setQualifyingId(int qualifyingId) {
         this.qualifyingId = qualifyingId;
     }
 
@@ -56,13 +56,13 @@ public class QualifyingScore {
     }
 
     @Basic
-    @Column(name = "personal_season_student_id")
-    public Integer getPersonalSeasonStudentId() {
-        return personalSeasonStudentId;
+    @Column(name = "season_student_id")
+    public Integer getSeasonStudentId() {
+        return seasonStudentId;
     }
 
-    public void setPersonalSeasonStudentId(Integer personalSeasonStudentId) {
-        this.personalSeasonStudentId = personalSeasonStudentId;
+    public void setSeasonStudentId(Integer seasonStudentId) {
+        this.seasonStudentId = seasonStudentId;
     }
 
     @Override
@@ -71,14 +71,14 @@ public class QualifyingScore {
         if (o == null || getClass() != o.getClass()) return false;
         QualifyingScore that = (QualifyingScore) o;
         return id == that.id &&
-                Objects.equals(score, that.score) &&
-                Objects.equals(qualifyingId, that.qualifyingId) &&
+                Double.compare(that.score, score) == 0 &&
+                qualifyingId == that.qualifyingId &&
                 Objects.equals(teamId, that.teamId) &&
-                Objects.equals(personalSeasonStudentId, that.personalSeasonStudentId);
+                Objects.equals(seasonStudentId, that.seasonStudentId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, score, qualifyingId, teamId, personalSeasonStudentId);
+        return Objects.hash(id, score, qualifyingId, teamId, seasonStudentId);
     }
 }

@@ -151,6 +151,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public boolean checkInTeam(Integer teamId, String studentId) {
+        if(studentId == null) return false;
         TeamStudentPK teamStudentPK = new TeamStudentPK();
         teamStudentPK.setTeamId(teamId);
         teamStudentPK.setStudentId(studentId);
