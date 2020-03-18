@@ -1,6 +1,8 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
+import cn.edu.scau.acm.acmer.entity.Contest;
 import cn.edu.scau.acm.acmer.entity.Qualifying;
+import cn.edu.scau.acm.acmer.entity.ScoreRecordView;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.service.QualifyingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,4 +26,22 @@ public class QualifyingController {
         qualifyingService.addQualifying(seasonId, title, ojName, cId, password, proportion, seasonAccountId);
         return new MyResponseEntity<>();
     }
+
+    @DeleteMapping("qualifying/{qualifyingId}")
+    MyResponseEntity<Void> deleteQualifying(@PathVariable Integer qualifyingId) throws Exception {
+        qualifyingService.deleteQualifying(qualifyingId);
+        return new MyResponseEntity<>();
+    }
+
+    @GetMapping("qualifyingScore/{qualifyingId}")
+    MyResponseEntity<List<ScoreRecordView>> getQualifyingScoreByQualifyingId(@PathVariable Integer qualifyingId) {
+        return new MyResponseEntity<>(qualifyingService.getQualifyingScoreByQualifyingId(qualifyingId));
+    }
+
+    @GetMapping("qualifyingScore/{qualifyingId}/contest")
+    MyResponseEntity<Contest> getContestByQualifyingId(@PathVariable Integer qualifyingId) {
+        return new MyResponseEntity<>(qualifyingService.getContestByQualifyingId(qualifyingId));
+    }
 }
+
+

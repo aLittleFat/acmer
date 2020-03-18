@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class QualifyingServiceImpl implements QualifyingService {
@@ -36,6 +37,9 @@ public class QualifyingServiceImpl implements QualifyingService {
 
     @Autowired
     private SeasonRepository seasonRepository;
+
+    @Autowired
+    private ScoreRecordViewRepository scoreRecordViewRepository;
 
     @Override
     public List<Qualifying> getBySeasonId(Integer seasonId) {
@@ -75,6 +79,26 @@ public class QualifyingServiceImpl implements QualifyingService {
         if (contest.getEndTime().getTime() < System.currentTimeMillis()) {
             qualifyingContestRecordService.updateQualifyingContestRecord(qualifying.getId());
         }
+    }
+
+    @Override
+    public void deleteQualifying(Integer qualifyingId) throws Exception {
+        Optional<Qualifying> optionalQualifying = qualifyingRepository.findById(qualifyingId);
+        if(optionalQualifying.isEmpty()) {
+            throw new Exception("不存在的排位赛");
+        }
+        qualifyingRepository.delete(optionalQualifying.get());
+    }
+
+    @Override
+    public List<ScoreRecordView> getQualifyingScoreByQualifyingId(Integer qualifyingId) {
+        return scoreRecordViewRepository.findAllByQualifyingIdOrderByScoreAsc(qualifyingId);
+    }
+
+    @Override
+    public Contest getContestByQualifyingId(Integer qualifyingId) {
+        Qualifying qualifying = qualifyingRepository.findById(qualifyingId).get();
+        return contestRepository.findById(qualifying.getContestId()).get();
     }
 
 

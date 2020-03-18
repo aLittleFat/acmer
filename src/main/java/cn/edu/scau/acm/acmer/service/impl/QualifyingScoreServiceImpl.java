@@ -50,6 +50,7 @@ public class QualifyingScoreServiceImpl implements QualifyingScoreService {
                 } else {
                     qualifyingContestRecord.setPenalty(optionalContestRecordView.get().getPenalty());
                     qualifyingContestRecord.setSolved( optionalContestRecordView.get().getSolvedNumber());
+                    qualifyingContestRecord.setContestRecordId(optionalContestRecordView.get().getId());
                 }
                 qualifyingContestRecords.add(qualifyingContestRecord);
             }
@@ -65,6 +66,7 @@ public class QualifyingScoreServiceImpl implements QualifyingScoreService {
                 } else {
                     qualifyingContestRecord.setPenalty(optionalContestRecordView.get().getPenalty());
                     qualifyingContestRecord.setSolved( optionalContestRecordView.get().getSolvedNumber());
+                    qualifyingContestRecord.setContestRecordId(optionalContestRecordView.get().getId());
                 }
                 qualifyingContestRecords.add(qualifyingContestRecord);
             }
@@ -118,6 +120,7 @@ public class QualifyingScoreServiceImpl implements QualifyingScoreService {
 		    } else {
 		        qualifyingScore = optionalQualifyingScore.get();
             }
+            qualifyingScore.setContestRecordId(qualifyingContestRecord.getContestRecordId());
 		    qualifyingScore.setScore(qualifyingContestRecord.getScore());
 		    qualifyingScoreRepository.save(qualifyingScore);
         }

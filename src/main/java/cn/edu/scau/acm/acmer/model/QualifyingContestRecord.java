@@ -6,6 +6,7 @@ public class QualifyingContestRecord {
     private Long solved;
     private Integer penalty;
     private Double score;
+    private Integer contestRecordId;
 
     public Integer getTeamId() {
         return teamId;
@@ -45,5 +46,13 @@ public class QualifyingContestRecord {
 
     public void setScore(Double score) {
         this.score = score;
+    }
+
+    public Integer getContestRecordId() {
+        return contestRecordId;
+    }
+
+    public void setContestRecordId(Integer contestRecordId) {
+        this.contestRecordId = contestRecordId;
     }
 }

@@ -4,15 +4,14 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "qualifying_score", uniqueConstraints = {
-    @UniqueConstraint(name = "uni", columnNames = {"qualifying_id", "team_id", "season_student_id"})
-})
+@Table(name = "qualifying_score", schema = "scauacm", catalog = "")
 public class QualifyingScore {
     private int id;
     private double score;
     private int qualifyingId;
     private Integer teamId;
     private Integer seasonStudentId;
+    private Integer contestRecordId;
 
     @Id
     @Column(name = "id")
@@ -65,6 +64,16 @@ public class QualifyingScore {
         this.seasonStudentId = seasonStudentId;
     }
 
+    @Basic
+    @Column(name = "contest_record_id")
+    public Integer getContestRecordId() {
+        return contestRecordId;
+    }
+
+    public void setContestRecordId(Integer contestRecordId) {
+        this.contestRecordId = contestRecordId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -74,11 +83,12 @@ public class QualifyingScore {
                 Double.compare(that.score, score) == 0 &&
                 qualifyingId == that.qualifyingId &&
                 Objects.equals(teamId, that.teamId) &&
-                Objects.equals(seasonStudentId, that.seasonStudentId);
+                Objects.equals(seasonStudentId, that.seasonStudentId) &&
+                Objects.equals(contestRecordId, that.contestRecordId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, score, qualifyingId, teamId, seasonStudentId);
+        return Objects.hash(id, score, qualifyingId, teamId, seasonStudentId, contestRecordId);
     }
 }
