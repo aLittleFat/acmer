@@ -2,15 +2,15 @@ package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.*;
 import cn.edu.scau.acm.acmer.model.QualifyingContestRecord;
+import cn.edu.scau.acm.acmer.model.Scores;
+import cn.edu.scau.acm.acmer.model.SeasonParticipant;
 import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.QualifyingScoreService;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class QualifyingScoreServiceImpl implements QualifyingScoreService {
@@ -124,5 +124,67 @@ public class QualifyingScoreServiceImpl implements QualifyingScoreService {
 		    qualifyingScore.setScore(qualifyingContestRecord.getScore());
 		    qualifyingScoreRepository.save(qualifyingScore);
         }
+		qualifying.setCalculated((byte) 1);
+		qualifyingRepository.save(qualifying);
+    }
+
+    @Override
+    public List<Scores> getSumScore(Integer seasonId) throws Exception {
+        Optional<Season> optionalSeason = seasonRepository.findById(seasonId);
+        if(optionalSeason.isEmpty()) {
+            throw new Exception("不存在的赛季");
+        }
+        Season season = optionalSeason.get();
+        List<SeasonParticipant> seasonParticipants;
+        if(season.getType().equals("个人赛")) {
+            seasonParticipants = seasonRepository.findAllSeasonStudentParticipantBySeasonId(seasonId);
+        } else {
+            seasonParticipants = seasonRepository.findAllSeasonTeamParticipantBySeasonId(seasonId);
+        }
+        List<Scores> scoresList = new ArrayList<>();
+        List<Qualifying> qualifyings = qualifyingRepository.findAllBySeasonIdAndCalculated(seasonId, (byte)1);
+        boolean hasCf = false;
+        for (Qualifying qualifying : qualifyings) {
+            if (qualifying.getTitle().equals("CF积分")) {
+                hasCf = true;
+                break;
+            }
+        }
+        if(hasCf) {
+            double sumProportion = 0;
+            for (Qualifying qualifying : qualifyings) {
+                sumProportion += qualifying.getProportion();
+            }
+            for (Qualifying qualifying : qualifyings) {
+                if (qualifying.getTitle().equals("CF积分")) {
+                    qualifying.setProportion(sumProportion / (1 - season.getCfProportion()) * season.getCfProportion());
+                }
+            }
+        }
+        for (SeasonParticipant seasonParticipant : seasonParticipants) {
+            Scores scores = new Scores();
+            scores.setParticipant(seasonParticipant);
+            boolean allCal = true;
+            List<Double> scoreList = new ArrayList<>();
+            double sum = 0.0;
+            for (Qualifying qualifying : qualifyings) {
+                Optional<QualifyingScore> qualifyingScore = qualifyingScoreRepository.findByQualifyingIdAndSeasonStudentIdAndTeamId(qualifying.getId(), seasonParticipant.getSeasonStudentId(), seasonParticipant.getTeamId());
+                if(qualifyingScore.isEmpty()) {
+                    allCal = false;
+                    break;
+                } else {
+                    scoreList.add(qualifyingScore.get().getScore());
+                    sum += qualifyingScore.get().getScore() * qualifying.getProportion();
+                }
+            }
+            if (allCal) {
+                scores.setScoreList(scoreList);
+                scores.setSumScore(sum);
+                scoresList.add(scores);
+            }
+        }
+        scoresList.sort(Comparator.comparing(Scores::getSumScore));
+        return scoresList;
+
     }
 }

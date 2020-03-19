@@ -9,7 +9,13 @@ import java.util.List;
 public interface QualifyingService {
     List<Qualifying> getBySeasonId(Integer seasonId);
 
+    List<Qualifying> getBySeasonIdCalculated(Integer seasonId);
+
     void addQualifying(Integer seasonId, String title, String ojName, String cId, String password, Double proportion, Integer seasonAccountId) throws Exception;
+
+    void addBaseQualifying(Integer seasonId) throws Exception;
+
+    void addCfQualifying(Integer seasonId) throws Exception;
 
     void deleteQualifying(Integer qualifyingId) throws Exception;
 

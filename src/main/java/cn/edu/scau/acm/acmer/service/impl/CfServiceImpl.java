@@ -227,7 +227,6 @@ public class CfServiceImpl implements CfService {
             problemList.add(problems.getJSONObject(i).getString("index"));
         }
         contest.setProblemList(StringUtils.join(problemList, " "));
-        contest.setProblemNumber(problems.size());
         contestRepository.save(contest);
         contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
         for (int i = 0; i < problems.size(); i++) {

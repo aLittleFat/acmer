@@ -196,7 +196,7 @@ public class VjServiceImpl implements VjService {
             JSONArray jsonProblems = jsonObject.getJSONArray("problems");
             Contest contest = new Contest();
             if(jsonProblems != null) {
-                contest.setProblemNumber(jsonProblems.size());
+//                contest.setProblemNumber(jsonProblems.size());
                 List<String> problemList = new ArrayList<>();
                 for (char i = 'A', j = 0; j < jsonProblems.size(); j++, i++) {
                     problemList.add(String.valueOf(i));
@@ -204,7 +204,7 @@ public class VjServiceImpl implements VjService {
                 contest.setProblemList(StringUtils.join(problemList, " "));
             }
             else {
-                contest.setProblemNumber(0);
+//                contest.setProblemNumber(0);
                 contest.setProblemList("");
             }
             contest.setTitle(jsonObject.getString("title"));
@@ -217,7 +217,7 @@ public class VjServiceImpl implements VjService {
             contest.setEndTime(endTime);
             contestRepository.save(contest);
             contest = contestRepository.findByOjNameAndCid("VJ", cId).get();
-            if (contest.getProblemNumber() != 0) {
+            if (!contest.getProblemList().equals("")) {
                 updateContestProblem(httpClient, contest);
             }
         } catch (ProtocolException e) {
@@ -237,7 +237,7 @@ public class VjServiceImpl implements VjService {
         Document document = Jsoup.parse(html);
         JSONObject jsonObject = (JSONObject) JSON.parse(document.body().selectFirst("[name=dataJson]").text());
         JSONArray jsonProblems = jsonObject.getJSONArray("problems");
-        contest.setProblemNumber(jsonProblems.size());
+//        contest.setProblemNumber(jsonProblems.size());
         contestRepository.save(contest);
         for(Object jsonProblemObject : jsonProblems) {
             JSONObject jsonProblem = (JSONObject) jsonProblemObject;
@@ -326,8 +326,10 @@ public class VjServiceImpl implements VjService {
 
         int penalty = 0;
 
+        List<String> problemList = Arrays.asList(contest.getProblemList().split(" "));
+
         List<Integer> penaltys = new ArrayList<>();
-        for (int i = 0; i < contest.getProblemNumber(); i++) {
+        for (int i = 0; i < problemList.size(); i++) {
             penaltys.add(0);
         }
 
@@ -341,13 +343,12 @@ public class VjServiceImpl implements VjService {
 
                 log.info(proNum + " " + isAc + " " + time + " " + penaltys.size());
 
-                char index = 'A';
-                index += proNum;
+                String index = problemList.get(proNum);
 
                 if(isAc != 0) {
                     if(time > contestLength) {
-                        if(!solved.contains(String.valueOf(index))) {
-                            upSolved.add(String.valueOf(index));
+                        if(!solved.contains(index)) {
+                            upSolved.add(index);
                         }
                     } else {
                         if(!solved.contains(String.valueOf(index))){

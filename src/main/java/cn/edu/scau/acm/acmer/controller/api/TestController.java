@@ -1,13 +1,17 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.entity.Contest;
+import cn.edu.scau.acm.acmer.httpclient.BaseHttpClient;
 import cn.edu.scau.acm.acmer.model.*;
 import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
 import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.ProblemAcRecordRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.*;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.shiro.SecurityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -24,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -118,6 +123,17 @@ public class TestController {
     @GetMapping("/testCharts")
     MyResponseEntity<List<OjAcChart>> testCharts(String studentId){
         return new MyResponseEntity<>(problemAcRecordRepository.countAllByStudentIdGroupByOJ(studentId));
+    }
+
+    @GetMapping("testscaucf")
+    MyResponseEntity<Void> testScauCf() throws Exception {
+        BaseHttpClient httpClient = new BaseHttpClient();
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("username", "admin"));
+        params.add(new BasicNameValuePair("password", "123456"));
+        JSONObject res = (JSONObject) JSON.parse(httpClient.postJson("http://www.scaucf.top/interfaces/app_login_API",params));
+        log.info(res.toJSONString());
+        return new MyResponseEntity<>();
     }
 
 }

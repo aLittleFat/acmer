@@ -41,11 +41,7 @@ public class ContestController {
 
     @GetMapping("personalContest/{studentId}")
     MyResponseEntity<JSONObject> getPersonalContestByStudentId(@PathVariable String studentId){
-
-        long a = System.currentTimeMillis();
         JSONObject res = contestService.getContestTableByStudentId(studentId);
-        log.info(System.currentTimeMillis()-a+"ms");
-
         return new MyResponseEntity<>(res);
     }
 

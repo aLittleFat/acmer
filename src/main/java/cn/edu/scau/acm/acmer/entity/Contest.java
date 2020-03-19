@@ -17,7 +17,6 @@ public class Contest {
     private String password;
     private String ojName;
     private String username;
-    private Integer problemNumber;
     private String problemList;
 
     @Id
@@ -101,20 +100,6 @@ public class Contest {
         this.username = username;
     }
 
-    @Basic
-    @Column(name = "problem_number")
-    public Integer getProblemNumber() {
-        return problemNumber;
-    }
-
-    public void setProblemNumber(int problemNumber) {
-        this.problemNumber = problemNumber;
-    }
-
-    public void setProblemNumber(Integer problemNumber) {
-        this.problemNumber = problemNumber;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -128,13 +113,12 @@ public class Contest {
                 Objects.equals(password, contest.password) &&
                 Objects.equals(ojName, contest.ojName) &&
                 Objects.equals(username, contest.username) &&
-                Objects.equals(problemNumber, contest.problemNumber) &&
                 Objects.equals(problemList, contest.problemList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startTime, endTime, cid, title, password, ojName, username, problemNumber, problemList);
+        return Objects.hash(id, startTime, endTime, cid, title, password, ojName, username, problemList);
     }
 
     @Basic

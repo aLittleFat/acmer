@@ -22,10 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 @Service
 public class JisuankeServiceImpl implements JisuankeService {
@@ -70,9 +67,8 @@ public class JisuankeServiceImpl implements JisuankeService {
         contest.setCid(cId);
         contest.setStartTime(new Timestamp(Timestamp.valueOf(startTime).getTime() + 8*60*60*1000));
         contest.setEndTime(new Timestamp(contest.getStartTime().getTime() + len));
-        contest.setProblemNumber(problemNumber);
         List<String> problemList = new ArrayList<>();
-        for (char i = 'A', j = 0; j < contest.getProblemNumber(); j++, i++) {
+        for (char i = 'A', j = 0; j < problemNumber; j++, i++) {
             problemList.add(String.valueOf(i));
         }
         contest.setProblemList(StringUtils.join(problemList, " "));
@@ -108,14 +104,13 @@ public class JisuankeServiceImpl implements JisuankeService {
 
                 Set<String> solved = new TreeSet<>();
 
-                char index = 'A';
-                for (int i = 0; i < contest.getProblemNumber(); i++) {
-                    String problemIndex = String.valueOf(index);
+                List<String> problemList = Arrays.asList(contest.getProblemList().split(" "));
+
+                for (int i = 0; i < problemList.size(); i++) {
                     String statusString = tds.get(i+6).text();
                     if (!statusString.contains("--")) {
-                        solved.add(problemIndex);
+                        solved.add(problemList.get(i));
                     }
-                    ++index;
                 }
                 contestRecord.setSolved(StringUtils.join(solved, " "));
                 contestRecord.setUpSolved("");

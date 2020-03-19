@@ -1,5 +1,6 @@
 package cn.edu.scau.acm.acmer.httpclient;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -10,6 +11,8 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.cookie.Cookie;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
@@ -89,14 +92,48 @@ public class BaseHttpClient {
 		CloseableHttpClient client = createHttpClient();
 		HttpPost httpPost = new HttpPost(url);
 		int retry = 3;
+		httpPost.setEntity(new UrlEncodedFormEntity(params));
+		if(headers != null) {
+			for (Header header : headers) {
+				httpPost.setHeader(header);
+			}
+		}
 		while (retry > 0) {
 			try {
-				httpPost.setEntity(new UrlEncodedFormEntity(params));
-				if(headers != null) {
-					for (Header header : headers) {
-						httpPost.setHeader(header);
-					}
-				}
+				CloseableHttpResponse response = client.execute(httpPost, context);
+				return getResponseContent(url, charset, response);
+			} catch (IOException e) {
+				retry--;
+				log.error("连接出错，第{}次重试，{}", 5-retry, e.getMessage());
+			}
+		}
+		throw new Exception("连接服务器错误");
+	}
+
+	public String postJson(String url, List<NameValuePair> params) throws Exception {
+		return postJson(url, "utf-8", params, null);
+	}
+
+	public String postJson(String url, List<NameValuePair> params, List<Header> headers) throws Exception {
+		return postJson(url, "utf-8", params, headers);
+	}
+
+	public String postJson(String url, String charset, List<NameValuePair> params, List<Header> headers) throws Exception {
+		CloseableHttpClient client = createHttpClient();
+		HttpPost httpPost = new HttpPost(url);
+		JSONObject jsonObject = new JSONObject();
+		for (NameValuePair param : params) {
+			jsonObject.put(param.getName(), param.getValue());
+		}
+		httpPost.setEntity(new StringEntity(jsonObject.toJSONString(), ContentType.APPLICATION_JSON));
+		if(headers != null) {
+			for (Header header : headers) {
+				httpPost.setHeader(header);
+			}
+		}
+		int retry = 3;
+		while (retry > 0) {
+			try {
 				CloseableHttpResponse response = client.execute(httpPost, context);
 				return getResponseContent(url, charset, response);
 			} catch (IOException e) {

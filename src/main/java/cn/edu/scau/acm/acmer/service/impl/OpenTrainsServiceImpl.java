@@ -58,35 +58,35 @@ public class OpenTrainsServiceImpl implements OpenTrainsService {
 
     @Override
     public void addContest(String ojName, String cId, String username) throws Exception {
-        if (contestRepository.findByOjNameAndCid(ojName, cId).isPresent()) return;
-        ojService.addOj(ojName);
-        Contest contest = new Contest();
-        contest.setOjName(ojName);
-        contest.setCid(cId);
-        String sid = login(username);
-        BaseHttpClient httpClient = new BaseHttpClient();
-        String info = httpClient.get("http://opentrains.snarknews.info/~ejudge/sn_sh.cgi?data=nonpriv_preview&sid=" + sid + "&contest=" + cId);
-        if(info.contains("No log file")) {
-            throw new Exception("比赛不存在");
-        }
-        Document document = Jsoup.parse(info);
-        contest.setTitle(document.selectFirst("h2").text());
-
-        info = httpClient.get("http://opentrains.snarknews.info/~ejudge/index.cgi?config=" + cId + "&sid=" + sid);
-
-        int count = 0;
-        int index = 0;
-        while ((index = info.indexOf(info, index)) != -1) {
-            index = index + info.length();
-            count++;
-        }
-
-        contest.setProblemNumber(count);
-
-        contest.setStartTime(new Timestamp(0));
-        contest.setEndTime(new Timestamp(0));
-
-        contestRepository.save(contest);
+//        if (contestRepository.findByOjNameAndCid(ojName, cId).isPresent()) return;
+//        ojService.addOj(ojName);
+//        Contest contest = new Contest();
+//        contest.setOjName(ojName);
+//        contest.setCid(cId);
+//        String sid = login(username);
+//        BaseHttpClient httpClient = new BaseHttpClient();
+//        String info = httpClient.get("http://opentrains.snarknews.info/~ejudge/sn_sh.cgi?data=nonpriv_preview&sid=" + sid + "&contest=" + cId);
+//        if(info.contains("No log file")) {
+//            throw new Exception("比赛不存在");
+//        }
+//        Document document = Jsoup.parse(info);
+//        contest.setTitle(document.selectFirst("h2").text());
+//
+//        info = httpClient.get("http://opentrains.snarknews.info/~ejudge/index.cgi?config=" + cId + "&sid=" + sid);
+//
+//        int count = 0;
+//        int index = 0;
+//        while ((index = info.indexOf(info, index)) != -1) {
+//            index = index + info.length();
+//            count++;
+//        }
+//
+//        contest.setProblemNumber(count);
+//
+//        contest.setStartTime(new Timestamp(0));
+//        contest.setEndTime(new Timestamp(0));
+//
+//        contestRepository.save(contest);
     }
 
     @Override

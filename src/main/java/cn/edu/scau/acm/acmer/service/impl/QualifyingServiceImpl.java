@@ -1,17 +1,27 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.*;
+import cn.edu.scau.acm.acmer.model.CfRating;
+import cn.edu.scau.acm.acmer.model.OjAcChart;
 import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.ContestService;
 import cn.edu.scau.acm.acmer.service.QualifyingContestRecordService;
+import cn.edu.scau.acm.acmer.service.QualifyingScoreService;
 import cn.edu.scau.acm.acmer.service.QualifyingService;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,9 +51,52 @@ public class QualifyingServiceImpl implements QualifyingService {
     @Autowired
     private ScoreRecordViewRepository scoreRecordViewRepository;
 
+    @Autowired
+    private TeamRepository teamRepository;
+
+    @Autowired
+    private ContestRecordRepository contestRecordRepository;
+
+    @Autowired
+    private QualifyingScoreService qualifyingScoreService;
+
+    @Autowired
+    private SeasonStudentRepository seasonStudentRepository;
+
+    @Autowired
+    private OjAccountRepository ojAccountRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Override
     public List<Qualifying> getBySeasonId(Integer seasonId) {
         return qualifyingRepository.findAllBySeasonId(seasonId);
+    }
+
+    @Override
+    public List<Qualifying> getBySeasonIdCalculated(Integer seasonId) {
+        Season season = seasonRepository.findById(seasonId).get();
+        List<Qualifying> qualifyings = qualifyingRepository.findAllBySeasonIdAndCalculated(seasonId, (byte)1);
+        boolean hasCf = false;
+        for (Qualifying qualifying : qualifyings) {
+            if (qualifying.getTitle().equals("CF积分")) {
+                hasCf = true;
+                break;
+            }
+        }
+        if(hasCf) {
+            double sumProportion = 0;
+            for (Qualifying qualifying : qualifyings) {
+                sumProportion += qualifying.getProportion();
+            }
+            for (Qualifying qualifying : qualifyings) {
+                if (qualifying.getTitle().equals("CF积分")) {
+                    qualifying.setProportion(sumProportion / (1 - season.getCfProportion()) * season.getCfProportion());
+                }
+            }
+        }
+        return qualifyings;
     }
 
     @Override
@@ -79,6 +132,185 @@ public class QualifyingServiceImpl implements QualifyingService {
         if (contest.getEndTime().getTime() < System.currentTimeMillis()) {
             qualifyingContestRecordService.updateQualifyingContestRecord(qualifying.getId());
         }
+    }
+
+    @Override
+    @Transactional
+    public void addBaseQualifying(Integer seasonId) throws Exception {
+        Season season = seasonRepository.findById(seasonId).get();
+        if(!season.getType().equals("组队赛")) {
+            throw new Exception("不是组队赛");
+        }
+        List<Team> teams = teamRepository.findAllBySeasonIdOrderByRank(seasonId);
+        int sz = teams.size();
+        List<String> problemList = new ArrayList<>();
+        char ch = 'A';
+        for (int i = 0; i < sz; i++) {
+            problemList.add(String.valueOf(ch));
+            ++ch;
+        }
+        Contest contest;
+        Optional<Contest> optionalContest = contestRepository.findByOjNameAndCid("Base", String.valueOf(seasonId));
+        if(optionalContest.isEmpty()) {
+            contest = new Contest();
+            contest.setOjName("Base");
+            contest.setCid(String.valueOf(seasonId));
+            contest.setProblemList(StringUtils.join(problemList, " "));
+            contest.setTitle("基础分");
+            contest.setStartTime(new Timestamp(0));
+            contest.setEndTime(new Timestamp(0));
+        } else {
+            contest = optionalContest.get();
+            contest.setProblemList(StringUtils.join(problemList, " "));
+        }
+        contest = contestRepository.save(contest);
+        List<String> solved = new ArrayList<>();
+        ch = 'A';
+        for (int i = sz-1; i >= 0; --i) {
+            solved.add(String.valueOf(ch));
+            ch++;
+            ContestRecord contestRecord = contestRecordRepository.findByContestIdAndStudentIdAndTeamId(contest.getId(), null, teams.get(i).getId()).orElse(new ContestRecord());
+            contestRecord.setTeamId(teams.get(i).getId());
+            contestRecord.setContestId(contest.getId());
+            contestRecord.setTime(contest.getStartTime());
+            contestRecord.setAccount("");
+            contestRecord.setPenalty(0);
+            contestRecord.setUpSolved("");
+            contestRecord.setSolved(StringUtils.join(solved, " "));
+            contestRecordRepository.save(contestRecord);
+        }
+        Qualifying qualifying = new Qualifying();
+        qualifying.setCalculated((byte)0);
+        qualifying.setContestId(contest.getId());
+        qualifying.setTitle("基础分");
+        qualifying.setSeasonId(seasonId);
+        qualifying.setProportion(2);
+        qualifying = qualifyingRepository.save(qualifying);
+        qualifyingScoreService.calcScore(qualifying.getId());
+    }
+
+    @Override
+    public void addCfQualifying(Integer seasonId) throws Exception {
+        Season season = seasonRepository.findById(seasonId).get();
+        if(!season.getType().equals("个人赛")) {
+            throw new Exception("不是个人赛");
+        }
+        List<SeasonStudent> seasonStudents = seasonStudentRepository.findAllBySeasonId(seasonId);
+        List<String> problemList = new ArrayList<>();
+        char ch = 'A';
+        for (int i = 0; i < 10; i++) {
+            problemList.add(String.valueOf(ch));
+            ++ch;
+        }
+        Contest contest;
+        Optional<Contest> optionalContest = contestRepository.findByOjNameAndCid("CfRating", String.valueOf(seasonId));
+        if(optionalContest.isEmpty()) {
+            contest = new Contest();
+            contest.setOjName("CfRating");
+            contest.setCid(String.valueOf(seasonId));
+            contest.setProblemList(StringUtils.join(problemList, " "));
+            contest.setTitle("CF积分");
+            contest.setStartTime(new Timestamp(0));
+            contest.setEndTime(new Timestamp(0));
+        } else {
+            contest = optionalContest.get();
+            contest.setProblemList(StringUtils.join(problemList, " "));
+        }
+        contest = contestRepository.save(contest);
+
+        List<CfRating> cfRatings = new ArrayList<>();
+
+        for (SeasonStudent seasonStudent : seasonStudents) {
+            Optional<OjAccount> optionalOjAccount = ojAccountRepository.findByStudentIdAndOjName(seasonStudent.getStudentId(), "CodeForces");
+            CfRating cfRating = new CfRating();
+            cfRating.setStudentId(seasonStudent.getStudentId());
+            if(optionalOjAccount.isEmpty()) {
+                cfRating.setSolved(0);
+                cfRating.setCfRating(0);
+            } else {
+                String cfHandle = optionalOjAccount.get().getAccount();
+                JSONObject jsonObject = restTemplate.getForObject("https://codeforces.com/api/user.rating?handle=" + cfHandle, JSONObject.class);
+                if (jsonObject.getString("status").equals("OK")) {
+                    Integer rating = 0;
+                    int count = 0;
+                    Long time = System.currentTimeMillis() / 1000 - 3*30*24*60*60;
+                    JSONArray ratingList = jsonObject.getJSONArray("result");
+                    for (int j = 0; j < ratingList.size(); j++) {
+                        JSONObject ratingData = ratingList.getJSONObject(j);
+                        if(ratingData.getLong("ratingUpdateTimeSeconds") >= time) {
+                            rating += ratingData.getInteger("newRating");
+                            count++;
+                        }
+                    }
+                    rating /= 3;
+                    if(count < 5) {
+                        rating = rating * 9 / 10;
+                    }
+                    cfRating.setCfRating(rating);
+                    if (rating == 0) {
+                        cfRating.setSolved(0);
+                    } else if (rating < 1200) {
+                        cfRating.setSolved(1);
+                    } else if (rating < 1400) {
+                        cfRating.setSolved(2);
+                    } else if (rating < 1600) {
+                        cfRating.setSolved(3);
+                    } else if (rating < 1900) {
+                        cfRating.setSolved(4);
+                    } else if (rating < 2100) {
+                        cfRating.setSolved(5);
+                    } else if (rating < 2300) {
+                        cfRating.setSolved(6);
+                    } else if (rating < 2400) {
+                        cfRating.setSolved(7);
+                    } else if (rating < 2600) {
+                        cfRating.setSolved(8);
+                    } else if (rating < 3000) {
+                        cfRating.setSolved(9);
+                    } else {
+                        cfRating.setSolved(10);
+                    }
+                } else {
+                    cfRating.setSolved(0);
+                    cfRating.setCfRating(0);
+                }
+            }
+            cfRatings.add(cfRating);
+        }
+
+        cfRatings.sort((o1,o2) -> o2.getCfRating().compareTo(o1.getCfRating()));
+
+
+
+        List<String> solved = new ArrayList<>();
+        ch = 'A';
+        for (int i = cfRatings.size() - 1; i >= 0; --i) {
+            while (solved.size() < cfRatings.get(i).getSolved()) {
+                solved.add(String.valueOf(ch));
+                ch++;
+            }
+            ContestRecord contestRecord = contestRecordRepository.findByContestIdAndStudentIdAndTeamId(contest.getId(), cfRatings.get(i).getStudentId(), null).orElse(new ContestRecord());
+            contestRecord.setStudentId(cfRatings.get(i).getStudentId());
+            contestRecord.setContestId(contest.getId());
+            contestRecord.setTime(contest.getStartTime());
+            contestRecord.setAccount("");
+            if (solved.size() == 0) {
+                contestRecord.setPenalty(0);
+            } else {
+                contestRecord.setPenalty(cfRatings.size() - i);
+            }
+            contestRecord.setUpSolved("");
+            contestRecord.setSolved(StringUtils.join(solved, " "));
+            contestRecordRepository.save(contestRecord);
+        }
+        Qualifying qualifying = new Qualifying();
+        qualifying.setCalculated((byte)0);
+        qualifying.setContestId(contest.getId());
+        qualifying.setTitle("CF积分");
+        qualifying.setSeasonId(seasonId);
+        qualifying.setProportion(0);
+        qualifying = qualifyingRepository.save(qualifying);
+        qualifyingScoreService.calcScore(qualifying.getId());
     }
 
     @Override

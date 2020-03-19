@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface QualifyingRepository extends JpaRepository<Qualifying, Integer> {
     List<Qualifying> findAllBySeasonId(Integer seasonId);
+
+    List<Qualifying> findAllBySeasonIdAndCalculated(Integer seasonId, Byte calculated);
 }

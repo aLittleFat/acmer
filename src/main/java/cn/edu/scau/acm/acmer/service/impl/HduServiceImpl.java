@@ -28,10 +28,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.TreeSet;
+import java.util.*;
 
 @Service
 public class HduServiceImpl implements HduService {
@@ -161,18 +158,17 @@ public class HduServiceImpl implements HduService {
         contest.setEndTime(new Timestamp(Timestamp.valueOf(endTime).getTime() + 8 * 60 * 60 * 1000));
         if (System.currentTimeMillis() > contest.getEndTime().getTime()) {
             Elements table = Jsoup.parse(html).selectFirst("tbody").select("tr");
-            contest.setProblemNumber(table.size() - 1);
             List<String> problemList = new ArrayList<>();
-            for (char i = 'A', j = 0; j < contest.getProblemNumber(); j++, i++) {
+            for (char i = 'A', j = 0; j < table.size() - 1; j++, i++) {
                 problemList.add(String.valueOf(i));
             }
             contest.setProblemList(StringUtils.join(problemList, " "));
         } else {
-            contest.setProblemNumber(0);
+            contest.setProblemList("");
         }
         contestRepository.save(contest);
 
-        if(contest.getProblemNumber() != 0) {
+        if(!contest.getProblemList().equals("")) {
             contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
             updateContestProblem(httpClient, contest);
         }
@@ -281,22 +277,22 @@ public class HduServiceImpl implements HduService {
                 String[] penaltyStrings = tds.get(3).text().split(":");
                 penalty = (Integer.parseInt(penaltyStrings[0])*60 + Integer.parseInt(penaltyStrings[1]))*60 + Integer.parseInt(penaltyStrings[2]);
 
+                List<String> problemList = Arrays.asList(contest.getProblemList().split(" "));
+
                 if (handle.equals(account)) {
 
-                    char index = 'A';
-                    for (int j = 4; j < 4 + contest.getProblemNumber(); ++j) {
+                    for (int j = 4; j < 4 + problemList.size(); ++j) {
+                        String index = problemList.get(j-4);
                         String[] statusStrings = tds.get(j).text().split(" ");
                         if (tds.get(j).text().length() == 0) {
                             // do nothing
                         } else if (statusStrings.length == 1) {
                             if (!statusStrings[0].contains("-")) {
-                                solved.add(String.valueOf(index));
+                                solved.add(index);
                             }
                         } else {
-                            solved.add(String.valueOf(index));
+                            solved.add(index);
                         }
-
-                        ++index;
                     }
 
 
