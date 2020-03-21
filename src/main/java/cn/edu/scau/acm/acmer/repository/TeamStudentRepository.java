@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -15,4 +16,6 @@ public interface TeamStudentRepository extends JpaRepository<TeamStudent, TeamSt
 
     @Query("select count(teamStudent) from TeamStudent as teamStudent left join Team as team on teamStudent.teamId = team.id where teamStudent.studentId = :studentId and team.seasonId = :seasonId")
     Integer countByStudentIdAndSeasonId(@Param("studentId") String studentId, @Param("seasonId") Integer seasonId);
+
+    List<TeamStudent> findAllByTeamId(Integer teamId);
 }

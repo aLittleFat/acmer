@@ -56,9 +56,6 @@ public class VjServiceImpl implements VjService {
     private OjAccountRepository ojAccountRepository;
 
     @Autowired
-    private OJService ojService;
-
-    @Autowired
     private ContestRepository contestRepository;
 
     @Autowired
@@ -70,6 +67,9 @@ public class VjServiceImpl implements VjService {
     @Autowired
     private ProblemRepository problemRepository;
 
+    @Autowired
+    private TeamStudentRepository teamStudentRepository;
+
     @Override
     public boolean checkVjLoginStatus() {
         String url = "https://vjudge.net/user/checkLogInStatus";
@@ -77,9 +77,7 @@ public class VjServiceImpl implements VjService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-        log.info(request.toString());
         String res = restTemplate.postForObject(url, request, String.class);
-        log.info(res);
         return res.equals("true");
     }
 
@@ -106,7 +104,6 @@ public class VjServiceImpl implements VjService {
         map.add("password", password);
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
         String response = restTemplate.postForObject( url, request , String.class );
-        log.info(response);
         return response.equals("success");
     }
 
@@ -196,7 +193,6 @@ public class VjServiceImpl implements VjService {
             JSONArray jsonProblems = jsonObject.getJSONArray("problems");
             Contest contest = new Contest();
             if(jsonProblems != null) {
-//                contest.setProblemNumber(jsonProblems.size());
                 List<String> problemList = new ArrayList<>();
                 for (char i = 'A', j = 0; j < jsonProblems.size(); j++, i++) {
                     problemList.add(String.valueOf(i));
@@ -204,7 +200,6 @@ public class VjServiceImpl implements VjService {
                 contest.setProblemList(StringUtils.join(problemList, " "));
             }
             else {
-//                contest.setProblemNumber(0);
                 contest.setProblemList("");
             }
             contest.setTitle(jsonObject.getString("title"));
@@ -237,7 +232,11 @@ public class VjServiceImpl implements VjService {
         Document document = Jsoup.parse(html);
         JSONObject jsonObject = (JSONObject) JSON.parse(document.body().selectFirst("[name=dataJson]").text());
         JSONArray jsonProblems = jsonObject.getJSONArray("problems");
-//        contest.setProblemNumber(jsonProblems.size());
+        List<String> problemList = new ArrayList<>();
+        for (char i = 'A', j = 0; j < jsonProblems.size(); j++, i++) {
+            problemList.add(String.valueOf(i));
+        }
+        contest.setProblemList(StringUtils.join(problemList, " "));
         contestRepository.save(contest);
         for(Object jsonProblemObject : jsonProblems) {
             JSONObject jsonProblem = (JSONObject) jsonProblemObject;
@@ -264,9 +263,6 @@ public class VjServiceImpl implements VjService {
             List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("password", password));
             String result = httpClient.post("https://vjudge.net/contest/login/" + cId, params);
-            log.info(result);
-            log.info("{\"error\":\"Password is not correct!\"}");
-            log.info(String.valueOf(result.equals("{\"error\":\"Password is not correct!\"}")));
             switch (result) {
                 case "{}": {
                     return;
@@ -333,7 +329,6 @@ public class VjServiceImpl implements VjService {
         for (Object submission : jsonObject.getJSONArray("submissions")) {
             JSONArray jsonSubmission = (JSONArray) submission;
             if(jsonSubmission.getInteger(0) == participantId) {
-                log.info(jsonSubmission.toJSONString());
                 int proNum = jsonSubmission.getInteger(1);
                 int isAc = jsonSubmission.getInteger(2);
                 int time = jsonSubmission.getInteger(3);
@@ -376,16 +371,56 @@ public class VjServiceImpl implements VjService {
         updateContestProblem(httpClient, contest);
         List<ContestRecord> contestRecords = contestRecordRepository.findAllByContestId(contest.getId());
         for (ContestRecord contestRecord : contestRecords) {
-//            updateContestProblemRecord(httpClient, contestRecord);
+            updateContestRecord(httpClient, contestRecord);
         }
     }
 
-    @Override
-    @Async
-    public void updateAllContest(BaseHttpClient httpClient) throws Exception {
-        List<Contest> contests = contestRepository.findAllByOjName("VJ");
-        for(Contest contest : contests) {
-            updateContest(httpClient, contest);
+    private void updateContestRecord(BaseHttpClient httpClient, ContestRecord contestRecord) throws Exception {
+        if(httpClient == null) {
+            httpClient = new BaseHttpClient();
+            login(httpClient);
         }
+        Contest contest = contestRepository.findById(contestRecord.getContestId()).get();
+
+        String url = "https://vjudge.net/contest/rank/single/" + contest.getCid();
+        JSONObject jsonObject = JSON.parseObject(httpClient.get(url));
+        int participantId = 0;
+        JSONObject participants = jsonObject.getJSONObject("participants");
+        for(String key : participants.keySet()) {
+            if(participants.getJSONArray(key).get(0).toString().equals(contestRecord.getAccount())) {
+                participantId = Integer.parseInt(key);
+                break;
+            }
+        }
+
+        int contestLength = (int) ((contest.getEndTime().getTime() - contest.getStartTime().getTime()) / 1000);
+
+        TreeSet<String> upSolved = new TreeSet<>();
+        TreeSet<String> solved = new TreeSet<>(Arrays.asList(contestRecord.getSolved().split(" ")));
+
+
+        List<String> problemList = Arrays.asList(contest.getProblemList().split(" "));
+
+        for (Object submission : jsonObject.getJSONArray("submissions")) {
+            JSONArray jsonSubmission = (JSONArray) submission;
+            if(jsonSubmission.getInteger(0) == participantId) {
+                int proNum = jsonSubmission.getInteger(1);
+                int isAc = jsonSubmission.getInteger(2);
+                int time = jsonSubmission.getInteger(3);
+
+                String index = problemList.get(proNum);
+
+                if(isAc != 0) {
+                    if (time > contestLength) {
+                        if (!solved.contains(index)) {
+                            upSolved.add(index);
+                        }
+                    }
+                }
+            }
+        }
+
+        contestRecord.setUpSolved(StringUtils.join(upSolved.toArray(), " "));
+        contestRecordRepository.save(contestRecord);
     }
 }

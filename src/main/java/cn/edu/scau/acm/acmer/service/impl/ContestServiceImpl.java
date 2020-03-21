@@ -1,16 +1,13 @@
 package cn.edu.scau.acm.acmer.service.impl;
 
-import cn.edu.scau.acm.acmer.entity.Contest;
-import cn.edu.scau.acm.acmer.entity.ContestRecord;
+import cn.edu.scau.acm.acmer.entity.*;
 import cn.edu.scau.acm.acmer.model.ContestRecordLine;
 import cn.edu.scau.acm.acmer.model.ContestTable;
 import cn.edu.scau.acm.acmer.model.MultiContestRecordLine;
-import cn.edu.scau.acm.acmer.repository.ContestProblemRepository;
-import cn.edu.scau.acm.acmer.repository.ContestRecordRepository;
-import cn.edu.scau.acm.acmer.repository.ContestRecordViewRepository;
-import cn.edu.scau.acm.acmer.repository.ContestRepository;
+import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.*;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +54,15 @@ public class ContestServiceImpl implements ContestService {
     @Autowired
     private TeamService teamService;
 
+    @Autowired
+    private ProblemService problemService;
+
+    @Autowired
+    private TeamStudentRepository teamStudentRepository;
+
+    @Autowired
+    private ProblemRepository problemRepository;
+
 
     @Override
     @Transactional
@@ -68,7 +74,8 @@ public class ContestServiceImpl implements ContestService {
         switch (ojName) {
             case "VJ": vjService.addContestRecord(ojName, cId, studentId, teamId, account, password); break;
             case "HDU": hduService.addContestRecord(ojName, cId, studentId, teamId, account, password); break;
-            case "CodeForces": cfService.addContestRecord(ojName, cId, studentId, teamId, account);  break;
+            case "CodeForces":
+            case "Gym": cfService.addContestRecord(ojName, cId, studentId, teamId, account);  break;
             case "计蒜客": jisuankeService.addContestRecord(ojName, cId, studentId, teamId, account);break;
             case "牛客": nowCoderService.addContestRecord(ojName, cId, studentId, teamId, account); break;
         }
@@ -81,7 +88,8 @@ public class ContestServiceImpl implements ContestService {
             switch (ojName) {
                 case "VJ": vjService.addContest(ojName, cId, password); break;
                 case "HDU": hduService.addContest(ojName, cId, username, password); break;
-                case "CodeForces": cfService.addContest(ojName, cId); break;
+                case "CodeForces":
+                case "Gym": cfService.addContest(ojName, cId); break;
                 case "计蒜客": jisuankeService.addContest(ojName, cId);break;
                 case "牛客": nowCoderService.addContest(ojName, cId); break;
                 default: throw new Exception("不支持的OJ");
@@ -115,6 +123,38 @@ public class ContestServiceImpl implements ContestService {
         contestTable.setTitle(contest.getTitle());
         contestTable.setProblemList(Arrays.asList(contest.getProblemList().split(" ")));
         return contestTable;
+    }
+
+    @Override
+    public void updateUpSolved(ContestRecord contestRecord) {
+        Contest contest = contestRepository.findById(contestRecord.getContestId()).get();
+        TreeSet<String> upSolved = new TreeSet<>();
+        TreeSet<String> solved = new TreeSet<>(Arrays.asList(contestRecord.getSolved().split(" ")));
+        List<ContestProblem> contestProblems = contestProblemRepository.findAllByContestIdOrderByProblemIndexAsc(contest.getId());
+        if(contestRecord.getTeamId() != null) {
+            List<TeamStudent> teamStudents = teamStudentRepository.findAllByTeamId(contestRecord.getTeamId());
+            for (ContestProblem contestProblem : contestProblems) {
+                Problem problem = problemRepository.findById(contestProblem.getProblemId()).get();
+                for (TeamStudent teamStudent : teamStudents) {
+                    if (problemService.checkIsAc(problem.getId(), teamStudent.getStudentId())) {
+                        if (!solved.contains(contestProblem.getProblemIndex())) {
+                            upSolved.add(contestProblem.getProblemIndex());
+                        }
+                    }
+                }
+            }
+        } else {
+            for (ContestProblem contestProblem : contestProblems) {
+                Problem problem = problemRepository.findById(contestProblem.getProblemId()).get();
+                if (problemService.checkIsAc(problem.getId(), contestRecord.getStudentId())) {
+                    if (!solved.contains(contestProblem.getProblemIndex())) {
+                        upSolved.add(contestProblem.getProblemIndex());
+                    }
+                }
+            }
+        }
+        contestRecord.setUpSolved(StringUtils.join(upSolved, " "));
+        contestRecordRepository.save(contestRecord);
     }
 
     private JSONObject getContestRecordTable(List<MultiContestRecordLine> multiContestRecordLines){

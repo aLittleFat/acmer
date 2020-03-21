@@ -45,20 +45,16 @@ public class NowCoderServiceImpl implements NowCoderService {
         String url = "https://ac.nowcoder.com/acm/contest/rank/submit-list?currentContestId=" + cId + "&contestList=" + cId;
         JSONObject res = restTemplate.getForObject(url, JSONObject.class);
 
-        boolean hasTakePartIn = false;
-
+        assert res != null;
         JSONArray signUpUsers = res.getJSONObject("data").getJSONArray("submitDataList").getJSONObject(0).getJSONArray("signUpUsers");
+        Integer uid = 0;
         for (int i = 0; i < signUpUsers.size(); ++i) {
             JSONObject signUpUser = signUpUsers.getJSONObject(i);
-            if(String.valueOf(signUpUser.getInteger("uid")).equals(account)) {
-                hasTakePartIn = true;
+            if(signUpUser.getString("name").equals(account)) {
+                uid = signUpUser.getInteger("uid");
                 break;
             }
         }
-
-//        if(!hasTakePartIn) {
-//            throw new Exception("没有参加该竞赛");
-//        }
 
         ContestRecord contestRecord = new ContestRecord();
         contestRecord.setContestId(contest.getId());
@@ -87,9 +83,7 @@ public class NowCoderServiceImpl implements NowCoderService {
 
         for (int i = 0; i < submissions.size(); ++i) {
             JSONObject submission = submissions.getJSONObject(i);
-            if(String.valueOf(submission.getInteger("uid")).equals(account)) {
-
-
+            if(submission.getInteger("uid").equals(uid)) {
                 String index = map.get(submission.getInteger("problemId"));
                 int isAc = submission.getInteger("status");
                 int time = (int) ((submission.getLong("submitTime") + 8*60*60*1000 - contest.getStartTime().getTime()) / 1000);
@@ -150,7 +144,57 @@ public class NowCoderServiceImpl implements NowCoderService {
 
 
     @Override
-    public void updateContestProblem(Contest contest) {
-        //todo
+    public void updateContestProblem(Contest contest) throws Exception {
+        String url = "https://ac.nowcoder.com/acm/contest/rank/submit-list?currentContestId=" + contest.getCid() + "&contestList=" + contest.getCid();
+        JSONObject res = restTemplate.getForObject(url, JSONObject.class);
+        assert res != null;
+        if (res.getInteger("code") == 1) {
+            throw new Exception(res.getString("msg"));
+        }
+        JSONArray problemData = res.getJSONObject("data").getJSONArray("problemData");
+        List<String> indexList = new ArrayList<>();
+        for (int i = 0; i < problemData.size(); i++) {
+            JSONObject problem = problemData.getJSONObject(i);
+            String index = problem.getString("index");
+            indexList.add(index);
+        }
+        contest.setProblemList(StringUtils.join(indexList, " "));
+        contestRepository.save(contest);
     }
+
+    @Override
+    public void updateContest(Contest contest) throws Exception {
+        updateContestProblem(contest);
+        List<ContestRecord> contestRecords = contestRecordRepository.findAllByContestId(contest.getId());
+        for (ContestRecord contestRecord: contestRecords) {
+            updateContestRecord(contestRecord);
+        }
+    }
+
+    public void updateContestRecord(ContestRecord contestRecord) throws Exception {
+        Contest contest = contestRepository.findById(contestRecord.getContestId()).get();
+        if (contest.getEndTime().getTime() > System.currentTimeMillis()) {
+            return;
+        }
+        String url = "https://ac.nowcoder.com/acm/contest/status-list?token=&id=" + contest.getCid() + "&pageSize=200&statusTypeFilter=5&searchUserName=" + contestRecord.getAccount();
+        Set<String> solved = new TreeSet<>(Arrays.asList(contestRecord.getSolved().split(" ")));
+        Set<String> upSolved = new TreeSet<>();
+        JSONObject res = restTemplate.getForObject(url, JSONObject.class);
+        assert res != null;
+        if (res.getInteger("code") == 1) {
+            throw new Exception(res.getString("msg"));
+        }
+        JSONArray submissions = res.getJSONObject("data").getJSONArray("data");
+        for (int i = 0; i < submissions.size(); i++) {
+            JSONObject submission = submissions.getJSONObject(i);
+            String index = submission.getString("index");
+            long time = submission.getLong("submitTime") + 8*60*60*1000;
+            if (time > contest.getEndTime().getTime() && !solved.contains(index)) {
+                upSolved.add(index);
+            }
+        }
+        contestRecord.setUpSolved(StringUtils.join(upSolved, ' '));
+        contestRecordRepository.save(contestRecord);
+    }
+
 }

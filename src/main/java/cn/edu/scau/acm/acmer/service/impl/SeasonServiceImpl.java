@@ -174,5 +174,4 @@ public class SeasonServiceImpl implements SeasonService {
         seasonStudentRepository.delete(optionalSeasonStudent.get());
     }
 
-
 }

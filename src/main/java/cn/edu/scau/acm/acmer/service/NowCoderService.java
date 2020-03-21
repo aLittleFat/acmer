@@ -8,5 +8,7 @@ public interface NowCoderService {
     void addContestRecord(String ojName, String cId, String studentId, Integer teamId, String account) throws Exception;
     void addContest(String ojName, String cId) throws Exception;
 
-    void updateContestProblem(Contest contest);
+    void updateContestProblem(Contest contest) throws Exception;
+
+    void updateContest(Contest contest) throws Exception;
 }

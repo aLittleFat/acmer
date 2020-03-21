@@ -187,6 +187,7 @@ public class HduServiceImpl implements HduService {
         Elements table = element.selectFirst("tbody").select("tr");
 
         char index = 'A';
+        List<String> problemList = new ArrayList<>();
 
         for (int i = 1; i < table.size(); i++) {
             String title = table.get(i).select("td").get(2).text();
@@ -207,8 +208,11 @@ public class HduServiceImpl implements HduService {
                     break;
                 }
             }
+            problemList.add(String.valueOf(index));
             ++index;
         }
+        contest.setProblemList(StringUtils.join(problemList, " "));
+        contestRepository.save(contest);
     }
 
     @Override

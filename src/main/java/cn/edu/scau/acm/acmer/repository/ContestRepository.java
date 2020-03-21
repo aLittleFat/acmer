@@ -12,4 +12,6 @@ public interface ContestRepository extends JpaRepository<Contest, Integer> {
     Optional<Contest> findByOjNameAndCid(String ojName, String cId);
 
     List<Contest> findAllByOjName(String ojName);
+
+    List<Contest> findAllByOjNameIn(List<String> ojNames);
 }
