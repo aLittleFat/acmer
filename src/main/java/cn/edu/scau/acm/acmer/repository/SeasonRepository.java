@@ -16,4 +16,7 @@ public interface SeasonRepository extends JpaRepository<Season, Integer> {
 
     @Query("select new cn.edu.scau.acm.acmer.model.SeasonParticipant(0, seasonStudent.id, user.name) from SeasonStudent as seasonStudent left join User as user on seasonStudent.studentId = user.studentId where seasonStudent.seasonId = :seasonId")
     List<SeasonParticipant> findAllSeasonStudentParticipantBySeasonId(Integer seasonId);
+
+    @Query("select season from Season as season where season.type = '组队赛' order by season.id desc")
+    List<Season> findAllTeamSeason();
 }

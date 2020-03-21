@@ -308,9 +308,6 @@ public class VjServiceImpl implements VjService {
                 break;
             }
         }
-//        if(participantId == 0) {
-//            throw new Exception("没有参与该比赛");
-//        }
 
         ContestRecord contestRecord = new ContestRecord();
         contestRecord.setStudentId(studentId);
@@ -340,8 +337,6 @@ public class VjServiceImpl implements VjService {
                 int proNum = jsonSubmission.getInteger(1);
                 int isAc = jsonSubmission.getInteger(2);
                 int time = jsonSubmission.getInteger(3);
-
-                log.info(proNum + " " + isAc + " " + time + " " + penaltys.size());
 
                 String index = problemList.get(proNum);
 

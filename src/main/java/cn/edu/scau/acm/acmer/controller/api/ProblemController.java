@@ -1,5 +1,6 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
+import cn.edu.scau.acm.acmer.entity.ProblemView;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.UserDto;
 import cn.edu.scau.acm.acmer.repository.TagRepository;
@@ -12,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -80,5 +82,10 @@ public class ProblemController {
     @GetMapping("tag")
     MyResponseEntity<List<String>> searchTagsByKey(String key) {
         return new MyResponseEntity<>(tagRepository.findAllLike("%" + key + "%"));
+    }
+
+    @GetMapping("problemView")
+    MyResponseEntity<Page<ProblemView>> searchProblem(String key, BigDecimal minDifficult,  BigDecimal maxDifficult, String tagName, Integer page, Integer size) {
+        return new MyResponseEntity<>(problemService.searchProblem(key, minDifficult, maxDifficult, tagName, page, size));
     }
 }

@@ -4,9 +4,8 @@ import cn.edu.scau.acm.acmer.entity.SeasonStudent;
 import cn.edu.scau.acm.acmer.entity.Season;
 import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.model.SeasonParticipant;
-import cn.edu.scau.acm.acmer.repository.SeasonStudentRepository;
-import cn.edu.scau.acm.acmer.repository.SeasonRepository;
-import cn.edu.scau.acm.acmer.repository.UserRepository;
+import cn.edu.scau.acm.acmer.model.TeamContestRank;
+import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.SeasonService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -32,6 +31,12 @@ public class SeasonServiceImpl implements SeasonService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ContestRecordViewRepository contestRecordViewRepository;
+
+    @Autowired
+    private AwardRepository awardRepository;
 
     @Override
     public List<Season> getAllSeason() {
@@ -100,6 +105,20 @@ public class SeasonServiceImpl implements SeasonService {
             seasonParticipants = seasonRepository.findAllSeasonTeamParticipantBySeasonId(seasonId);
         }
         return seasonParticipants;
+    }
+
+    @Override
+    public List<Season> getAllTeamSeason() {
+        return seasonRepository.findAllTeamSeason();
+    }
+
+    @Override
+    public List<TeamContestRank> findAllTeamContestRankBySeasonId(Integer seasonId) {
+        List<TeamContestRank> teamContestRanks = contestRecordViewRepository.findAllTeamContestRankBySeasonId(seasonId);
+        for (TeamContestRank teamContestRank : teamContestRanks) {
+            teamContestRank.setAwardList(awardRepository.findAllByTeamIdAndVerifiedOrderByTimeAsc(teamContestRank.getTeamId(), (byte)1));
+        }
+        return teamContestRanks;
     }
 
     private JSONArray getChoiceArray(List<User> users) {

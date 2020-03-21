@@ -3,6 +3,7 @@ package cn.edu.scau.acm.acmer.service.impl;
 import cn.edu.scau.acm.acmer.entity.*;
 import cn.edu.scau.acm.acmer.model.CfRating;
 import cn.edu.scau.acm.acmer.model.OjAcChart;
+import cn.edu.scau.acm.acmer.model.QualifyingAcChart;
 import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.ContestService;
 import cn.edu.scau.acm.acmer.service.QualifyingContestRecordService;
@@ -20,10 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class QualifyingServiceImpl implements QualifyingService {
@@ -331,6 +329,13 @@ public class QualifyingServiceImpl implements QualifyingService {
     public Contest getContestByQualifyingId(Integer qualifyingId) {
         Qualifying qualifying = qualifyingRepository.findById(qualifyingId).get();
         return contestRepository.findById(qualifying.getContestId()).get();
+    }
+
+    @Override
+    public List<QualifyingAcChart> getQualifyingAcChartBySeasonId(Integer seasonId) {
+        List<QualifyingAcChart> qualifyingAcCharts = scoreRecordViewRepository.findAllAcChartBySeasonId(seasonId);
+        Collections.sort(qualifyingAcCharts);
+        return qualifyingAcCharts;
     }
 
 

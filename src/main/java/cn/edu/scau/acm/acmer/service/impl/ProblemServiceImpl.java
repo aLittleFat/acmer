@@ -9,6 +9,10 @@ import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -47,6 +51,9 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Autowired
     private AwardRepository awardRepository;
+
+    @Autowired
+    private ProblemViewRepository problemViewRepository;
 
     @Override
     public void addProblem(String ojName, String problemId, String title) {
@@ -198,8 +205,15 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     public boolean checkIsAc(int problemId, String studentId) {
-        boolean ac = problemAcRecordRepository.isAc(problemId, studentId) > 0;
-        return ac;
+        return problemAcRecordRepository.isAc(problemId, studentId) > 0;
+    }
+
+    @Override
+    public Page<ProblemView> searchProblem(String key, BigDecimal minDifficult, BigDecimal maxDifficult, String tagName, Integer page, Integer size) {
+        Pageable pr = PageRequest.of(page-1, size, Sort.Direction.ASC, "id");
+        key = "%" + key + "%";
+        tagName = "%" + tagName + "%";
+        return problemViewRepository.findAllByOjNameLikeAndDifficultBetweenAndTagsLikeOrProblemIdLikeAndDifficultBetweenAndTagsLikeOrTitleLikeAndDifficultBetweenAndTagsLike(key, minDifficult, maxDifficult, tagName, key, minDifficult, maxDifficult, tagName, key, minDifficult, maxDifficult, tagName, pr);
     }
 
 

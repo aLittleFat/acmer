@@ -3,6 +3,7 @@ package cn.edu.scau.acm.acmer.service;
 import cn.edu.scau.acm.acmer.entity.Contest;
 import cn.edu.scau.acm.acmer.entity.Qualifying;
 import cn.edu.scau.acm.acmer.entity.ScoreRecordView;
+import cn.edu.scau.acm.acmer.model.QualifyingAcChart;
 
 import java.util.List;
 
@@ -22,4 +23,6 @@ public interface QualifyingService {
     List<ScoreRecordView> getQualifyingScoreByQualifyingId(Integer qualifyingId);
 
     Contest getContestByQualifyingId(Integer qualifyingId);
+
+    List<QualifyingAcChart> getQualifyingAcChartBySeasonId(Integer seasonId);
 }

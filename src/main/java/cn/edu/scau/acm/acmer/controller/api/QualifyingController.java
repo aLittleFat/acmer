@@ -5,6 +5,7 @@ import cn.edu.scau.acm.acmer.entity.Qualifying;
 import cn.edu.scau.acm.acmer.entity.QualifyingScore;
 import cn.edu.scau.acm.acmer.entity.ScoreRecordView;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
+import cn.edu.scau.acm.acmer.model.QualifyingAcChart;
 import cn.edu.scau.acm.acmer.model.Scores;
 import cn.edu.scau.acm.acmer.service.QualifyingScoreService;
 import cn.edu.scau.acm.acmer.service.QualifyingService;
@@ -69,6 +70,11 @@ public class QualifyingController {
     @GetMapping("season/{seasonId}/sumScore")
     MyResponseEntity<List<Scores>> getSumScoreBySeasonId(@PathVariable Integer seasonId) throws Exception {
         return new MyResponseEntity<>(qualifyingScoreService.getSumScore(seasonId));
+    }
+
+    @GetMapping("season/{seasonId}/acChart")
+    MyResponseEntity<List<QualifyingAcChart>> getQualifyingAcChartBySeasonId(@PathVariable Integer seasonId) throws Exception {
+        return new MyResponseEntity<>(qualifyingService.getQualifyingAcChartBySeasonId(seasonId));
     }
 }
 

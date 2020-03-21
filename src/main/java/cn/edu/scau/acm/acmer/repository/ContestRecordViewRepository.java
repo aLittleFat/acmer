@@ -3,6 +3,7 @@ package cn.edu.scau.acm.acmer.repository;
 import cn.edu.scau.acm.acmer.entity.ContestRecordView;
 import cn.edu.scau.acm.acmer.model.ContestRecordLine;
 import cn.edu.scau.acm.acmer.model.MultiContestRecordLine;
+import cn.edu.scau.acm.acmer.model.TeamContestRank;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +30,7 @@ public interface ContestRecordViewRepository extends JpaRepository<ContestRecord
     Optional<ContestRecordView> findByContestIdAndStudentIdAndAccount(Integer contestId, String studentId, String account);
 
     Optional<ContestRecordView> findByContestIdAndTeamIdAndAccount(Integer contestId, Integer teamId, String account);
+
+    @Query("select new cn.edu.scau.acm.acmer.model.TeamContestRank(team.id, team.nameCn, team.nameEn, contestRecordView.students, count(contestRecordView)) from ContestRecordView as contestRecordView join Team as team on contestRecordView.teamId = team.id where contestRecordView.ojName not in ('CfRating', 'Base') group by team.id order by count(contestRecordView) desc")
+    List<TeamContestRank> findAllTeamContestRankBySeasonId(@Param("seasonId") Integer seasonId);
 }

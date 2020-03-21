@@ -5,7 +5,10 @@ import cn.edu.scau.acm.acmer.entity.SeasonAccount;
 import cn.edu.scau.acm.acmer.entity.User;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.SeasonParticipant;
+import cn.edu.scau.acm.acmer.model.TeamContestRank;
 import cn.edu.scau.acm.acmer.model.TeamWithUsers;
+import cn.edu.scau.acm.acmer.repository.ContestRecordViewRepository;
+import cn.edu.scau.acm.acmer.repository.ScoreRecordViewRepository;
 import cn.edu.scau.acm.acmer.repository.SeasonAccountRepository;
 import cn.edu.scau.acm.acmer.service.SeasonAccountService;
 import cn.edu.scau.acm.acmer.service.SeasonService;
@@ -35,10 +38,19 @@ public class SeasonController {
     @Autowired
     private SeasonAccountService seasonAccountService;
 
+    @Autowired
+    private ContestRecordViewRepository contestRecordViewRepository;
+
     @ApiOperation("获取赛季列表")
     @GetMapping("/season")
     MyResponseEntity<List<Season>> getSeason() {
         return new MyResponseEntity<>(seasonService.getAllSeason());
+    }
+
+    @ApiOperation("获取组队赛季列表")
+    @GetMapping("/teamSeason")
+    MyResponseEntity<List<Season>> getTeamSeason() {
+        return new MyResponseEntity<>(seasonService.getAllTeamSeason());
     }
 
     @ApiOperation("获取单个赛季")
@@ -132,6 +144,11 @@ public class SeasonController {
     @GetMapping("season/{seasonId}/participant")
     MyResponseEntity<List<SeasonParticipant>> getSeasonParticipantBySeasonId(@PathVariable Integer seasonId) throws Exception {
         return new MyResponseEntity<>(seasonService.getSeasonParticipantBySeasonId(seasonId));
+    }
+
+    @GetMapping("season/{seasonId}/teamContestRank")
+    MyResponseEntity<List<TeamContestRank>> getTeamContestRankBySeasonId(@PathVariable Integer seasonId) throws Exception {
+        return new MyResponseEntity<>(seasonService.findAllTeamContestRankBySeasonId(seasonId));
     }
 
 }
