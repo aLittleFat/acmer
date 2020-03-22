@@ -25,4 +25,6 @@ public interface QualifyingService {
     Contest getContestByQualifyingId(Integer qualifyingId);
 
     List<QualifyingAcChart> getQualifyingAcChartBySeasonId(Integer seasonId);
+
+    void updateSeasonQualifying(Integer seasonId);
 }

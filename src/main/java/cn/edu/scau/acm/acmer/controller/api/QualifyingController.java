@@ -76,6 +76,12 @@ public class QualifyingController {
     MyResponseEntity<List<QualifyingAcChart>> getQualifyingAcChartBySeasonId(@PathVariable Integer seasonId) throws Exception {
         return new MyResponseEntity<>(qualifyingService.getQualifyingAcChartBySeasonId(seasonId));
     }
+
+    @PutMapping("season/{seasonId}/qualifyingContestRecord")
+    MyResponseEntity<Void> updateSeasonQualifying(@PathVariable Integer seasonId) {
+        qualifyingService.updateSeasonQualifying(seasonId);
+        return new MyResponseEntity<>();
+    }
 }
 
 

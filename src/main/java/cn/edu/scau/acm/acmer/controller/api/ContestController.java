@@ -115,4 +115,14 @@ public class ContestController {
     MyResponseEntity<Contest> getContest(Integer contestId) {
         return new MyResponseEntity<>(contestRepository.findById(contestId).get());
     }
+
+    @ApiOperation("删除比赛记录")
+    @DeleteMapping("contestRecord")
+    @RequiresRoles("student")
+    MyResponseEntity<Void> deleteContestRecord(Integer contestRecordId) throws Exception {
+        int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
+        String studentId = userRepository.findById(id).get().getStudentId();
+        contestService.deleteContestRecord(contestRecordId, studentId);
+        return new MyResponseEntity<>();
+    }
 }

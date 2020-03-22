@@ -338,5 +338,13 @@ public class QualifyingServiceImpl implements QualifyingService {
         return qualifyingAcCharts;
     }
 
+    @Override
+    public void updateSeasonQualifying(Integer seasonId) {
+        List<Qualifying> qualifyings = qualifyingRepository.findAllBySeasonId(seasonId);
+        for (Qualifying qualifying: qualifyings) {
+            qualifyingContestRecordService.updateQualifyingContestRecord(qualifying.getId());
+        }
+    }
+
 
 }

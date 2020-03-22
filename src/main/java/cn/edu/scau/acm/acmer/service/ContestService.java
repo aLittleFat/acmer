@@ -16,4 +16,6 @@ public interface ContestService {
     void changeSolution(Integer contestRecordId, String solution) throws Exception;
 
     JSONObject getContestInfo(Integer contestId);
+
+    void deleteContestRecord(Integer contestRecordId, String studentId) throws Exception;
 }

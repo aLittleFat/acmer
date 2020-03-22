@@ -184,6 +184,25 @@ public class ContestServiceImpl implements ContestService {
         return res;
     }
 
+    @Override
+    public void deleteContestRecord(Integer contestRecordId, String studentId) throws Exception {
+        Optional<ContestRecord> optionalContestRecord = contestRecordRepository.findById(contestRecordId);
+        if(optionalContestRecord.isEmpty()) {
+            throw new Exception("不存在的比赛记录");
+        }
+        ContestRecord contestRecord = optionalContestRecord.get();
+        if(contestRecord.getTeamId() != null) {
+            if (!teamService.checkInTeam(contestRecord.getTeamId(), studentId)) {
+                throw new Exception("不是自己队伍的比赛记录");
+            }
+        } else {
+            if (!contestRecord.getStudentId().equals(studentId)) {
+                throw new Exception("不是自己的比赛记录");
+            }
+        }
+        contestRecordRepository.delete(contestRecord);
+    }
+
     private JSONObject getContestRecordTable(List<MultiContestRecordLine> multiContestRecordLines){
         JSONObject res = new JSONObject();
         Set<String> problemList = new TreeSet<>();
