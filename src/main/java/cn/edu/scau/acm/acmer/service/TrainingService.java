@@ -1,5 +1,8 @@
 package cn.edu.scau.acm.acmer.service;
 
+import cn.edu.scau.acm.acmer.entity.TrainingParticipantView;
+import cn.edu.scau.acm.acmer.entity.TrainingRecordView;
+import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import com.alibaba.fastjson.JSONArray;
 
 import java.util.List;
@@ -18,4 +21,8 @@ public interface TrainingService {
     JSONArray getTeamChoiceByTrainingIdAndSeasonId(Integer trainingId, Integer seasonId);
 
     void deleteTrainingParticipant(Integer trainingParticipantId) throws Exception;
+
+    List<TrainingRecordView> getTrainingRecord(Integer trainingId);
+
+    List<TrainingParticipantView> findAllUnFinishedByTrainingId(Integer trainingId);
 }

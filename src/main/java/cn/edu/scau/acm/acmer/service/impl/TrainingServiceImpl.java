@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +37,12 @@ public class TrainingServiceImpl implements TrainingService {
 
     @Autowired
     private TeamStudentViewRepository teamStudentViewRepository;
+
+    @Autowired
+    private TrainingRecordViewRepository trainingRecordViewRepository;
+
+    @Autowired
+    private TrainingParticipantViewRepository trainingParticipantViewRepository;
 
     @Override
     public void addTraining(String title, String ojName, String cId, String username, String password, String endTime) throws Exception {
@@ -123,6 +130,31 @@ public class TrainingServiceImpl implements TrainingService {
             throw new Exception("不存在的参赛者");
         }
         trainingParticipantRepository.delete(trainingParticipant.get());
+    }
+
+    @Override
+    public List<TrainingRecordView> getTrainingRecord(Integer trainingId) {
+        List<TrainingRecordView> trainingRecordViews = trainingRecordViewRepository.findAllByTrainingId(trainingId);
+        trainingRecordViews.sort((o1,o2) -> {
+            if(o1.getSolvedNumber().equals(o2.getSolvedNumber())) {
+                return o1.getPenalty().compareTo(o2.getPenalty());
+            } else {
+                return o2.getSolvedNumber().compareTo(o1.getSolvedNumber());
+            }
+        });
+        return trainingRecordViews;
+    }
+
+    @Override
+    public List<TrainingParticipantView> findAllUnFinishedByTrainingId(Integer trainingId) {
+        List<TrainingParticipantView> trainingParticipantViews = trainingParticipantViewRepository.findAllByTrainingId(trainingId);
+        List<TrainingParticipantView> res = new ArrayList<>();
+        for (TrainingParticipantView trainingParticipantView : trainingParticipantViews) {
+            if (trainingRecordViewRepository.findByTrainingIdAndTrainingParticipantId(trainingId, trainingParticipantView.getId()).isEmpty()) {
+                res.add(trainingParticipantView);
+            }
+        }
+        return res;
     }
 
     private JSONArray getChoiceArray(List<User> users) {

@@ -3,31 +3,19 @@ package cn.edu.scau.acm.acmer.model;
 
 import cn.edu.scau.acm.acmer.entity.Award;
 import cn.edu.scau.acm.acmer.entity.Team;
+import cn.edu.scau.acm.acmer.entity.User;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
 public class StudentInfo {
-    private String name;
-    private Integer grade;
+    private User user;
     private Integer acNumber;
-    private Integer cfRating;
     private List<Award> awardList;
     private List<JSONObject> teams;
     private List<OjAcChart> ojAcCharts;
     private List<TagAcChart> tagAcCharts;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getGrade() {
-        return grade;
-    }
 
     public Integer getAcNumber() {
         return acNumber;
@@ -37,24 +25,12 @@ public class StudentInfo {
         this.acNumber = acNumber;
     }
 
-    public Integer getCfRating() {
-        return cfRating;
-    }
-
-    public void setCfRating(Integer cfRating) {
-        this.cfRating = cfRating;
-    }
-
     public List<Award> getAwardList() {
         return awardList;
     }
 
     public void setAwardList(List<Award> awardList) {
         this.awardList = awardList;
-    }
-
-    public void setGrade(Integer grade) {
-        this.grade = grade;
     }
 
     public List<OjAcChart> getOjAcCharts() {
@@ -79,5 +55,13 @@ public class StudentInfo {
 
     public void setTeams(List<JSONObject> teams) {
         this.teams = teams;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

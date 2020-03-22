@@ -1,9 +1,11 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
+import cn.edu.scau.acm.acmer.entity.Contest;
 import cn.edu.scau.acm.acmer.entity.TeamStudentPK;
 import cn.edu.scau.acm.acmer.model.ContestTable;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.model.UserDto;
+import cn.edu.scau.acm.acmer.repository.ContestRepository;
 import cn.edu.scau.acm.acmer.repository.TeamStudentRepository;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.ContestService;
@@ -30,6 +32,9 @@ public class ContestController {
 
     @Autowired
     private TeamStudentRepository teamStudentRepository;
+
+    @Autowired
+    private ContestRepository contestRepository;
 
     @ApiOperation("获取我的竞赛记录表格")
     @GetMapping("personalContest")
@@ -103,5 +108,11 @@ public class ContestController {
     @GetMapping("contestInfo")
     MyResponseEntity<JSONObject> getContestInfo(Integer contestId) {
         return new MyResponseEntity<>(contestService.getContestInfo(contestId));
+    }
+
+    @ApiOperation("获取比赛")
+    @GetMapping("contest")
+    MyResponseEntity<Contest> getContest(Integer contestId) {
+        return new MyResponseEntity<>(contestRepository.findById(contestId).get());
     }
 }

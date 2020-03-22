@@ -223,4 +223,28 @@ public class AccountServiceImpl implements AccountService {
         userRepository.save(u);
     }
 
+    @Override
+    public void deleteStudents(String studentId, String myStudentId) throws Exception {
+        if(studentId.equals(myStudentId)) {
+            throw new Exception("不要企图删除自己");
+        }
+        Optional<User> optionalUser = userRepository.findByStudentId(studentId);
+        if(optionalUser.isEmpty()) {
+            throw new Exception("不存在该队员");
+        }
+        User u = optionalUser.get();
+        userRepository.delete(u);
+    }
+
+    @Override
+    public void setAdmin(String studentId) throws Exception {
+        Optional<User> optionalUser = userRepository.findByStudentId(studentId);
+        if(optionalUser.isEmpty()) {
+            throw new Exception("不存在该队员");
+        }
+        User u = optionalUser.get();
+        u.setIsAdmin((byte)1);
+        userRepository.save(u);
+    }
+
 }

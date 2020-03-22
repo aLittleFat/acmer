@@ -24,4 +24,8 @@ public interface AccountService {
     Page<User> getRequestRetireUser(Integer page, Integer size);
 
     void changeUserStatus(Integer id, String status);
+
+    void deleteStudents(String studentId, String myStudentId) throws Exception;
+
+    void setAdmin(String studentId) throws Exception;
 }

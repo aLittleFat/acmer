@@ -3,6 +3,7 @@ package cn.edu.scau.acm.acmer.controller.api;
 import cn.edu.scau.acm.acmer.entity.Training;
 import cn.edu.scau.acm.acmer.entity.TrainingParticipant;
 import cn.edu.scau.acm.acmer.entity.TrainingParticipantView;
+import cn.edu.scau.acm.acmer.entity.TrainingRecordView;
 import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import cn.edu.scau.acm.acmer.repository.TrainingParticipantRepository;
 import cn.edu.scau.acm.acmer.repository.TrainingParticipantViewRepository;
@@ -59,6 +60,11 @@ public class TrainingController {
         return new MyResponseEntity<>(trainingParticipantViewRepository.findAllByTrainingId(trainingId));
     }
 
+    @GetMapping("trainingParticipant/unFinished")
+    MyResponseEntity<List<TrainingParticipantView>> getAllTrainingParticipantUnFinished(Integer trainingId) {
+        return new MyResponseEntity<>(trainingService.findAllUnFinishedByTrainingId(trainingId));
+    }
+
     @DeleteMapping("trainingParticipant")
     MyResponseEntity<Void> deleteTrainingParticipant(Integer trainingParticipantId) throws Exception {
         trainingService.deleteTrainingParticipant(trainingParticipantId);
@@ -85,5 +91,10 @@ public class TrainingController {
     MyResponseEntity<Void> addTeams(@PathVariable Integer trainingId, @RequestParam List<Integer> teamIds) throws Exception {
         trainingService.addTeams(trainingId, teamIds);
         return new MyResponseEntity<>();
+    }
+
+    @GetMapping("/training/{trainingId}/record")
+    MyResponseEntity<List<TrainingRecordView>> getTrainingRecord(@PathVariable Integer trainingId) {
+        return new MyResponseEntity<>(trainingService.getTrainingRecord(trainingId));
     }
 }

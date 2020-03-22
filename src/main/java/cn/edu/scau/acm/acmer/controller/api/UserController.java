@@ -12,7 +12,13 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api", produces = "application/json; charset=utf-8")
@@ -61,5 +67,33 @@ public class UserController {
         return new MyResponseEntity<>();
     }
 
+    @ApiOperation("获取队员列表")
+    @GetMapping("student")
+    @RequiresRoles("admin")
+    MyResponseEntity<Page<User>> getStudents(Integer page, Integer size) throws Exception {
+        Pageable pr = PageRequest.of(page-1, size, Sort.Direction.DESC, "id");
+        return new MyResponseEntity<>(userRepository.findAllByStudentIdNotNull(pr));
+    }
+
+    @ApiOperation("删除队员")
+    @DeleteMapping("student")
+    @RequiresRoles("admin")
+    MyResponseEntity<Void> deleteStudents(String studentId) throws Exception {
+        String myStudentId = null;
+        try {
+            int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
+            myStudentId = userRepository.findById(id).get().getStudentId();
+        } catch (Exception ignored) {}
+        accountService.deleteStudents(studentId, myStudentId);
+        return new MyResponseEntity<>();
+    }
+
+    @ApiOperation("设为管理员")
+    @PutMapping("admin")
+    @RequiresRoles("admin")
+    MyResponseEntity<Void> setAdmin(String studentId) throws Exception {
+        accountService.setAdmin(studentId);
+        return new MyResponseEntity<>();
+    }
 
 }

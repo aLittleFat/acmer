@@ -36,10 +36,8 @@ public class StudentServiceImpl implements StudentService {
     public StudentInfo getStudentInfo(String studentId) {
         StudentInfo studentInfo = new StudentInfo();
         User user = userRepository.findByStudentId(studentId).get();
-        studentInfo.setName(user.getName());
-        studentInfo.setGrade(user.getGrade());
+        studentInfo.setUser(user);
         studentInfo.setAwardList(awardRepository.findAllByStudentId(studentId));
-        //todo studentInfo.setCfRating();
         List<Team> teams = teamRepository.findAllByStudentId(studentId);
         List<JSONObject> jsonTeams = new ArrayList<>();
         for (Team team : teams) {
