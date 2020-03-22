@@ -157,6 +157,33 @@ public class ContestServiceImpl implements ContestService {
         contestRecordRepository.save(contestRecord);
     }
 
+    @Override
+    public void changeSolution(Integer contestRecordId, String solution) throws Exception {
+        ContestRecord contestRecord = contestRecordRepository.findById(contestRecordId).get();
+        contestRecord.setSolution(solution);
+        contestRecordRepository.save(contestRecord);
+    }
+
+    @Override
+    public JSONObject getContestInfo(Integer contestId) {
+        Contest contest = contestRepository.findById(contestId).get();
+        JSONObject res = new JSONObject();
+        res.put("title", contest.getTitle());
+        String link;
+        switch (contest.getOjName()) {
+            case "VJ": link = "https://vjudge.net/contest/" + contest.getCid(); break;
+            case "HDU": link = "http://acm.hdu.edu.cn/userloginex.php?cid=" + contest.getCid(); break;
+            case "牛客": link = "https://ac.nowcoder.com/acm/contest/" + contest.getCid(); break;
+            case "CodeForces": link = "https://codeforces.com/contest/" + contest.getCid(); break;
+            case "Gym": link = "https://codeforces.com/gym/" + contest.getCid(); break;
+            case "计蒜客": link = "https://www.jisuanke.com/contest/" + contest.getCid(); break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + contest.getOjName());
+        }
+        res.put("link", link);
+        return res;
+    }
+
     private JSONObject getContestRecordTable(List<MultiContestRecordLine> multiContestRecordLines){
         JSONObject res = new JSONObject();
         Set<String> problemList = new TreeSet<>();

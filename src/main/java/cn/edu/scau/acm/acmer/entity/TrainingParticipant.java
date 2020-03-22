@@ -4,12 +4,12 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "training_plan_participant", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"student_id", "traning_plan_id", "student_id"})
+@Table(name = "training_participant", uniqueConstraints = {
+        @UniqueConstraint(name = "uni", columnNames = {"student_id", "training_id", "student_id"})
 })
-public class TrainingPlanParticipant {
+public class TrainingParticipant {
     private int id;
-    private Integer traningPlanId;
+    private Integer trainingId;
     private Integer teamId;
     private String studentId;
 
@@ -25,13 +25,13 @@ public class TrainingPlanParticipant {
     }
 
     @Basic
-    @Column(name = "traning_plan_id")
-    public Integer getTraningPlanId() {
-        return traningPlanId;
+    @Column(name = "training_id")
+    public Integer getTrainingId() {
+        return trainingId;
     }
 
-    public void setTraningPlanId(Integer traningPlanId) {
-        this.traningPlanId = traningPlanId;
+    public void setTrainingId(Integer traningPlanId) {
+        this.trainingId = traningPlanId;
     }
 
     @Basic
@@ -58,15 +58,15 @@ public class TrainingPlanParticipant {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TrainingPlanParticipant that = (TrainingPlanParticipant) o;
+        TrainingParticipant that = (TrainingParticipant) o;
         return id == that.id &&
-                Objects.equals(traningPlanId, that.traningPlanId) &&
+                Objects.equals(trainingId, that.trainingId) &&
                 Objects.equals(teamId, that.teamId) &&
                 Objects.equals(studentId, that.studentId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, traningPlanId, teamId, studentId);
+        return Objects.hash(id, trainingId, teamId, studentId);
     }
 }

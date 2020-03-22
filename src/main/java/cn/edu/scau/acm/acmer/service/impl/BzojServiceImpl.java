@@ -47,7 +47,7 @@ public class BzojServiceImpl implements BzojService {
 
     @Override
     public void bzojLogout() {
-        String url = "https://www.lydsy.com/JudgeOnline/logout.php";
+        String url = "http://www.lydsy.com/JudgeOnline/logout.php";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
@@ -58,7 +58,7 @@ public class BzojServiceImpl implements BzojService {
     @Override
     public boolean checkBzojAccount(String username, String password) {
         bzojLogout();
-        String url = "https://www.lydsy.com/JudgeOnline/login.php";
+        String url = "http://www.lydsy.com/JudgeOnline/login.php";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
@@ -76,7 +76,7 @@ public class BzojServiceImpl implements BzojService {
     @Transactional
     public void getAcProblemsByBzojAccount(OjAccount bzojAccount) {
         BaseHttpClient httpClient = new BaseHttpClient();
-        String url = "https://www.lydsy.com/JudgeOnline/status.php?problem_id=&user_id=" + bzojAccount.getAccount() + "&language=-1&jresult=4";
+        String url = "http://www.lydsy.com/JudgeOnline/status.php?problem_id=&user_id=" + bzojAccount.getAccount() + "&language=-1&jresult=4";
         try {
             while(url != null) {
                 Document document = Jsoup.connect(url).get();
@@ -86,7 +86,7 @@ public class BzojServiceImpl implements BzojService {
                     String proId = line.get(2).selectFirst("a").text();
                     Timestamp time = Timestamp.valueOf(line.get(8).text());
                     if (problemRepository.findByOjNameAndProblemId("HYSBZ", proId).isEmpty()) {
-                        String title = Jsoup.connect("https://www.lydsy.com/JudgeOnline/problem.php?id=" + proId).get().selectFirst("h2").text().split(" ")[1];
+                        String title = Jsoup.connect("http://www.lydsy.com/JudgeOnline/problem.php?id=" + proId).get().selectFirst("h2").text().split(" ")[1];
                         problemService.addProblem("HYSBZ", proId, title);
                     }
                     Problem problem = problemService.findProblem("HYSBZ", proId);
@@ -97,7 +97,7 @@ public class BzojServiceImpl implements BzojService {
                 Elements links = document.body().select("a");
                 for (Element link : links) {
                     if (link.text().equals("Next Page")) {
-                        String nextPage = "https://www.lydsy.com/JudgeOnline/" + link.attr("href");
+                        String nextPage = "http://www.lydsy.com/JudgeOnline/" + link.attr("href");
                         if(url.equals(nextPage)) url = null;
                         else url = nextPage;
                     }

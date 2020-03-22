@@ -9,8 +9,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MultiContestRecordLine {
+    private Integer contestRecordId;
     private Integer contestId;
     private String contestTitle;
+    private String solution;
     private Timestamp time;
     private Integer solvedNumber;
     private Integer penalty;
@@ -19,8 +21,10 @@ public class MultiContestRecordLine {
     private List<String> problemList;
 
     public MultiContestRecordLine(ContestRecordView contestRecordView) {
+        this.contestRecordId = contestRecordView.getId();
         this.contestId = contestRecordView.getContestId();
         this.contestTitle = contestRecordView.getTitle();
+        this.solution = contestRecordView.getSolution();
         this.time = contestRecordView.getTime();
         this.penalty = contestRecordView.getPenalty() / 60;
         this.solved = Arrays.asList(contestRecordView.getSolved().split(" "));
@@ -91,5 +95,21 @@ public class MultiContestRecordLine {
 
     public void setPenalty(Integer penalty) {
         this.penalty = penalty;
+    }
+
+    public Integer getContestRecordId() {
+        return contestRecordId;
+    }
+
+    public void setContestRecordId(Integer contestRecordId) {
+        this.contestRecordId = contestRecordId;
+    }
+
+    public String getSolution() {
+        return solution;
+    }
+
+    public void setSolution(String solution) {
+        this.solution = solution;
     }
 }

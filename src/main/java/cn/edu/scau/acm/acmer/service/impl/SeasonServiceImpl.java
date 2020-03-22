@@ -121,6 +121,21 @@ public class SeasonServiceImpl implements SeasonService {
         return teamContestRanks;
     }
 
+    @Override
+    public JSONArray getSeasonChoice() {
+        List<Season> seasons = seasonRepository.findAllTeamSeason();
+        JSONArray jsonArray = new JSONArray();
+        for (Season season : seasons) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("title", season.getName());
+            jsonObject.put("id", season.getId());
+            jsonObject.put("children", new JSONArray());
+            jsonObject.put("loading", false);
+            jsonArray.add(jsonObject);
+        }
+        return jsonArray;
+    }
+
     private JSONArray getChoiceArray(List<User> users) {
         JSONArray studentChoicePerGrade = new JSONArray();
         int nowYear = 0;

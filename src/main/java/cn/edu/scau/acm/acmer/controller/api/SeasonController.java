@@ -151,4 +151,9 @@ public class SeasonController {
         return new MyResponseEntity<>(seasonService.findAllTeamContestRankBySeasonId(seasonId));
     }
 
+    @GetMapping("seasonChoice")
+    MyResponseEntity<JSONArray> getSeasonChoice() throws Exception {
+        return new MyResponseEntity<>(seasonService.getSeasonChoice());
+    }
+
 }

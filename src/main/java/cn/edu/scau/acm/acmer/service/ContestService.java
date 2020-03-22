@@ -2,6 +2,7 @@ package cn.edu.scau.acm.acmer.service;
 
 import cn.edu.scau.acm.acmer.entity.ContestRecord;
 import cn.edu.scau.acm.acmer.model.ContestTable;
+import cn.edu.scau.acm.acmer.model.MyResponseEntity;
 import com.alibaba.fastjson.JSONObject;
 
 public interface ContestService {
@@ -11,4 +12,8 @@ public interface ContestService {
     JSONObject getContestTableByTeamId(Integer teamId, String studentId);
     ContestTable getContestTableByContestId(Integer contestId) throws Exception;
     void updateUpSolved(ContestRecord contestRecord);
+
+    void changeSolution(Integer contestRecordId, String solution) throws Exception;
+
+    JSONObject getContestInfo(Integer contestId);
 }

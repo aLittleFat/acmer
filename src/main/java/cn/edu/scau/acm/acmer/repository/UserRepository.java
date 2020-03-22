@@ -31,6 +31,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query(value = "select user from User as user where user.status = '现役' and user.studentId is not null and user.studentId not in (select teamStudent.studentId from TeamStudent as teamStudent left join Team as team on teamStudent.teamId = team.id where team.seasonId = :seasonId) order by user.grade asc ")
     List<User> findAllNotInTeamBySeasonId(@Param("seasonId") int seasonId);
 
+    @Query(value = "select user from User as user where user.status = '现役' and user.studentId is not null and user.studentId not in (select trainingParticipant.studentId from TrainingParticipant as trainingParticipant where trainingParticipant.trainingId = :trainingId)")
+    List<User> findAllNotInTrainingByTrainingId(@Param("trainingId") int trainingId);
+
     Optional<User> findByStudentId(String studentId);
 
     @Query(value = "select user from User as user left join TeamStudent as teamStudent on user.studentId = teamStudent.studentId where teamStudent.teamId = :teamId")

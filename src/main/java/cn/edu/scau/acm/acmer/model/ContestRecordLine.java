@@ -17,6 +17,7 @@ public class ContestRecordLine implements Comparable<ContestRecordLine> {
     private String participants;
     private Integer teamId;
     private String studentId;
+    private String solution;
 
     public ContestRecordLine(ContestRecordView contestRecordView) {
         this.time = contestRecordView.getTime();
@@ -27,6 +28,7 @@ public class ContestRecordLine implements Comparable<ContestRecordLine> {
         this.participants = contestRecordView.getStudents();
         this.teamId = contestRecordView.getTeamId();
         this.studentId = contestRecordView.getStudentId();
+        this.solution = contestRecordView.getSolution();
     }
 
 
@@ -104,5 +106,13 @@ public class ContestRecordLine implements Comparable<ContestRecordLine> {
 
     public void setStudentId(String studentId) {
         this.studentId = studentId;
+    }
+
+    public String getSolution() {
+        return solution;
+    }
+
+    public void setSolution(String solution) {
+        this.solution = solution;
     }
 }

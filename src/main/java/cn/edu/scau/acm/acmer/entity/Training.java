@@ -5,12 +5,12 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-@Table(name = "training_plan", schema = "scauacm", catalog = "")
-public class TrainingPlan {
+@Table(name = "training")
+public class Training {
     private int id;
-    private Timestamp time;
     private Timestamp endTime;
-    private Integer contestId;
+    private int contestId;
+    private String title;
 
     @Id
     @Column(name = "id")
@@ -21,16 +21,6 @@ public class TrainingPlan {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    @Basic
-    @Column(name = "time")
-    public Timestamp getTime() {
-        return time;
-    }
-
-    public void setTime(Timestamp time) {
-        this.time = time;
     }
 
     @Basic
@@ -45,27 +35,37 @@ public class TrainingPlan {
 
     @Basic
     @Column(name = "contest_id")
-    public Integer getContestId() {
+    public int getContestId() {
         return contestId;
     }
 
-    public void setContestId(Integer contestId) {
+    public void setContestId(int contestId) {
         this.contestId = contestId;
+    }
+
+    @Basic
+    @Column(name = "title")
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TrainingPlan that = (TrainingPlan) o;
+        Training that = (Training) o;
         return id == that.id &&
-                Objects.equals(time, that.time) &&
+                contestId == that.contestId &&
                 Objects.equals(endTime, that.endTime) &&
-                Objects.equals(contestId, that.contestId);
+                Objects.equals(title, that.title);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, time, endTime, contestId);
+        return Objects.hash(id, endTime, contestId, title);
     }
 }
