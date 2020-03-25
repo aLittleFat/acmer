@@ -1,0 +1,58 @@
+server:
+  port: 8880
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/scauacm?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=true
+    username: root
+    password: admin
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      max-lifetime: 300000
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQL5Dialect
+  task:
+    execution:
+      pool:
+        allow-core-thread-timeout: true
+        core-size: 8
+        keep-alive: 60s
+        max-size: 20
+  redis:
+    host: localhost
+    port: 6379
+    password:
+  mail:
+    host: smtp.qq.com
+    username: zhanghonghai9999@qq.com
+    password: txnqevcafpamgcfi
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+            required: false
+mail:
+  fromMail:
+    addr: zhanghonghai9999@qq.com
+scau:
+  acmer:
+    url: http://localhost/
+    ojaccounts:
+      vj:
+        username: 1478527245
+        password: 631665391
+      jisuanke:
+        username: 15914764919
+        password: 631665391
+      opentrains:
+        password: kBRALa+R!
+  cf:
+    url: http://www.scaucf.top/
+    username: admin
+    password: 123456
+swagger:
+  host: localhost

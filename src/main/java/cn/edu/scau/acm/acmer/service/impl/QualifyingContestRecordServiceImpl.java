@@ -66,8 +66,8 @@ public class QualifyingContestRecordServiceImpl implements QualifyingContestReco
             List<SeasonStudent> seasonStudents = seasonStudentRepository.findAllBySeasonId(qualifying.getSeasonId());
             for (SeasonStudent seasonStudent : seasonStudents) {
                 String studentId = seasonStudent.getStudentId();
-                OjAccount ojAccount = ojAccountRepository.findByStudentIdAndOjName(studentId, "VJ").get();
                 try {
+                    OjAccount ojAccount = ojAccountRepository.findByStudentIdAndOjName(studentId, "VJ").get();
                     contestService.addContestRecord(contest.getOjName(), contest.getCid(), studentId, null, ojAccount.getAccount(), null);
                 } catch (Exception e) {
                     log.error(e.getMessage());

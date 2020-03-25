@@ -38,14 +38,14 @@ public class AuthController {
 
     @ApiOperation("登录")
     @PostMapping("/login")
-    public MyResponseEntity<Void> login(String email, String password, HttpServletResponse response){
-        log.info(email + " " + password);
+    public MyResponseEntity<Void> login(String email, String password, HttpServletResponse response) throws Exception {
+        boolean verified = accountService.isVerify(email);
         Subject subject = SecurityUtils.getSubject();
         try {
             UsernamePasswordToken token = new UsernamePasswordToken(email, password);
             subject.login(token);
-
-            if(!accountService.isVerify(email)){
+            if(!verified){
+                subject.logout();
                 return new MyResponseEntity<>("账号未通过审核，请等待管理员审核");
             }
             response.setHeader("token", (String) subject.getSession().getId());
@@ -86,8 +86,11 @@ public class AuthController {
     public MyResponseEntity<Void> register(String email, String password, String phone, String name, String verifyCode, String grade, String studentId, String qq, String type) throws Exception {
         if (type.equals("教师")) {
             studentId = null;
+            accountService.register(email, password, phone, name, verifyCode, null, studentId, qq);
         }
-        accountService.register(email, password, phone, name, verifyCode, Integer.parseInt(grade), studentId, qq);
+        else {
+            accountService.register(email, password, phone, name, verifyCode, Integer.parseInt(grade), studentId, qq);
+        }
         return new MyResponseEntity<>();
     }
 

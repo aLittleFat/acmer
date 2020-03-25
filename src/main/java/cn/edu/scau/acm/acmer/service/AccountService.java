@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 
 public interface AccountService {
     void register(String email, String password, String phone, String name, String verifyCode, Integer grade, String studentId, String qq) throws Exception;
-    boolean isVerify(String email);
+    boolean isVerify(String email) throws Exception;
     void verifyAccount(int id) throws Exception;
     void verifyEmail(String email, String verifyCode) throws Exception;
     String verifyForgetPasswordEmail(String email, String verifyCode);

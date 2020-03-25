@@ -75,8 +75,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean isVerify(String email) {
-        return userRepository.findByEmail(email).get().getVerified() == (byte)1;
+    public boolean isVerify(String email) throws Exception {
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isEmpty()) {
+            throw new Exception("用户不存在");
+        }
+        return user.get().getVerified() == (byte)1;
     }
 
     @Override

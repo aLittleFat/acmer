@@ -5,10 +5,7 @@ import cn.edu.scau.acm.acmer.model.CfRating;
 import cn.edu.scau.acm.acmer.model.OjAcChart;
 import cn.edu.scau.acm.acmer.model.QualifyingAcChart;
 import cn.edu.scau.acm.acmer.repository.*;
-import cn.edu.scau.acm.acmer.service.ContestService;
-import cn.edu.scau.acm.acmer.service.QualifyingContestRecordService;
-import cn.edu.scau.acm.acmer.service.QualifyingScoreService;
-import cn.edu.scau.acm.acmer.service.QualifyingService;
+import cn.edu.scau.acm.acmer.service.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -66,6 +63,9 @@ public class QualifyingServiceImpl implements QualifyingService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private OJService ojService;
 
     @Override
     public List<Qualifying> getBySeasonId(Integer seasonId) {
@@ -147,6 +147,7 @@ public class QualifyingServiceImpl implements QualifyingService {
             problemList.add(String.valueOf(ch));
             ++ch;
         }
+        ojService.addOj("Base");
         Contest contest;
         Optional<Contest> optionalContest = contestRepository.findByOjNameAndCid("Base", String.valueOf(seasonId));
         if(optionalContest.isEmpty()) {
@@ -201,6 +202,7 @@ public class QualifyingServiceImpl implements QualifyingService {
             ++ch;
         }
         Contest contest;
+        ojService.addOj("CfRating");
         Optional<Contest> optionalContest = contestRepository.findByOjNameAndCid("CfRating", String.valueOf(seasonId));
         if(optionalContest.isEmpty()) {
             contest = new Contest();

@@ -37,19 +37,19 @@ public class BaseHttpClient {
 	public static CloseableHttpClient createHttpClient() {
 		CloseableHttpClient httpclient = null;
 		try {
-			SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(
-					new File(BaseHttpClient.class.getResource("/truststore").getFile()),
-					"acmTrust".toCharArray(), new TrustSelfSignedStrategy()).build();
-			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-			        sslContext, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+//			SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(
+//					new File(BaseHttpClient.class.getResource("/truststore").getFile()),
+//					"acmTrust".toCharArray(), new TrustSelfSignedStrategy()).build();
+//			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+//			        sslContext, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 			RequestConfig requestConfig = RequestConfig.custom()
 					.setConnectTimeout(5000)
 					.setConnectionRequestTimeout(5000)
-					.setSocketTimeout(20000)
+					.setSocketTimeout(30000)
 //					.setProxy(new HttpHost("localhost", 8888))
 					.build();
 			httpclient = HttpClients.custom()
-					.setSSLSocketFactory(sslsf)
+//					.setSSLSocketFactory(sslsf)
 					.setDefaultRequestConfig(requestConfig).build();
 		} catch (Exception e) {
 			e.printStackTrace();
