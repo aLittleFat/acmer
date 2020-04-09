@@ -50,6 +50,10 @@ public class QualifyingContestRecordServiceImpl implements QualifyingContestReco
     public void updateQualifyingContestRecord(Integer qualifyingId) {
         Qualifying qualifying = qualifyingRepository.findById(qualifyingId).get();
         Season season = seasonRepository.findById(qualifying.getSeasonId()).get();
+        Contest contest = contestRepository.findById(qualifying.getContestId()).get();
+        if(contest.getEndTime().getTime() > System.currentTimeMillis() + 8*60*60*1000) {
+            return;
+        }
         if(season.getType().equals("个人赛")) {
             updatePersonalQualifyingContestRecord(qualifyingId);
         } else {

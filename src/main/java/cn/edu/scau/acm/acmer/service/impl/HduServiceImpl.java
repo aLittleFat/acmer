@@ -247,10 +247,6 @@ public class HduServiceImpl implements HduService {
             loginContest(httpClient, contest.getCid(), contest.getUsername(), contest.getPassword());
         }
 
-        if (contest.getEndTime().getTime() > System.currentTimeMillis()) {
-            throw new Exception("比赛还未结束");
-        }
-
         int maxPage = 1;
         Document document = Jsoup.parse(httpClient.get("http://acm.hdu.edu.cn/contests/contest_ranklist.php?cid=" + cId + "&page=" + 1));
         Elements links = document.select("a");

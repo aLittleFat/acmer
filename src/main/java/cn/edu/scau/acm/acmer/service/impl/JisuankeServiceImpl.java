@@ -14,9 +14,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -37,6 +40,12 @@ public class JisuankeServiceImpl implements JisuankeService {
 
     @Autowired
     private ContestRecordRepository contestRecordRepository;
+
+    @Value("${scau.acmer.ojaccounts.jisuanke.username}")
+    private String username;
+
+    @Value("${scau.acmer.ojaccounts.jisuanke.password}")
+    private String password;
 
     @Override
     public void addContest(String ojName, String cId) throws Exception {
@@ -79,46 +88,71 @@ public class JisuankeServiceImpl implements JisuankeService {
     @Transactional
     public void addContestRecord(String ojName, String cId, String studentId, Integer teamId, String account) throws Exception {
         Contest contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
-
-        if(System.currentTimeMillis() < contest.getEndTime().getTime()) {
-            throw new Exception("比赛还没结束");
-        }
         WebDriver webDriver = new ChromeDriver();
+        Elements table;
         webDriver.get("https://passport.jisuanke.com/?n=https://www.jisuanke.com/contest/" + cId + "?view=rank&page=1&school=%E5%8D%8E%E5%8D%97%E5%86%9C%E4%B8%9A%E5%A4%A7%E5%AD%A6#/");
         login(webDriver);
-        Document document = Jsoup.parse(webDriver.getPageSource());
-        webDriver.close();
-        Elements table = document.selectFirst("tbody").select("tr");
-        boolean hasTakePartIn = false;
-        for (Element element : table) {
-            Elements tds = element.select("td");
-            if (tds.get(2).selectFirst("a").text().equals(account)) {
-
-                ContestRecord contestRecord = new ContestRecord();
-                contestRecord.setTime(contest.getStartTime());
-                contestRecord.setAccount(account);
-                contestRecord.setTeamId(teamId);
-                contestRecord.setStudentId(studentId);
-                contestRecord.setContestId(contest.getId());
-                contestRecord.setPenalty(Integer.parseInt(tds.get(5).text())*60);
-
-                Set<String> solved = new TreeSet<>();
-
-                List<String> problemList = Arrays.asList(contest.getProblemList().split(" "));
-
-                for (int i = 0; i < problemList.size(); i++) {
-                    String statusString = tds.get(i+6).text();
-                    if (!statusString.contains("--")) {
-                        solved.add(problemList.get(i));
-                    }
+        while (true){
+            Document document = Jsoup.parse(webDriver.getPageSource());
+            Element thead = document.selectFirst("thead");
+            Elements theadThs = thead.select("th");
+            int accountIndex = 0;
+            int problemIndexOffset = 0;
+            int penaltyIndex = 0;
+            for (int i = 0; i < theadThs.size(); i++) {
+                Element theadTh = theadThs.get(i);
+                if(theadTh.text().equals("用户名")) {
+                    accountIndex = i;
                 }
-                contestRecord.setSolved(StringUtils.join(solved, " "));
-                contestRecord.setUpSolved("");
-                contestRecordRepository.save(contestRecord);
-                hasTakePartIn = true;
+                if(theadTh.text().equals("A")) {
+                    problemIndexOffset = i;
+                }
+                if(theadTh.text().equals("用时")) {
+                    penaltyIndex = i;
+                }
+            }
+            log.info(String.valueOf(accountIndex));
+            log.info(String.valueOf(problemIndexOffset));
+            table = document.selectFirst("tbody").select("tr");
+//                log.info(table.toString());
+            boolean hasTakePartIn = false;
+            for (Element element : table) {
+                Elements tds = element.select("td");
+                log.info(tds.get(accountIndex).select("a").text());
+                if (tds.get(accountIndex).selectFirst("a").text().equals(account)) {
+                    ContestRecord contestRecord = new ContestRecord();
+                    contestRecord.setTime(contest.getStartTime());
+                    contestRecord.setAccount(account);
+                    contestRecord.setTeamId(teamId);
+                    contestRecord.setStudentId(studentId);
+                    contestRecord.setContestId(contest.getId());
+                    contestRecord.setPenalty(Integer.parseInt(tds.get(penaltyIndex).text()) * 60);
+
+                    Set<String> solved = new TreeSet<>();
+
+                    List<String> problemList = Arrays.asList(contest.getProblemList().split(" "));
+
+                    for (int i = 0; i < problemList.size(); i++) {
+                        String statusString = tds.get(i + problemIndexOffset).text();
+                        if (!statusString.contains("--")) {
+                            solved.add(problemList.get(i));
+                        }
+                    }
+                    contestRecord.setSolved(StringUtils.join(solved, " "));
+                    contestRecord.setUpSolved("");
+                    contestRecordRepository.save(contestRecord);
+                    hasTakePartIn = true;
+                    break;
+                }
+            }
+            try {
+                webDriver.findElement(By.className("jsk-icon-angle-right")).click();
+                Thread.sleep(2000);
+            } catch (Exception e) {
                 break;
             }
         }
+        webDriver.close();
 //        if(!hasTakePartIn) {
 //            throw new Exception("未参加该竞赛");
 //        }
@@ -126,12 +160,20 @@ public class JisuankeServiceImpl implements JisuankeService {
 
     @Override
     public void login(WebDriver webDriver) throws InterruptedException {
-        WebElement username = webDriver.findElements(By.tagName("input")).get(0);
-        username.sendKeys("15914764919");
-        WebElement password = webDriver.findElements(By.tagName("input")).get(1);
-        password.sendKeys("QqSt631665391");
+        WebDriverWait wait = new WebDriverWait(webDriver, 10);
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("input")));
+        List<WebElement> webElements = webDriver.findElements(By.tagName("input"));
+        for(WebElement webElement: webElements) {
+            log.info(webElement.getAttribute("placeholder"));
+            if(webElement.getAttribute("placeholder").contains("请输入你的邮箱或手机号")) {
+                webElement.sendKeys(username);
+            } else if (webElement.getAttribute("placeholder").contains("请输入你的密码")) {
+                webElement.sendKeys(password);
+                break;
+            }
+        }
         WebElement submit = webDriver.findElement(By.linkText("登录"));
         submit.click();
-        Thread.sleep(2000);
+        Thread.sleep(5000);
     }
 }

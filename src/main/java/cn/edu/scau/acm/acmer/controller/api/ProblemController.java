@@ -79,11 +79,13 @@ public class ProblemController {
         return new MyResponseEntity<>();
     }
 
+    @ApiOperation("通过关键字获取标签列表")
     @GetMapping("tag")
     MyResponseEntity<List<String>> searchTagsByKey(String key) {
         return new MyResponseEntity<>(tagRepository.findAllLike("%" + key + "%"));
     }
 
+    @ApiOperation("搜索题目")
     @GetMapping("problemView")
     MyResponseEntity<Page<ProblemView>> searchProblem(String key, BigDecimal minDifficult,  BigDecimal maxDifficult, String tagName, Integer page, Integer size) {
         return new MyResponseEntity<>(problemService.searchProblem(key, minDifficult, maxDifficult, tagName, page, size));

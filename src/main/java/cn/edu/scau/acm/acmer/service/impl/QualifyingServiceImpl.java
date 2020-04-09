@@ -20,6 +20,8 @@ import org.springframework.web.client.RestTemplate;
 import java.sql.Timestamp;
 import java.util.*;
 
+import static java.lang.Integer.max;
+
 @Service
 public class QualifyingServiceImpl implements QualifyingService {
 
@@ -127,9 +129,7 @@ public class QualifyingServiceImpl implements QualifyingService {
         qualifying.setSeasonAccountId(seasonAccountId);
         qualifying.setProportion(proportion);
         qualifying = qualifyingRepository.save(qualifying);
-        if (contest.getEndTime().getTime() < System.currentTimeMillis()) {
-            qualifyingContestRecordService.updateQualifyingContestRecord(qualifying.getId());
-        }
+        qualifyingContestRecordService.updateQualifyingContestRecord(qualifying.getId());
     }
 
     @Override
@@ -235,12 +235,17 @@ public class QualifyingServiceImpl implements QualifyingService {
                     int count = 0;
                     Long time = System.currentTimeMillis() / 1000 - 3*30*24*60*60;
                     JSONArray ratingList = jsonObject.getJSONArray("result");
+                    List<Integer> ratings = new ArrayList<>();
                     for (int j = 0; j < ratingList.size(); j++) {
                         JSONObject ratingData = ratingList.getJSONObject(j);
                         if(ratingData.getLong("ratingUpdateTimeSeconds") >= time) {
-                            rating += ratingData.getInteger("newRating");
+                            ratings.add(ratingData.getInteger("newRating"));
                             count++;
                         }
+                    }
+                    ratings.sort(Integer::compareTo);
+                    for (int i = ratings.size()-1; i >= max(0, ratings.size()-3) ; i--) {
+                        rating += ratings.get(i);
                     }
                     rating /= 3;
                     if(count < 5) {
@@ -297,8 +302,9 @@ public class QualifyingServiceImpl implements QualifyingService {
             if (solved.size() == 0) {
                 contestRecord.setPenalty(0);
             } else {
-                contestRecord.setPenalty(cfRatings.size() - i);
+                contestRecord.setPenalty(i*60);
             }
+//            log.info(i + " " + cfRatings.get(i).getCfRating() + " " + contestRecord.getPenalty());
             contestRecord.setUpSolved("");
             contestRecord.setSolved(StringUtils.join(solved, " "));
             contestRecordRepository.save(contestRecord);

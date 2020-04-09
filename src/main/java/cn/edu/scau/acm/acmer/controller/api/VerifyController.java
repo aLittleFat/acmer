@@ -21,6 +21,7 @@ public class VerifyController {
     private AwardService awardService;
 
     @ApiOperation("获取未通过注册审核的用户信息")
+    @RequiresRoles("admin")
     @GetMapping("user_unVerify")
     MyResponseEntity<Page<User>> getUserUnverify(Integer page, Integer size){
         return new MyResponseEntity<>(accountService.getUserUnVerified(page, size));

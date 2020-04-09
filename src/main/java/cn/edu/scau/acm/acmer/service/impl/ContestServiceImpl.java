@@ -70,6 +70,10 @@ public class ContestServiceImpl implements ContestService {
 
         ojService.addOj(ojName);
         addContest(ojName, cId, account, password);
+        Contest contest = contestRepository.findByOjNameAndCid(ojName, cId).get();
+        if(contest.getEndTime().getTime() > System.currentTimeMillis() + 8*60*60*1000) {
+            throw new Exception("比赛还未结束");
+        }
 
         switch (ojName) {
             case "VJ": vjService.addContestRecord(ojName, cId, studentId, teamId, account, password); break;

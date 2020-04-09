@@ -290,10 +290,6 @@ public class VjServiceImpl implements VjService {
             throw new Exception("已存在该竞赛记录");
         }
 
-        if(contest.getEndTime().getTime() > System.currentTimeMillis()) {
-            throw new Exception("比赛还未结束");
-        }
-
         String url = "https://vjudge.net/contest/rank/single/" + contest.getCid();
         JSONObject jsonObject = JSON.parseObject(httpClient.get(url));
         int participantId = 0;
