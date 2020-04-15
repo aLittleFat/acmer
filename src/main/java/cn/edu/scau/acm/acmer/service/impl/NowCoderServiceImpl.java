@@ -56,6 +56,10 @@ public class NowCoderServiceImpl implements NowCoderService {
             }
         }
 
+        if(uid == 0) {
+            throw new Exception("没有参加该比赛");
+        }
+
         ContestRecord contestRecord = new ContestRecord();
         contestRecord.setContestId(contest.getId());
         contestRecord.setStudentId(studentId);

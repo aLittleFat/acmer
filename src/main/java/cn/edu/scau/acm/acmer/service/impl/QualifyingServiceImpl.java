@@ -139,7 +139,7 @@ public class QualifyingServiceImpl implements QualifyingService {
         if(!season.getType().equals("组队赛")) {
             throw new Exception("不是组队赛");
         }
-        List<Team> teams = teamRepository.findAllBySeasonIdOrderByRank(seasonId);
+        List<Team> teams = teamRepository.findAllBySeasonIdOrderByRankNumAsc(seasonId);
         int sz = teams.size();
         List<String> problemList = new ArrayList<>();
         char ch = 'A';

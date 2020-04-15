@@ -2,11 +2,9 @@ package cn.edu.scau.acm.acmer.service.impl;
 
 import cn.edu.scau.acm.acmer.entity.*;
 import cn.edu.scau.acm.acmer.model.MyTeamMenu;
+import cn.edu.scau.acm.acmer.model.TeamAccount;
 import cn.edu.scau.acm.acmer.model.TeamWithUsers;
-import cn.edu.scau.acm.acmer.repository.AwardRepository;
-import cn.edu.scau.acm.acmer.repository.TeamRepository;
-import cn.edu.scau.acm.acmer.repository.TeamStudentRepository;
-import cn.edu.scau.acm.acmer.repository.UserRepository;
+import cn.edu.scau.acm.acmer.repository.*;
 import cn.edu.scau.acm.acmer.service.MailService;
 import cn.edu.scau.acm.acmer.service.TeamService;
 import com.alibaba.fastjson.JSONObject;
@@ -35,9 +33,12 @@ public class TeamServiceImpl implements TeamService {
     @Autowired
     private MailService mailService;
 
+    @Autowired
+    private SeasonParticipantAccountRepository seasonParticipantAccountRepository;
+
     @Override
     public List<TeamWithUsers> getTeamBySeasonId(int seasonId) {
-        List<Team> teams = teamRepository.findAllBySeasonIdOrderByRank(seasonId);
+        List<Team> teams = teamRepository.findAllBySeasonIdOrderByRankNumAsc(seasonId);
         List<TeamWithUsers> teamWithUsersList = new ArrayList<>();
         for (Team team : teams) {
             List<User> users = userRepository.findAllByTeamId(team.getId());
@@ -51,7 +52,7 @@ public class TeamServiceImpl implements TeamService {
     public void addTeam(int seasonId, int rank, String vjAccount) {
         Team team = new Team();
         team.setSeasonId(seasonId);
-        team.setRank(rank);
+        team.setRankNum(rank);
         team.setVjAccount(vjAccount);
         teamRepository.save(team);
     }
@@ -164,5 +165,13 @@ public class TeamServiceImpl implements TeamService {
         for (User user : users) {
             mailService.sendTextMail(user.getEmail(), title, msg);
         }
+    }
+
+    @Override
+    public List<TeamAccount> getTeamAccountByTeamId(Integer teamId, String studentId) throws Exception {
+        if(!checkInTeam(teamId, studentId)) {
+            throw new Exception("不是你的队伍");
+        }
+        return seasonParticipantAccountRepository.findAllTeamAccountByTeamId(teamId);
     }
 }

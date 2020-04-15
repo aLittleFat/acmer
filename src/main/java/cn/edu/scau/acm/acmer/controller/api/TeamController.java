@@ -1,10 +1,7 @@
 package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.entity.Team;
-import cn.edu.scau.acm.acmer.model.MyResponseEntity;
-import cn.edu.scau.acm.acmer.model.MyTeamMenu;
-import cn.edu.scau.acm.acmer.model.TeamWithUsers;
-import cn.edu.scau.acm.acmer.model.UserDto;
+import cn.edu.scau.acm.acmer.model.*;
 import cn.edu.scau.acm.acmer.repository.UserRepository;
 import cn.edu.scau.acm.acmer.service.TeamService;
 import com.alibaba.fastjson.JSONObject;
@@ -77,6 +74,24 @@ public class TeamController {
         String studentId = userRepository.findById(id).get().getStudentId();
         teamService.changeTeamName(teamId, nameCn, nameEn, studentId);
         return new MyResponseEntity<>();
+    }
+
+    @ApiOperation("队伍获取自己的账号集")
+    @GetMapping("teamAccount")
+    @RequiresRoles("student")
+    MyResponseEntity<List<TeamAccount>> getTeamAccountByTeamId(Integer teamId) throws Exception {
+        int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
+        String studentId = userRepository.findById(id).get().getStudentId();
+        return new MyResponseEntity<>(teamService.getTeamAccountByTeamId(teamId, studentId));
+    }
+
+    @ApiOperation("查看是不是自己队伍")
+    @GetMapping("isMyTeam")
+    @RequiresRoles("student")
+    MyResponseEntity<Boolean> checkIsMyTeam(Integer teamId) throws Exception {
+        int id = ((UserDto) SecurityUtils.getSubject().getPrincipal()).getId();
+        String studentId = userRepository.findById(id).get().getStudentId();
+        return new MyResponseEntity<>(teamService.checkInTeam(teamId, studentId));
     }
 
 }

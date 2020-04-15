@@ -165,9 +165,9 @@ public class CfServiceImpl implements CfService {
                     }
                 }
             } while(rows.size() == sz && standingRow == null);
-//            if(standingRow == null) {
-//                throw new Exception("未参加该竞赛");
-//            }
+            if(standingRow == null) {
+                throw new Exception("未参加该竞赛");
+            }
         }
 
         ContestRecord contestRecord = new ContestRecord();

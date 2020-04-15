@@ -96,7 +96,7 @@ public class QualifyingContestRecordServiceImpl implements QualifyingContestReco
         Qualifying qualifying = qualifyingRepository.findById(qualifyingId).get();
         Contest contest = contestRepository.findById(qualifying.getContestId()).get();
         if(contest.getOjName().equals("VJ")) {
-            List<Team> teams = teamRepository.findAllBySeasonIdOrderByRank(qualifying.getSeasonId());
+            List<Team> teams = teamRepository.findAllBySeasonIdOrderByRankNumAsc(qualifying.getSeasonId());
             for (Team team : teams) {
                 try {
                     contestService.addContestRecord(contest.getOjName(), contest.getCid(), null, team.getId(), team.getVjAccount(), null);

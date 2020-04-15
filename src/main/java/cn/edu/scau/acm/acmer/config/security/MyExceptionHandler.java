@@ -27,7 +27,6 @@ public class MyExceptionHandler implements HandlerExceptionResolver {
             attributes.put("status", 1);
             attributes.put("msg", ex.getMessage());
         }
-
         view.setAttributesMap(attributes);
         mv.setView(view);
         return mv;

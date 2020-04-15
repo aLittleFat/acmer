@@ -92,7 +92,9 @@ public class JisuankeServiceImpl implements JisuankeService {
         Elements table;
         webDriver.get("https://passport.jisuanke.com/?n=https://www.jisuanke.com/contest/" + cId + "?view=rank&page=1&school=%E5%8D%8E%E5%8D%97%E5%86%9C%E4%B8%9A%E5%A4%A7%E5%AD%A6#/");
         login(webDriver);
-        while (true){
+
+        boolean hasTakePartIn = false;
+        while (!hasTakePartIn){
             Document document = Jsoup.parse(webDriver.getPageSource());
             Element thead = document.selectFirst("thead");
             Elements theadThs = thead.select("th");
@@ -115,7 +117,6 @@ public class JisuankeServiceImpl implements JisuankeService {
             log.info(String.valueOf(problemIndexOffset));
             table = document.selectFirst("tbody").select("tr");
 //                log.info(table.toString());
-            boolean hasTakePartIn = false;
             for (Element element : table) {
                 Elements tds = element.select("td");
                 log.info(tds.get(accountIndex).select("a").text());
@@ -153,9 +154,9 @@ public class JisuankeServiceImpl implements JisuankeService {
             }
         }
         webDriver.close();
-//        if(!hasTakePartIn) {
-//            throw new Exception("未参加该竞赛");
-//        }
+        if(!hasTakePartIn) {
+            throw new Exception("未参加该竞赛");
+        }
     }
 
     @Override

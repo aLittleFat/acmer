@@ -110,7 +110,7 @@ public class TrainingServiceImpl implements TrainingService {
 
     @Override
     public JSONArray getTeamChoiceByTrainingIdAndSeasonId(Integer trainingId, Integer seasonId) {
-        List<Team> teams = teamRepository.findAllBySeasonIdOrderByRank(seasonId);
+        List<Team> teams = teamRepository.findAllBySeasonIdOrderByRankNumAsc(seasonId);
         JSONArray jsonArray = new JSONArray();
         for (Team team : teams) {
             if (trainingParticipantRepository.findByTrainingIdAndStudentIdAndTeamId(trainingId, null, team.getId()).isPresent()) continue;

@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Integer> {
-    List<Team> findAllBySeasonIdOrderByRank(Integer seasonId);
+    List<Team> findAllBySeasonIdOrderByRankNumAsc(Integer seasonId);
 
     @Query("select team from Team as team left join TeamStudent as teamStudent on team.id = teamStudent.teamId where teamStudent.studentId = :studentId order by team.seasonId desc")
     List<Team> findAllByStudentId(@Param("studentId") String studentId);

@@ -2,11 +2,9 @@ package cn.edu.scau.acm.acmer.controller.api;
 
 import cn.edu.scau.acm.acmer.entity.Season;
 import cn.edu.scau.acm.acmer.entity.SeasonAccount;
+import cn.edu.scau.acm.acmer.entity.SeasonParticipantAccount;
 import cn.edu.scau.acm.acmer.entity.User;
-import cn.edu.scau.acm.acmer.model.MyResponseEntity;
-import cn.edu.scau.acm.acmer.model.SeasonParticipant;
-import cn.edu.scau.acm.acmer.model.TeamContestRank;
-import cn.edu.scau.acm.acmer.model.TeamWithUsers;
+import cn.edu.scau.acm.acmer.model.*;
 import cn.edu.scau.acm.acmer.repository.ContestRecordViewRepository;
 import cn.edu.scau.acm.acmer.repository.ScoreRecordViewRepository;
 import cn.edu.scau.acm.acmer.repository.SeasonAccountRepository;
@@ -125,10 +123,17 @@ public class SeasonController {
         return new MyResponseEntity<>();
     }
 
-    @ApiOperation("获取赛季账号集")
+    @ApiOperation("获取赛季账号集列表")
     @GetMapping("season/{seasonId}/seasonAccount")
     MyResponseEntity<List<SeasonAccount>> getSeasonAccountBySeasonId(@PathVariable Integer seasonId) {
         return new MyResponseEntity<>(seasonAccountRepository.findAllBySeasonId(seasonId));
+    }
+
+    @ApiOperation("获取账号集")
+    @RequiresRoles("admin")
+    @GetMapping("seasonAccount")
+    MyResponseEntity<SeasonAccount> getSeasonAccount(Integer seasonAccountId) throws Exception {
+        return new MyResponseEntity<>(seasonAccountService.getSeasonAccount(seasonAccountId));
     }
 
     @ApiOperation("添加账号集")

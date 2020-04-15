@@ -49,4 +49,14 @@ public class SeasonAccountServiceImpl implements SeasonAccountService {
         SeasonAccount seasonAccount = optionalSeasonAccount.get();
         seasonAccountRepository.delete(seasonAccount);
     }
+
+
+    @Override
+    public SeasonAccount getSeasonAccount(Integer seasonAccountId) throws Exception {
+        Optional<SeasonAccount> optionalSeasonAccount = seasonAccountRepository.findById(seasonAccountId);
+        if(optionalSeasonAccount.isEmpty()) {
+            throw new Exception("不存在的赛季账号集");
+        }
+        return optionalSeasonAccount.get();
+    }
 }

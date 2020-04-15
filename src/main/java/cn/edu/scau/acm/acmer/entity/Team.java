@@ -5,13 +5,13 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "team", uniqueConstraints = {
-        @UniqueConstraint(name = "uni", columnNames = {"rank", "season_id"})
+        @UniqueConstraint(name = "uni", columnNames = {"rank_num", "season_id"})
 })
 public class Team {
     private int id;
     private String nameCn;
     private String nameEn;
-    private int rank;
+    private int rankNum;
     private int seasonId;
     private String vjAccount;
 
@@ -47,13 +47,13 @@ public class Team {
     }
 
     @Basic
-    @Column(name = "rank")
-    public int getRank() {
-        return rank;
+    @Column(name = "rank_num")
+    public int getRankNum() {
+        return rankNum;
     }
 
-    public void setRank(int rank) {
-        this.rank = rank;
+    public void setRankNum(int rankNum) {
+        this.rankNum = rankNum;
     }
 
     @Basic
@@ -82,7 +82,7 @@ public class Team {
         if (o == null || getClass() != o.getClass()) return false;
         Team team = (Team) o;
         return id == team.id &&
-                rank == team.rank &&
+                rankNum == team.rankNum &&
                 seasonId == team.seasonId &&
                 Objects.equals(nameCn, team.nameCn) &&
                 Objects.equals(nameEn, team.nameEn) &&
@@ -91,6 +91,6 @@ public class Team {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nameCn, nameEn, rank, seasonId, vjAccount);
+        return Objects.hash(id, nameCn, nameEn, rankNum, seasonId, vjAccount);
     }
 }

@@ -2,6 +2,7 @@ package cn.edu.scau.acm.acmer.service;
 
 import cn.edu.scau.acm.acmer.entity.Team;
 import cn.edu.scau.acm.acmer.model.MyTeamMenu;
+import cn.edu.scau.acm.acmer.model.TeamAccount;
 import cn.edu.scau.acm.acmer.model.TeamWithUsers;
 import com.alibaba.fastjson.JSONObject;
 
@@ -27,4 +28,6 @@ public interface TeamService {
     boolean checkInTeam(Integer teamId, String studentId);
 
     void sendMail(Integer teamId, String title, String msg);
+
+    List<TeamAccount> getTeamAccountByTeamId(Integer teamId, String studentId) throws Exception;
 }

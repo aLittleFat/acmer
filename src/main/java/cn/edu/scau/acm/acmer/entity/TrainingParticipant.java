@@ -30,8 +30,8 @@ public class TrainingParticipant {
         return trainingId;
     }
 
-    public void setTrainingId(Integer traningPlanId) {
-        this.trainingId = traningPlanId;
+    public void setTrainingId(Integer trainingId) {
+        this.trainingId = trainingId;
     }
 
     @Basic
