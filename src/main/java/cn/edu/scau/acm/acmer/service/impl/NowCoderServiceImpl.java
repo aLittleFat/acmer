@@ -131,7 +131,7 @@ public class NowCoderServiceImpl implements NowCoderService {
         contest.setCid(cId);
         contest.setStartTime(new Timestamp(contestInfo.getLong("startTime") + 8*60*60*1000));
         contest.setEndTime(new Timestamp(contestInfo.getLong("endTime") + 8*60*60*1000));
-        if(System.currentTimeMillis() < contest.getEndTime().getTime()) {
+        if(System.currentTimeMillis() + 8*60*60*1000 < contest.getEndTime().getTime()) {
             contest.setProblemList("");
         } else {
             JSONArray problemData = res.getJSONObject("data").getJSONArray("problemData");

@@ -334,7 +334,7 @@ public class VjServiceImpl implements VjService {
 
                 String index = problemList.get(proNum);
 
-                if(isAc != 0) {
+                if(isAc == 1) {
                     if(time > contestLength) {
                         if(!solved.contains(index)) {
                             upSolved.add(index);
@@ -409,7 +409,7 @@ public class VjServiceImpl implements VjService {
 
                 String index = problemList.get(proNum);
 
-                if(isAc != 0) {
+                if(isAc == 1) {
                     if (time > contestLength) {
                         if (!solved.contains(index)) {
                             upSolved.add(index);
